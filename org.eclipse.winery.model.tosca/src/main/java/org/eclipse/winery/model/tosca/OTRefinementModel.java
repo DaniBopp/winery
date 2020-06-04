@@ -42,6 +42,13 @@ public abstract class OTRefinementModel extends TExtensibleElements implements H
     @XmlElement(name = "RelationMapping")
     protected List<OTRelationMapping> relationMappings;
 
+    @XmlElementWrapper(name = "PermutationMappings")
+    @XmlElement(name = "PermutationMapping")
+    protected List<OTPermutationMapping> permutationMappings;
+
+    @XmlElement(name = "PermutationOptions")
+    protected List<OTPermutationOption> permutationOptions;
+
     @Override
     public String getName() {
         return name;
@@ -97,5 +104,21 @@ public abstract class OTRefinementModel extends TExtensibleElements implements H
 
     public void setRelationMappings(List<OTRelationMapping> relationMappings) {
         this.relationMappings = relationMappings;
+    }
+
+    public List<OTPermutationMapping> getPermutationMappings() {
+        return permutationMappings;
+    }
+
+    public void setPermutationMappings(List<OTPermutationMapping> permutationMappings) {
+        this.permutationMappings = permutationMappings;
+    }
+
+    public List<OTPermutationOption> getPermutationOptions() {
+        return permutationOptions;
+    }
+
+    public void setPermutationOptions(List<OTPermutationOption> permutationOptions) {
+        this.permutationOptions = permutationOptions;
     }
 }
