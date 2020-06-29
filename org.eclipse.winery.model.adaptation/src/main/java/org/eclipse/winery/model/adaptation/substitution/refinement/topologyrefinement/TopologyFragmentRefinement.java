@@ -32,6 +32,7 @@ import org.eclipse.winery.model.adaptation.substitution.refinement.AbstractRefin
 import org.eclipse.winery.model.adaptation.substitution.refinement.DefaultRefinementChooser;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementChooser;
+import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils;
 import org.eclipse.winery.model.tosca.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.OTAttributeMappingType;
 import org.eclipse.winery.model.tosca.OTDeploymentArtifactMapping;
@@ -105,10 +106,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
 
         // determine the elements that are staying
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        List<TEntityTemplate> stayingRefinementElements = prm.getStayMappings() == null ? new ArrayList<>() :
-            prm.getStayMappings().stream()
-                .map(OTPrmMapping::getRefinementNode)
-                .collect(Collectors.toList());
+        List<TEntityTemplate> stayingRefinementElements = RefinementUtils.getStayingModelElements(prm);
 
         // import the refinement structure
         Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
