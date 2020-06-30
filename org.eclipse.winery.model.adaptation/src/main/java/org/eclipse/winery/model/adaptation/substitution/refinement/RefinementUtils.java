@@ -16,6 +16,8 @@ package org.eclipse.winery.model.adaptation.substitution.refinement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,6 +32,11 @@ import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
+import org.eclipse.winery.model.tosca.TNodeType;
+import org.eclipse.winery.model.tosca.TRelationshipTemplate;
+import org.eclipse.winery.model.tosca.TRelationshipType;
+import org.eclipse.winery.model.tosca.TTopologyTemplate;
+import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 
 public abstract class RefinementUtils {
 
@@ -45,19 +52,37 @@ public abstract class RefinementUtils {
                 .collect(Collectors.toList());
     }
 
-    public static boolean permutabilityMappingsExistsForRefinementNode(TEntityTemplate refinementNode, OTTopologyFragmentRefinementModel prm) {
+    public static boolean isStayPlaceholder(TEntityTemplate element, OTTopologyFragmentRefinementModel prm) {
+        return getStayPlaceholders(prm).stream()
+            .anyMatch(stayingElement -> stayingElement.getId().equals(element.getId()));
+    }
+
+    public static List<TEntityTemplate> getStayPlaceholders(OTTopologyFragmentRefinementModel prm) {
+        return prm.getStayMappings() == null ? new ArrayList<>() :
+            prm.getStayMappings().stream()
+                .map(OTPrmMapping::getRefinementNode)
+                .collect(Collectors.toList());
+    }
+
+    public static boolean permutabilityMappingExistsForDetectorElement(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getPermutationMappings() != null &&
             prm.getPermutationMappings().stream()
-                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(refinementNode));
+                .anyMatch(permutationMap -> permutationMap.getDetectorNode().equals(entityTemplate));
     }
 
-    public static boolean stayMappingsExistsForRefinementNode(TEntityTemplate refinementNode, OTTopologyFragmentRefinementModel prm) {
+    public static boolean permutabilityMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
+        return prm.getPermutationMappings() != null &&
+            prm.getPermutationMappings().stream()
+                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(entityTemplate));
+    }
+
+    public static boolean stayMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() != null &&
             prm.getStayMappings().stream()
-                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(refinementNode));
+                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(entityTemplate));
     }
 
-    public static void addPermutabilityMapping(TNodeTemplate detectorNode, TEntityTemplate refinementNode,
+    public static void addPermutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
                                                OTTopologyFragmentRefinementModel prm) {
         prm.setPermutationMappings(
             addMapping(detectorNode, refinementNode, new OTPermutationMapping(), prm.getPermutationMappings())
@@ -94,7 +119,7 @@ public abstract class RefinementUtils {
         mapping.setArtifactType(artifactType);
     }
 
-    private static <T extends OTPrmMapping> List<T> addMapping(TNodeTemplate detectorNode, TEntityTemplate refinementNode,
+    private static <T extends OTPrmMapping> List<T> addMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
                                                                T mapping, List<T> mappings) {
         if (mappings == null) {
             mappings = new ArrayList<>();
@@ -126,5 +151,46 @@ public abstract class RefinementUtils {
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getAttributeMappings()));
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getDeploymentArtifactMappings()));
         return mappings;
+    }
+
+    public static List<OTPrmMapping> getAllMappingsForRefinementNode(TEntityTemplate refinementNode,
+                                                                     OTTopologyFragmentRefinementModel refinementModel) {
+        return getAllMappingsForRefinementNodeWithoutDetectorNode(null, refinementNode, refinementModel);
+    }
+
+    public static boolean canRedirectRelation(OTRelationMapping relationMapping,
+                                              TRelationshipTemplate relationship,
+                                              Map<QName, TRelationshipType> relationshipTypes,
+                                              Map<QName, TNodeType> nodeTypes) {
+        return redirectRelation(relationMapping, relationship, null, null, relationshipTypes, nodeTypes);
+    }
+
+    public static boolean redirectRelation(OTRelationMapping relationMapping,
+                                           TRelationshipTemplate relationship,
+                                           TTopologyTemplate topology,
+                                           Map<String, String> idMapping,
+                                           Map<QName, TRelationshipType> relationshipTypes,
+                                           Map<QName, TNodeType> nodeTypes) {
+        if (ModelUtilities.isOfType(relationMapping.getRelationType(), relationship.getType(), relationshipTypes)) {
+            if (relationMapping.getDirection() == OTRelationDirection.INGOING
+                && (Objects.isNull(relationMapping.getValidSourceOrTarget())
+                || ModelUtilities.isOfType(relationship.getSourceElement().getRef().getType(), relationMapping.getValidSourceOrTarget(), nodeTypes))
+            ) {
+                // change the source element to the new source defined in the relation mapping
+                if (Objects.nonNull(idMapping)) {
+                    String id = idMapping.get(relationMapping.getRefinementNode().getId());
+                    relationship.setTargetNodeTemplate(topology.getNodeTemplate(id));
+                }
+                return true;
+            } else if (Objects.isNull(relationMapping.getValidSourceOrTarget())
+                || ModelUtilities.isOfType(relationship.getSourceElement().getRef().getType(), relationMapping.getValidSourceOrTarget(), nodeTypes)) {
+                if (Objects.nonNull(idMapping)) {
+                    String id = idMapping.get(relationMapping.getRefinementNode().getId());
+                    relationship.setSourceNodeTemplate(topology.getNodeTemplate(id));
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

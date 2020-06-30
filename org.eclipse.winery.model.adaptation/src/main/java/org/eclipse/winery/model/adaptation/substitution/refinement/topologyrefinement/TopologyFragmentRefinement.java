@@ -14,13 +14,11 @@
 
 package org.eclipse.winery.model.adaptation.substitution.refinement.topologyrefinement;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.xml.namespace.QName;
@@ -36,9 +34,7 @@ import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUti
 import org.eclipse.winery.model.tosca.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.OTAttributeMappingType;
 import org.eclipse.winery.model.tosca.OTDeploymentArtifactMapping;
-import org.eclipse.winery.model.tosca.OTPrmMapping;
 import org.eclipse.winery.model.tosca.OTRefinementModel;
-import org.eclipse.winery.model.tosca.OTRelationDirection;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TArtifactType;
@@ -58,6 +54,8 @@ import org.eclipse.winery.topologygraph.model.ToscaNode;
 import org.jgrapht.GraphMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.redirectRelation;
 
 public class TopologyFragmentRefinement extends AbstractRefinement {
 
@@ -261,29 +259,9 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                         .stream()
                         // use anyMatch to reduce runtime
                         .filter(mapping -> mapping.getDetectorNode().getId().equals(detectorNode.getId()))
-                        .anyMatch(relationMapping -> {
-                            if (ModelUtilities.isOfType(relationMapping.getRelationType(), relationship.getType(), this.relationshipTypes)) {
-                                if (relationMapping.getDirection() == OTRelationDirection.INGOING
-                                    && (Objects.isNull(relationMapping.getValidSourceOrTarget())
-                                    || relationship.getSourceElement().getRef().getType().equals(relationMapping.getValidSourceOrTarget()))
-                                ) {
-                                    // change the source element to the new source defined in the relation mapping
-                                    if (Objects.nonNull(idMapping)) {
-                                        String id = idMapping.get(relationMapping.getRefinementNode().getId());
-                                        relationship.setTargetNodeTemplate(topology.getNodeTemplate(id));
-                                    }
-                                    return true;
-                                } else if (Objects.isNull(relationMapping.getValidSourceOrTarget())
-                                    || relationship.getTargetElement().getRef().getType().equals(relationMapping.getValidSourceOrTarget())) {
-                                    if (Objects.nonNull(idMapping)) {
-                                        String id = idMapping.get(relationMapping.getRefinementNode().getId());
-                                        relationship.setSourceNodeTemplate(topology.getNodeTemplate(id));
-                                    }
-                                    return true;
-                                }
-                            }
-                            return false;
-                        })
+                        .anyMatch(relationMapping ->
+                            redirectRelation(relationMapping, relationship, topology, idMapping, this.relationshipTypes, this.nodeTypes)
+                        )
                 );
     }
 
