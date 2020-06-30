@@ -46,9 +46,6 @@ public abstract class OTRefinementModel extends TExtensibleElements implements H
     @XmlElement(name = "PermutationMapping")
     protected List<OTPermutationMapping> permutationMappings;
 
-    @XmlElement(name = "PermutationOptions")
-    protected List<OTPermutationOption> permutationOptions;
-
     @Override
     public String getName() {
         return name;
@@ -112,13 +109,5 @@ public abstract class OTRefinementModel extends TExtensibleElements implements H
 
     public void setPermutationMappings(List<OTPermutationMapping> permutationMappings) {
         this.permutationMappings = permutationMappings;
-    }
-
-    public List<OTPermutationOption> getPermutationOptions() {
-        return permutationOptions;
-    }
-
-    public void setPermutationOptions(List<OTPermutationOption> permutationOptions) {
-        this.permutationOptions = permutationOptions;
     }
 }

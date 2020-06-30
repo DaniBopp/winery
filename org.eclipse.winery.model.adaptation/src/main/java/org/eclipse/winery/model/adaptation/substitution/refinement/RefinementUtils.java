@@ -108,20 +108,23 @@ public abstract class RefinementUtils {
         return mappings;
     }
 
-    public static List<OTRelationMapping> relationMappingsNotExistingBetweenTheGivenMaps(TNodeTemplate detectorNode,
-                                                                                       TEntityTemplate refinementNode,
-                                                                                       OTTopologyFragmentRefinementModel refinementModel) {
-        List<OTRelationMapping> relationMappings = refinementModel.getRelationMappings();
-        return relationMappings.stream()
-            .filter(relMap -> relMap.getRefinementNode().equals(refinementNode))
-            .filter(relMap -> !relMap.getDetectorNode().equals(detectorNode))
-            .collect(Collectors.toList());
+    private static <T extends OTPrmMapping> List<T> getMappingsForRefinementNodeButNotFromDetectorNode(TNodeTemplate detectorNode,
+                                                                                                       TEntityTemplate refinementNode,
+                                                                                                       List<T> mappings) {
+        return mappings == null ? new ArrayList<>() :
+            mappings.stream()
+                .filter(mapping -> mapping.getRefinementNode().equals(refinementNode))
+                .filter(mapping -> !mapping.getDetectorNode().equals(detectorNode))
+                .collect(Collectors.toList());
     }
-    
-    public static boolean detectorNodeIsTheOnlyMappingToThisRefinementNode(TNodeTemplate detectorNode,
-                                                                           TEntityTemplate refinementNode,
-                                                                           OTTopologyFragmentRefinementModel refinementModel) {        
-        return relationMappingsNotExistingBetweenTheGivenMaps(detectorNode, refinementNode, refinementModel)
-            .size() == 0;
+
+    public static List<OTPrmMapping> getAllMappingsForRefinementNodeWithoutDetectorNode(TNodeTemplate detectorNode,
+                                                                                        TEntityTemplate refinementNode,
+                                                                                        OTTopologyFragmentRefinementModel refinementModel) {
+        ArrayList<OTPrmMapping> mappings = new ArrayList<>();
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getRelationMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getAttributeMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getDeploymentArtifactMappings()));
+        return mappings;
     }
 }

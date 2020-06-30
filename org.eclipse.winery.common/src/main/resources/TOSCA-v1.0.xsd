@@ -848,13 +848,6 @@
        </xs:sequence>
       </xs:complexType>
      </xs:element>
-     <xs:element name="PermutationOptions">
-      <xs:complexType>
-       <xs:sequence>
-        <xs:element name="PermutationOption" type="xs:string"/>
-       </xs:sequence>
-      </xs:complexType>
-     </xs:element>
      <xs:element name="PermutationMappings">
       <xs:complexType>
        <xs:sequence>
@@ -866,6 +859,20 @@
       <xs:complexType>
        <xs:sequence>
         <xs:element name="DeploymentArtifactMapping" type="otDeploymentArtifactMapping" maxOccurs="unbounded"/>
+       </xs:sequence>
+      </xs:complexType>
+     </xs:element>
+     <xs:element name="PermutationOptions">
+      <xs:complexType>
+       <xs:sequence>
+        <xs:element name="PermutationOption" type="xs:string"/>
+       </xs:sequence>
+      </xs:complexType>
+     </xs:element>
+     <xs:element name="ComponentSets">
+      <xs:complexType>
+       <xs:sequence>
+        <xs:element name="ComponentSet" type="xs:string"/>
        </xs:sequence>
       </xs:complexType>
      </xs:element>

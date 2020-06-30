@@ -46,6 +46,12 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
     @XmlElement(name = "DeploymentArtifactMapping")
     protected List<OTDeploymentArtifactMapping> deploymentArtifactMappings;
 
+    @XmlElement(name = "PermutationOptions")
+    protected List<OTPermutationOption> permutationOptions;
+
+    @XmlElement(name = "ComponentSets")
+    protected List<OTComponentSet> componentSets;
+
     @NonNull
     @JsonIgnore
     @XmlTransient
@@ -89,5 +95,21 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
 
     public void setDeploymentArtifactMappings(List<OTDeploymentArtifactMapping> deploymentArtifactMappings) {
         this.deploymentArtifactMappings = deploymentArtifactMappings;
+    }
+
+    public List<OTPermutationOption> getPermutationOptions() {
+        return permutationOptions;
+    }
+
+    public void setPermutationOptions(List<OTPermutationOption> permutationOptions) {
+        this.permutationOptions = permutationOptions;
+    }
+
+    public List<OTComponentSet> getComponentSets() {
+        return componentSets;
+    }
+
+    public void setComponentSets(List<OTComponentSet> componentSets) {
+        this.componentSets = componentSets;
     }
 }
