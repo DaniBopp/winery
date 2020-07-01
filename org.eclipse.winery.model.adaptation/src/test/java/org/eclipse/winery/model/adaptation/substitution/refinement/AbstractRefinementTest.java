@@ -294,14 +294,14 @@ public class AbstractRefinementTest {
             | (2)          | (2)
             +-------|------+
                    \/
-                 ########
-                 # (12) #
-                 ########
+                ########
+                # (12) #
+                ########
                     | (2)
                    \/
-                 ########
-                 # (13) #
-                 ########
+                ########
+                # (13) #
+                ########
          */
         TTopologyTemplate refinementStructure = new TTopologyTemplate();
         refinementStructure.addNodeTemplate(nt10);

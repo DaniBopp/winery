@@ -174,7 +174,7 @@ public abstract class RefinementUtils {
         if (ModelUtilities.isOfType(relationMapping.getRelationType(), relationship.getType(), relationshipTypes)) {
             if (relationMapping.getDirection() == OTRelationDirection.INGOING
                 && (Objects.isNull(relationMapping.getValidSourceOrTarget())
-                || ModelUtilities.isOfType(relationship.getSourceElement().getRef().getType(), relationMapping.getValidSourceOrTarget(), nodeTypes))
+                || ModelUtilities.isOfType(relationMapping.getValidSourceOrTarget(), relationship.getSourceElement().getRef().getType(), nodeTypes))
             ) {
                 // change the source element to the new source defined in the relation mapping
                 if (Objects.nonNull(idMapping)) {
@@ -183,7 +183,7 @@ public abstract class RefinementUtils {
                 }
                 return true;
             } else if (Objects.isNull(relationMapping.getValidSourceOrTarget())
-                || ModelUtilities.isOfType(relationship.getSourceElement().getRef().getType(), relationMapping.getValidSourceOrTarget(), nodeTypes)) {
+                || ModelUtilities.isOfType(relationMapping.getValidSourceOrTarget(), relationship.getTargetElement().getRef().getType(), nodeTypes)) {
                 if (Objects.nonNull(idMapping)) {
                     String id = idMapping.get(relationMapping.getRefinementNode().getId());
                     relationship.setSourceNodeTemplate(topology.getNodeTemplate(id));

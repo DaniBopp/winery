@@ -450,14 +450,14 @@ class PatternRefinementTest extends AbstractRefinementTest {
 
         // region *** assertions ***
         assertNotNull(topology2.getNodeTemplate("4"));
-        assertEquals(topology2.getRelationshipTemplate("1012").getTargetElement().getRef().getId(), "4");
-        assertEquals(topology2.getRelationshipTemplate("1012").getSourceElement().getRef().getId(), "10");
+        assertEquals("4", topology2.getRelationshipTemplate("1012").getTargetElement().getRef().getId());
+        assertEquals("10", topology2.getRelationshipTemplate("1012").getSourceElement().getRef().getId());
 
-        assertEquals(topology2.getRelationshipTemplate("1112").getTargetElement().getRef().getId(), "4");
-        assertEquals(topology2.getRelationshipTemplate("1112").getSourceElement().getRef().getId(), "11");
+        assertEquals("4", topology2.getRelationshipTemplate("1112").getTargetElement().getRef().getId());
+        assertEquals("11", topology2.getRelationshipTemplate("1112").getSourceElement().getRef().getId());
 
-        assertEquals(topology2.getRelationshipTemplate("21").getTargetElement().getRef().getId(), "1");
-        assertEquals(topology2.getRelationshipTemplate("21").getSourceElement().getRef().getId(), "10");
+        assertEquals("1", topology2.getRelationshipTemplate("21").getTargetElement().getRef().getId());
+        assertEquals("10", topology2.getRelationshipTemplate("21").getSourceElement().getRef().getId());
         // endregion
     }
 
