@@ -30,17 +30,18 @@ public class OTComponentSet {
     @XmlList
     protected List<String> componentSet;
 
+    public OTComponentSet() {
+    }
+
+    public OTComponentSet(List<String> componentSet) {
+        this.componentSet = componentSet;
+    }
+
     public List<String> getComponentSet() {
         return componentSet;
     }
 
     public void setComponentSet(List<String> componentSet) {
         this.componentSet = componentSet;
-    }
-    
-    public static OTComponentSet of(List<String> componentSet) {
-        OTComponentSet c = new OTComponentSet();
-        c.setComponentSet(componentSet);
-        return c;
     }
 }

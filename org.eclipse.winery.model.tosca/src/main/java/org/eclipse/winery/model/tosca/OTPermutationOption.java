@@ -30,6 +30,13 @@ public class OTPermutationOption {
     @XmlList
     protected List<String> options;
 
+    public OTPermutationOption() {
+    }
+
+    public OTPermutationOption(List<String> options) {
+        this.options = options;
+    }
+
     public List<String> getOptions() {
         return options;
     }
