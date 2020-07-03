@@ -67,7 +67,7 @@ public abstract class RefinementUtils {
     public static boolean permutabilityMappingExistsForDetectorElement(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getPermutationMappings() != null &&
             prm.getPermutationMappings().stream()
-                .anyMatch(permutationMap -> permutationMap.getDetectorNode().equals(entityTemplate));
+                .anyMatch(permutationMap -> permutationMap.getDetectorElement().equals(entityTemplate));
     }
 
     public static boolean permutabilityMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
@@ -133,13 +133,30 @@ public abstract class RefinementUtils {
         return mappings;
     }
 
+    private static <T extends OTPrmMapping> List<T> getMappingsForDetectorNode(TNodeTemplate detectorNode,
+                                                                               List<T> mappings) {
+        return mappings == null ? new ArrayList<>() :
+            mappings.stream()
+                .filter(mapping -> mapping.getDetectorElement().equals(detectorNode))
+                .collect(Collectors.toList());
+    }
+
+    public static List<OTPrmMapping> getAllMappingsForDetectorNode(TNodeTemplate detectorNode,
+                                                                   OTTopologyFragmentRefinementModel refinementModel) {
+        ArrayList<OTPrmMapping> mappings = new ArrayList<>();
+        mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getRelationMappings()));
+        mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getAttributeMappings()));
+        mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getDeploymentArtifactMappings()));
+        return mappings;
+    }
+
     private static <T extends OTPrmMapping> List<T> getMappingsForRefinementNodeButNotFromDetectorNode(TNodeTemplate detectorNode,
                                                                                                        TEntityTemplate refinementNode,
                                                                                                        List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
                 .filter(mapping -> mapping.getRefinementNode().equals(refinementNode))
-                .filter(mapping -> !mapping.getDetectorNode().equals(detectorNode))
+                .filter(mapping -> !mapping.getDetectorElement().equals(detectorNode))
                 .collect(Collectors.toList());
     }
 

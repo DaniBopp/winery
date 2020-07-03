@@ -140,35 +140,29 @@ public class AbstractRefinementTest {
 
         // region *** topology 3 ***
         /*
-        #######   (1)  #######----|
-        # (1) # <----- # (2) # DA |
-        #######        #######----|
+        #######   (1)  #######
+        # (1) # <----- # (2) #
+        #######        #######
                           | (2)
                          \/
-                       #######
-                       # (4) #
-                       #######
+                       #######----|
+                       # (4) # DA |
+                       #######----|
          */
         QName artifactTypeFile = new QName("file", "http://example.org/tosca/at");
         QName test_da = new QName("test_da", "http://example.org/tosca/atemp/das");
 
         TNodeTemplate nt30 = new TNodeTemplate();
-        nt30.setType("{http://ex.org}nodeType_2");
+        nt30.setType("{http://ex.org}nodeType_4");
         nt30.setId("30");
         nt30.setX("110");
-        nt30.setY("10");
+        nt30.setY("110");
 
-        TRelationshipTemplate rt304 = new TRelationshipTemplate();
-        rt304.setType("{http://ex.org}relType_2");
-        rt304.setId("304");
-        rt304.setSourceNodeTemplate(nt30);
-        rt304.setTargetNodeTemplate(nt4);
-
-        TRelationshipTemplate rt301 = new TRelationshipTemplate();
-        rt301.setType("{http://ex.org}relType_1");
-        rt301.setId("301");
-        rt301.setSourceNodeTemplate(nt30);
-        rt301.setTargetNodeTemplate(nt1);
+        TRelationshipTemplate rt230 = new TRelationshipTemplate();
+        rt230.setType("{http://ex.org}relType_2");
+        rt230.setId("302");
+        rt230.setSourceNodeTemplate(nt2);
+        rt230.setTargetNodeTemplate(nt30);
 
         TDeploymentArtifacts das = new TDeploymentArtifacts();
         TDeploymentArtifact da = new TDeploymentArtifact();
@@ -179,10 +173,10 @@ public class AbstractRefinementTest {
 
         topology3 = new TTopologyTemplate();
         topology3.addNodeTemplate(nt1);
+        topology3.addNodeTemplate(nt2);
         topology3.addNodeTemplate(nt30);
-        topology3.addNodeTemplate(nt4);
-        topology3.addRelationshipTemplate(rt301);
-        topology3.addRelationshipTemplate(rt304);
+        topology3.addRelationshipTemplate(rt21);
+        topology3.addRelationshipTemplate(rt230);
         // endregion
 
         // region *** topology4 ***
@@ -381,8 +375,8 @@ public class AbstractRefinementTest {
         OTDeploymentArtifactMapping deploymentArtifactMapping1 = new OTDeploymentArtifactMapping();
         deploymentArtifactMapping1.setId("daMap-1");
         deploymentArtifactMapping1.setArtifactType(artifactTypeFile);
-        deploymentArtifactMapping1.setDetectorNode(nt7);
-        deploymentArtifactMapping1.setRefinementNode(nt11);
+        deploymentArtifactMapping1.setDetectorNode(nt8);
+        deploymentArtifactMapping1.setRefinementNode(nt13);
 
         OTPatternRefinementModel matchingPrmWithDa = new OTPatternRefinementModel();
         matchingPrmWithDa.setDetector(detector);

@@ -177,7 +177,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
             deploymentArtifactMappings != null && matchingNode.getDeploymentArtifacts().getDeploymentArtifact().stream()
                 .allMatch(deploymentArtifact ->
                     deploymentArtifactMappings.stream()
-                        .filter(mapping -> mapping.getDetectorNode().getId().equals(detectorNode.getId()))
+                        .filter(mapping -> mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                         .anyMatch(mapping -> {
                             if (ModelUtilities.isOfType(mapping.getArtifactType(), deploymentArtifact.getArtifactType(), this.artifactTypes)) {
                                 if (idMapping != null) {
@@ -208,7 +208,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
         List<OTAttributeMapping> propertyMappings = ((OTTopologyFragmentRefinementModel) refinement.getRefinementModel()).getAttributeMappings();
         if (Objects.nonNull(propertyMappings)) {
             propertyMappings.stream()
-                .filter(mapping -> mapping.getDetectorNode().getId().equals(detectorNodeId))
+                .filter(mapping -> mapping.getDetectorElement().getId().equals(detectorNodeId))
                 .forEach(mapping -> {
                     if (Objects.nonNull(matchingEntity.getProperties())) {
                         Map<String, String> sourceProperties = matchingEntity.getProperties().getKVProperties();
@@ -258,7 +258,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                     refinement.getRefinementModel().getRelationMappings()
                         .stream()
                         // use anyMatch to reduce runtime
-                        .filter(mapping -> mapping.getDetectorNode().getId().equals(detectorNode.getId()))
+                        .filter(mapping -> mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                         .anyMatch(relationMapping ->
                             redirectRelation(relationMapping, relationship, topology, idMapping, this.relationshipTypes, this.nodeTypes)
                         )
@@ -354,6 +354,6 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
     private Stream<OTStayMapping> getStayMappingsOfCurrentElement(OTTopologyFragmentRefinementModel prm, TEntityTemplate currentDetectorNode) {
         return prm.getStayMappings() == null ? Stream.of() :
             prm.getStayMappings().stream()
-                .filter(stayMapping -> stayMapping.getDetectorNode().getId().equals(currentDetectorNode.getId()));
+                .filter(stayMapping -> stayMapping.getDetectorElement().getId().equals(currentDetectorNode.getId()));
     }
 }

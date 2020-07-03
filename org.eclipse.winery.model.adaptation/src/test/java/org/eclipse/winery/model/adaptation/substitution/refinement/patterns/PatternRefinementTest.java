@@ -494,7 +494,7 @@ class PatternRefinementTest extends AbstractRefinementTest {
         patternRefinement.applyRefinement(candidateForTopology3WithDa, topology3);
 
         // region *** assertions ***
-        TNodeTemplate refinedNt = topology3.getNodeTemplate("11");
+        TNodeTemplate refinedNt = topology3.getNodeTemplate("13");
         assertNotNull(refinedNt);
         assertNotNull(refinedNt.getDeploymentArtifacts());
         assertEquals(1, refinedNt.getDeploymentArtifacts().getDeploymentArtifact().size());

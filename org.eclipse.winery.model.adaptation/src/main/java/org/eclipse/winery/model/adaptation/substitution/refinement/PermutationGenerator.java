@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.addPermutabilityMapping;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForRefinementNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForRefinementNodeWithoutDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayPlaceholder;
@@ -88,10 +89,12 @@ public class PermutationGenerator {
             )
         ));
 
+        refinementModel.setComponentSets(new ArrayList<>());
+
         for (TNodeTemplate detectorNode : detectorNodeTemplates) {
             // todo: other mappings? 
-            refinementModel.getRelationMappings().stream()
-                .filter(relationMapping -> relationMapping.getRefinementNode().equals(detectorNode))
+            getAllMappingsForDetectorNode(detectorNode, refinementModel).stream()
+                .filter(relationMapping -> relationMapping.getDetectorElement().equals(detectorNode))
                 .filter(relationMapping -> relationMapping.getRefinementNode() instanceof TNodeTemplate)
                 .map(relationMapping -> (TNodeTemplate) relationMapping.getRefinementNode())
                 .forEach(refinementNode ->
@@ -103,11 +106,11 @@ public class PermutationGenerator {
                     TNodeTemplate dependantNode = (TNodeTemplate) relation.getSourceElement().getRef();
                     if (refinementModel.getRelationMappings() != null) {
                         refinementModel.getRelationMappings().stream()
-                            .filter(relMap -> relMap.getDetectorNode().equals(dependantNode))
+                            .filter(relMap -> relMap.getDetectorElement().equals(dependantNode))
                             .filter(relMap -> RefinementUtils.canRedirectRelation(relMap, relation, this.relationshipTypes, this.nodeTypes))
                             .findFirst()
                             .ifPresent(relMap ->
-                                addPermutabilityMapping(relMap.getDetectorNode(), relMap.getRefinementNode(), refinementModel)
+                                addPermutabilityMapping(relMap.getDetectorElement(), relMap.getRefinementNode(), refinementModel)
                             );
                     }
                 });
@@ -119,14 +122,29 @@ public class PermutationGenerator {
             return false;
         }
 
-        long numberOfUnmappedRefinementNodes = refinementModel.getRefinementStructure().getNodeTemplates().stream()
-            .filter(refinementNode -> isStayPlaceholder(refinementNode, refinementModel))
-            .filter(refinementNode -> permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel))
-            .count();
+        List<String> unmappedDetectorNodes = refinementModel.getDetector().getNodeTemplates().stream()
+            .filter(detectorNode -> !isStayingElement(detectorNode, refinementModel))
+            .filter(detectorNode -> !permutabilityMappingExistsForDetectorElement(detectorNode, refinementModel))
+            .map(HasId::getId)
+            .collect(Collectors.toList());
 
-        if (numberOfUnmappedRefinementNodes > 0) {
+        if (unmappedDetectorNodes.size() > 0) {
             logger.debug("Permutations cannot be determined automatically! " +
-                "Reason: There are refinement nodes which could not be mapped to a detector node.");
+                    "Reason: There are detector nodes which could not be mapped to a refinement node: {}",
+                String.join(", ", unmappedDetectorNodes));
+            return false;
+        }
+
+        List<String> unmappedRefinementNodes = refinementModel.getRefinementStructure().getNodeTemplates().stream()
+            .filter(refinementNode -> !isStayPlaceholder(refinementNode, refinementModel))
+            .filter(refinementNode -> !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel))
+            .map(HasId::getId)
+            .collect(Collectors.toList());
+
+        if (unmappedRefinementNodes.size() > 0) {
+            logger.debug("Permutations cannot be determined automatically! " +
+                    "Reason: There are refinement nodes which could not be mapped to a detector node: {}",
+                String.join(", ", unmappedRefinementNodes));
             return false;
         }
 
@@ -142,9 +160,9 @@ public class PermutationGenerator {
                 // If there is no permutation mapping for the relation and there is more than one permutation
                 // mapping sourcing from the source node, the relation cannot be redirected automatically
                 detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
-                    .anyMatch(pm -> pm.getDetectorNode().equals(detectorNode) &&
+                    .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
                         refinementModel.getPermutationMappings().stream()
-                            .filter(pm2 -> pm2.getDetectorNode().equals(detectorNode))
+                            .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
                             .anyMatch(pm2 -> !pm.getRefinementNode().equals(pm2.getRefinementNode()))
                     );
                 if (detectorNodeRefinesToMultipleNodes) {
@@ -166,7 +184,7 @@ public class PermutationGenerator {
                                              TNodeTemplate detectorNode,
                                              OTTopologyFragmentRefinementModel refinementModel) {
         logger.debug("Checking component permutability of detectorNode \"{}\" to refinementNode \"{}\"",
-            refinementNode.getId(), detectorNode.getId());
+            detectorNode.getId(), refinementNode.getId());
 
         if (!permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
             !stayMappingExistsForRefinementNode(refinementNode, refinementModel)) {
@@ -174,12 +192,13 @@ public class PermutationGenerator {
                 getAllMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
 
             if (mappingsWithoutDetectorNode.size() == 0) {
-                logger.debug("Adding PermutabilityMapping between \"{}\" and \"{}\"", detectorNode.getId(), refinementNode.getId());
+                logger.debug("Adding PermutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
+                    detectorNode.getId(), refinementNode.getId());
                 addPermutabilityMapping(detectorNode, refinementNode, refinementModel);
             } else {
                 ArrayList<String> patternSet = new ArrayList<>();
                 mappingsWithoutDetectorNode.stream()
-                    .map(OTPrmMapping::getDetectorNode)
+                    .map(OTPrmMapping::getDetectorElement)
                     .distinct()
                     .forEach(node -> {
                         refinementModel.getPermutationOptions().forEach(permutationOption ->
@@ -224,6 +243,6 @@ public class PermutationGenerator {
             .map(element -> (TNodeTemplate) element.getTargetElement().getRef())
             .filter(dependentNode -> !isStayPlaceholder(dependentNode, refinementModel))
             .filter(dependentNode -> getAllMappingsForRefinementNode(dependentNode, refinementModel).size() == 0)
-            .forEach(dependentNode -> this.checkComponentPermutability(detectorNode, dependentNode, refinementModel));
+            .forEach(dependentNode -> this.checkComponentPermutability(dependentNode, detectorNode, refinementModel));
     }
 }

@@ -28,7 +28,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         setUp();
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        OTTopologyFragmentRefinementModel refinementModel = (OTTopologyFragmentRefinementModel) candidateForTopology.getRefinementModel();
+        OTTopologyFragmentRefinementModel refinementModel = (OTTopologyFragmentRefinementModel) candidateForTopology3WithDa.getRefinementModel();
 
         assertTrue(permutationGenerator.checkPermutability(refinementModel));
         assertNotNull(refinementModel.getPermutationOptions());

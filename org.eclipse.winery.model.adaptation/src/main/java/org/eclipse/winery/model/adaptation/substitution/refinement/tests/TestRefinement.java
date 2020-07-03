@@ -83,7 +83,7 @@ public class TestRefinement extends AbstractRefinement {
                         relationshipTemplate.setName(relationMapping.getRelationType().getLocalPart());
 
                         // Retrieve the id from the correspondence node of the graph mapping.
-                        ToscaNode node = refinement.getDetectorGraph().getNode(relationMapping.getDetectorNode().getId());
+                        ToscaNode node = refinement.getDetectorGraph().getNode(relationMapping.getDetectorElement().getId());
                         String topologyNodeId = refinement.getGraphMapping().getVertexCorrespondence(node, false).getId();
 
                         if (relationMapping.getDirection() == OTRelationDirection.INGOING) {
