@@ -32,7 +32,7 @@ public class PrmDeploymentArtifactMappingApiData extends AbstractPrmMappingEleme
     public OTDeploymentArtifactMapping createDeploymentArtifactMapping(TEntityTemplate detectorNodeTemplate, TEntityTemplate refinementNodeTemplate) {
         OTDeploymentArtifactMapping artifactMapping = new OTDeploymentArtifactMapping();
         artifactMapping.setId(this.id);
-        artifactMapping.setDetectorNode(detectorNodeTemplate);
+        artifactMapping.setDetectorElement(detectorNodeTemplate);
         artifactMapping.setArtifactType(this.artifactType);
         artifactMapping.setRefinementElement(refinementNodeTemplate);
 

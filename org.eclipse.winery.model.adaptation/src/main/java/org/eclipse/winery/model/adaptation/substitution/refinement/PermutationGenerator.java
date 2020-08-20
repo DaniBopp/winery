@@ -70,7 +70,7 @@ public class PermutationGenerator {
     }
 
     public boolean checkPermutability(OTTopologyFragmentRefinementModel refinementModel) {
-        logger.debug("Starting permutability check of {}", refinementModel.getIdFromIdOrNameField());
+        logger.info("Starting permutability check of {}", refinementModel.getIdFromIdOrNameField());
         List<TNodeTemplate> detectorNodeTemplates = refinementModel.getDetector().getNodeTemplates();
         Set<TNodeTemplate> permutableNodes = detectorNodeTemplates.stream()
             .filter(nodeTemplate -> !isStayingElement(nodeTemplate, refinementModel))
@@ -116,7 +116,7 @@ public class PermutationGenerator {
         }
 
         if (refinementModel.getPermutationMappings() == null) {
-            logger.debug("Permutations cannot be determined automatically! " +
+            logger.info("Permutations cannot be determined automatically! " +
                 "Reason: No permutation mappings could be identified.");
             return false;
         }
@@ -128,7 +128,7 @@ public class PermutationGenerator {
             .collect(Collectors.toList());
 
         if (unmappedDetectorNodes.size() > 0) {
-            logger.debug("Permutations cannot be determined automatically! " +
+            logger.info("Permutations cannot be determined automatically! " +
                     "Reason: There are detector nodes which could not be mapped to a refinement node: {}",
                 String.join(", ", unmappedDetectorNodes));
             return false;
@@ -141,7 +141,7 @@ public class PermutationGenerator {
             .collect(Collectors.toList());
 
         if (unmappedRefinementNodes.size() > 0) {
-            logger.debug("Permutations cannot be determined automatically! " +
+            logger.info("Permutations cannot be determined automatically! " +
                     "Reason: There are refinement nodes which could not be mapped to a detector node: {}",
                 String.join(", ", unmappedRefinementNodes));
             return false;
@@ -171,7 +171,7 @@ public class PermutationGenerator {
         }
 
         if (detectorNodeRefinesToMultipleNodes) {
-            logger.debug("Permutations cannot be determined automatically! " +
+            logger.info("Permutations cannot be determined automatically! " +
                 "Reason: There are relations that cannot be redirected during the generation.");
             return false;
         }

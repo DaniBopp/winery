@@ -133,7 +133,7 @@ public abstract class RefinementUtils {
             mappings = new ArrayList<>();
         }
 
-        mapping.setDetectorNode(detectorNode);
+        mapping.setDetectorElement(detectorNode);
         mapping.setRefinementElement(refinementNode);
         mapping.setId(UUID.randomUUID().toString());
         mappings.add(mapping);

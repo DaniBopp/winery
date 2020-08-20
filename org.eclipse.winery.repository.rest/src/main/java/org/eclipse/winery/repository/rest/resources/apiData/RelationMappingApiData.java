@@ -36,7 +36,7 @@ public class RelationMappingApiData extends AbstractPrmMappingElement {
     public OTRelationMapping createTRelationMapping(TNodeTemplate detectorNodeTemplate, TNodeTemplate refinementNodeTemplate) {
         OTRelationMapping mapping = new OTRelationMapping();
         mapping.setId(this.id);
-        mapping.setDetectorNode(detectorNodeTemplate);
+        mapping.setDetectorElement(detectorNodeTemplate);
         mapping.setRefinementElement(refinementNodeTemplate);
         mapping.setDirection(this.direction);
         mapping.setRelationType(this.relationType);

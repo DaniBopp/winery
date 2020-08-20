@@ -309,14 +309,14 @@ public class AbstractRefinementTest {
 
         // region *** relation mapping ***
         OTRelationMapping rm1 = new OTRelationMapping();
-        rm1.setDetectorNode(nt7);
+        rm1.setDetectorElement(nt7);
         rm1.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm1.setDirection(OTRelationDirection.INGOING);
         rm1.setValidSourceOrTarget(QName.valueOf("{http://ex.org}nodeType_3"));
         rm1.setRefinementElement(nt11);
 
         OTRelationMapping rm2 = new OTRelationMapping();
-        rm2.setDetectorNode(nt7);
+        rm2.setDetectorElement(nt7);
         rm2.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm2.setDirection(OTRelationDirection.OUTGOING);
         rm2.setValidSourceOrTarget(QName.valueOf("{http://ex.org}nodeType_1"));
@@ -375,7 +375,7 @@ public class AbstractRefinementTest {
         OTDeploymentArtifactMapping deploymentArtifactMapping1 = new OTDeploymentArtifactMapping();
         deploymentArtifactMapping1.setId("daMap-1");
         deploymentArtifactMapping1.setArtifactType(artifactTypeFile);
-        deploymentArtifactMapping1.setDetectorNode(nt8);
+        deploymentArtifactMapping1.setDetectorElement(nt8);
         deploymentArtifactMapping1.setRefinementElement(nt13);
 
         OTPatternRefinementModel matchingPrmWithDa = new OTPatternRefinementModel();
@@ -391,7 +391,7 @@ public class AbstractRefinementTest {
         OTDeploymentArtifactMapping deploymentArtifactMapping2 = new OTDeploymentArtifactMapping();
         deploymentArtifactMapping2.setId("daMap-1");
         deploymentArtifactMapping2.setArtifactType(artifactTypeZip);
-        deploymentArtifactMapping2.setDetectorNode(nt7);
+        deploymentArtifactMapping2.setDetectorElement(nt7);
         deploymentArtifactMapping2.setRefinementElement(nt11);
 
         OTPatternRefinementModel nonMatchingPrmWithDa = new OTPatternRefinementModel();
@@ -412,7 +412,7 @@ public class AbstractRefinementTest {
         OTRelationMapping rm3 = new OTRelationMapping();
         rm3.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm3.setDirection(OTRelationDirection.INGOING);
-        rm3.setDetectorNode(nt7);
+        rm3.setDetectorElement(nt7);
         rm3.setRefinementElement(nt11);
 
         OTPatternRefinementModel prmWithNT2HostedOnNT4AndIngoingRT1AtNT2 = new OTPatternRefinementModel();
@@ -426,7 +426,7 @@ public class AbstractRefinementTest {
         OTRelationMapping rm4 = new OTRelationMapping();
         rm4.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm4.setDirection(OTRelationDirection.INGOING);
-        rm4.setDetectorNode(nt8);
+        rm4.setDetectorElement(nt8);
         rm4.setRefinementElement(nt13);
 
         OTPatternRefinementModel prmWithNT2HostedOnNT4AndIngoingRT1AtNT2AndIngoingRT1AtNT4 = new OTPatternRefinementModel();

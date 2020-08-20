@@ -31,7 +31,7 @@ public class PrmStayMappingApiData extends AbstractPrmMappingElement {
     public OTStayMapping createOTPrmStayMapping(TEntityTemplate detectorNodeTemplate, TEntityTemplate refinementNodeTemplate) {
         OTStayMapping mapping = new OTStayMapping();
         mapping.setId(this.id);
-        mapping.setDetectorNode(detectorNodeTemplate);
+        mapping.setDetectorElement(detectorNodeTemplate);
         mapping.setRefinementElement(refinementNodeTemplate);
         mapping.setModelElementType(this.modelElementType);
 

@@ -45,8 +45,8 @@ public abstract class OTPrmMapping extends HasId implements Serializable {
         return detectorElement;
     }
 
-    public void setDetectorNode(TEntityTemplate detectorNode) {
-        this.detectorElement = detectorNode;
+    public void setDetectorElement(TEntityTemplate detectorElement) {
+        this.detectorElement = detectorElement;
     }
 
     public TEntityTemplate getRefinementElement() {
