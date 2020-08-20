@@ -197,42 +197,41 @@ public class PermutationGenerator {
                 addPermutabilityMapping(detectorNode, refinementNode, refinementModel);
             } else {
                 ArrayList<String> patternSet = new ArrayList<>();
+                patternSet.add(detectorNode.getId());
+
                 mappingsWithoutDetectorNode.stream()
                     .map(OTPrmMapping::getDetectorElement)
-                    .distinct()
-                    .forEach(node -> {
-                        refinementModel.getPermutationOptions().forEach(permutationOption ->
-                            permutationOption.getOptions().removeIf(option -> option.equals(detectorNode.getId()))
-                        );
-                        patternSet.add(detectorNode.getId());
-                    });
+                    .forEach(node -> patternSet.add(node.getId()));
 
                 logger.debug("Found pattern set of components: {}", String.join(",", patternSet));
 
                 if (refinementModel.getComponentSets() == null) {
                     refinementModel.setComponentSets(new ArrayList<>());
-                } else {
-                    boolean added = false;
-                    for (OTComponentSet componentSet : refinementModel.getComponentSets()) {
-                        List<String> nodesNotInComponentSet = patternSet.stream()
-                            .filter(node -> componentSet.getComponentSet().stream()
-                                .anyMatch(nodeId -> !nodeId.equals(node))
-                            )
-                            .collect(Collectors.toList());
-                        if (nodesNotInComponentSet.size() != patternSet.size()) {
-                            added = componentSet.getComponentSet().addAll(nodesNotInComponentSet);
-                            logger.debug("Added pattern set to existing set: {}",
-                                String.join(",", componentSet.getComponentSet()));
-                            break;
-                        }
-                    }
+                }
 
-                    if (!added) {
-                        if (refinementModel.getComponentSets() == null) {
-                            refinementModel.setComponentSets(new ArrayList<>());
-                        }
-                        refinementModel.getComponentSets().add(new OTComponentSet(patternSet));
+                refinementModel.getPermutationOptions()
+                    .removeIf(permutationOption -> !(permutationOption.getOptions().containsAll(patternSet)
+                        || permutationOption.getOptions().stream().noneMatch(patternSet::contains))
+                    );
+
+                boolean added = false;
+                for (OTComponentSet componentSet : refinementModel.getComponentSets()) {
+                    List<String> existingPatternSet = componentSet.getComponentSet();
+                    if (existingPatternSet.stream().anyMatch(patternSet::contains)) {
+                        added = true;
+                        patternSet.forEach(id -> {
+                            if (!existingPatternSet.contains(id)) {
+                                existingPatternSet.add(id);
+                            }
+                        });
+                        logger.debug("Added pattern set to existing set: {}",
+                            String.join(",", existingPatternSet));
+                        break;
                     }
+                }
+
+                if (!added) {
+                    refinementModel.getComponentSets().add(new OTComponentSet(patternSet));
                 }
             }
         }

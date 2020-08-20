@@ -59,8 +59,46 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
     @Test
     void checkPermutabilityWithPatternSet() {
+        OTPatternRefinementModel refinementModel = generatePrm();
 
-        // region PRM
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+
+        assertFalse(permutationGenerator.checkPermutability(refinementModel));
+
+        assertEquals(3, refinementModel.getPermutationMappings().size());
+        refinementModel.getPermutationMappings()
+            .forEach(mapping -> {
+                assertFalse("1".equals(mapping.getDetectorElement().getId())
+                    && "14".equals(mapping.getRefinementElement().getId()));
+                assertFalse("2".equals(mapping.getDetectorElement().getId())
+                    && "14".equals(mapping.getRefinementElement().getId()));
+                assertFalse("2".equals(mapping.getDetectorElement().getId())
+                    && "15".equals(mapping.getRefinementElement().getId()));
+                assertFalse("2".equals(mapping.getDetectorElement().getId())
+                    && "16".equals(mapping.getRefinementElement().getId()));
+                assertFalse("3".equals(mapping.getDetectorElement().getId())
+                    && "15".equals(mapping.getRefinementElement().getId()));
+            });
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("11")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("12")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("13")
+        ));
+
+        assertEquals(1, refinementModel.getComponentSets().size());
+        assertEquals(2, refinementModel.getPermutationOptions().size());
+
+        assertTrue(refinementModel.getComponentSets().get(0).getComponentSet().containsAll(Arrays.asList("2", "3")));
+
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().contains("1")));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().containsAll(Arrays.asList("2", "3"))));
+    }
+
+    private OTPatternRefinementModel generatePrm() {
         /*                +------------------------+   
                           |                        \| 
         ########----------+      ########        ######## 
@@ -241,24 +279,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         refinementModel.setAttributeMappings(Collections.singletonList(pattern2_to_node13));
         refinementModel.setRelationMappings(Arrays.asList(pattern1_to_node11, pattern2_to_node15, pattern3_to_node15));
         refinementModel.setDeploymentArtifactMappings(Collections.singletonList(pattern1_to_node12));
-        // endregion
 
-        PermutationGenerator permutationGenerator = new PermutationGenerator();
-
-        assertFalse(permutationGenerator.checkPermutability(refinementModel));
-
-        refinementModel.getPermutationMappings()
-            .forEach(mapping -> {
-                assertFalse("1".equals(mapping.getDetectorElement().getId())
-                    && "14".equals(mapping.getRefinementElement().getId()));
-                assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "14".equals(mapping.getRefinementElement().getId()));
-                assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "15".equals(mapping.getRefinementElement().getId()));
-                assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "16".equals(mapping.getRefinementElement().getId()));
-                assertFalse("3".equals(mapping.getDetectorElement().getId())
-                    && "15".equals(mapping.getRefinementElement().getId()));
-            });
+        return refinementModel;
     }
 }
