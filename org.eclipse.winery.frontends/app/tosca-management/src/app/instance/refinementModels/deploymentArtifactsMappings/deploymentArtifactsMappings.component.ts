@@ -34,8 +34,8 @@ export class DeploymentArtifactsMappingsComponent implements OnInit {
     loading = true;
     columns: Array<WineryTableColumn> = [
         { title: 'Deployment Artifact Type', name: 'artifactType', sort: true },
-        { title: 'Detector Element', name: 'detectorNode', sort: true },
-        { title: 'Refinement Element', name: 'refinementNode', sort: true },
+        { title: 'Detector Element', name: 'detectorElement', sort: true },
+        { title: 'Refinement Element', name: 'refinementElement', sort: true },
     ];
 
     deploymentArtifactMappings: DeploymentArtifactMapping[];
@@ -86,7 +86,7 @@ export class DeploymentArtifactsMappingsComponent implements OnInit {
     }
 
     detectorNodeSelected(node: SelectData) {
-        this.mapping.detectorNode = node.id;
+        this.mapping.detectorElement = node.id;
     }
 
     onRemoveButtonClicked(selected: DeploymentArtifactMapping) {

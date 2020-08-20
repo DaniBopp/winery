@@ -181,7 +181,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                         .anyMatch(mapping -> {
                             if (ModelUtilities.isOfType(mapping.getArtifactType(), deploymentArtifact.getArtifactType(), this.artifactTypes)) {
                                 if (idMapping != null) {
-                                    TNodeTemplate addedNode = topology.getNodeTemplate(idMapping.get(mapping.getRefinementNode().getId()));
+                                    TNodeTemplate addedNode = topology.getNodeTemplate(idMapping.get(mapping.getRefinementElement().getId()));
                                     if (addedNode != null) {
                                         TDeploymentArtifacts existingDeploymentArtifactsOfRefinement = addedNode.getDeploymentArtifacts();
                                         if (existingDeploymentArtifactsOfRefinement == null) {
@@ -214,7 +214,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                         Map<String, String> sourceProperties = matchingEntity.getProperties().getKVProperties();
                         topology.getNodeTemplateOrRelationshipTemplate()
                             .stream()
-                            .filter(element -> element.getId().equals(idMapping.get(mapping.getRefinementNode().getId())))
+                            .filter(element -> element.getId().equals(idMapping.get(mapping.getRefinementElement().getId())))
                             .findFirst()
                             .ifPresent(addedElement -> {
                                 if (addedElement.getProperties() != null) {
@@ -276,7 +276,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                                 String targetId = relationship.getTargetElement().getRef().getId();
                                 String sourceId = relationship.getSourceElement().getRef().getId();
 
-                                String idInRefinementStructure = staying.getRefinementNode().getId();
+                                String idInRefinementStructure = staying.getRefinementElement().getId();
 
                                 if (targetId.equals(idInRefinementStructure)) {
                                     LOGGER.debug("Redirecting target of {} to {}", relationship.getId(), matchingNodeInTopology.getId());

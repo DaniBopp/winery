@@ -320,19 +320,19 @@ class PatternRefinementTest extends AbstractRefinementTest {
         OTAttributeMapping allOn4to13 = new OTAttributeMapping();
         allOn4to13.setType(OTAttributeMappingType.ALL);
         allOn4to13.setDetectorNode(candidateForTopology.getRefinementModel().getDetector().getNodeTemplate("8"));
-        allOn4to13.setRefinementNode(nt13);
+        allOn4to13.setRefinementElement(nt13);
 
         OTAttributeMapping pIn2_to_jIn12 = new OTAttributeMapping();
         pIn2_to_jIn12.setType(OTAttributeMappingType.SELECTIVE);
         pIn2_to_jIn12.setDetectorNode(candidateForTopology.getRefinementModel().getDetector().getNodeTemplate("7"));
-        pIn2_to_jIn12.setRefinementNode(nt12);
+        pIn2_to_jIn12.setRefinementElement(nt12);
         pIn2_to_jIn12.setDetectorProperty("p");
         pIn2_to_jIn12.setRefinementProperty("j");
 
         OTAttributeMapping xIn2_to_kIn11 = new OTAttributeMapping();
         xIn2_to_kIn11.setType(OTAttributeMappingType.SELECTIVE);
         xIn2_to_kIn11.setDetectorNode(candidateForTopology.getRefinementModel().getDetector().getNodeTemplate("7"));
-        xIn2_to_kIn11.setRefinementNode(nt11);
+        xIn2_to_kIn11.setRefinementElement(nt11);
         xIn2_to_kIn11.setDetectorProperty("x");
         xIn2_to_kIn11.setRefinementProperty("k");
 
@@ -430,7 +430,7 @@ class PatternRefinementTest extends AbstractRefinementTest {
         nt4staysAsNt12.setModelElementType(OTPrmModelElementType.NODE);
         nt4staysAsNt12.setId("stay1");
         nt4staysAsNt12.setDetectorNode(nt4);
-        nt4staysAsNt12.setRefinementNode(nt12);
+        nt4staysAsNt12.setRefinementElement(nt12);
         ((OTPatternRefinementModel) candidateForTopology.getRefinementModel())
             .setStayMappings(Collections.singletonList(nt4staysAsNt12));
         // endregion

@@ -55,7 +55,7 @@
                     },
                     "id": "mapping0",
                     "detectorElement": "Infrastructure-As-A-Service_w1",
-                    "refinementNode": "NodeTypeWith5Versions_0.3.4-w3-wip3",
+                    "refinementElement": "NodeTypeWith5Versions_0.3.4-w3-wip3",
                     "relationType": "{http://plain.winery.opentosca.org/relationshiptypes}RelationshipTypeWithTwoKvPropertie",
                     "direction": "INGOING"
                 },
@@ -68,7 +68,7 @@
                     },
                     "id": "mapping1",
                     "detectorElement": "Infrastructure-As-A-Service_w1",
-                    "refinementNode": "NodeTypeWith5Versions_0.3.0-w2",
+                    "refinementElement": "NodeTypeWith5Versions_0.3.0-w2",
                     "relationType": "{http://plain.winery.opentosca.org/relationshiptypes}RelationshipTypeWithoutProperties",
                     "direction": "OUTGOING",
                     "validSourceOrTarget": "{http://plain.winery.opentosca.org/nodetypes}NodeTypeWithTwoKVProperties"

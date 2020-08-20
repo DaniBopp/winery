@@ -48,7 +48,7 @@ public abstract class RefinementUtils {
     public static List<TEntityTemplate> getStayingModelElements(OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() == null ? new ArrayList<>() :
             prm.getStayMappings().stream()
-                .map(OTPrmMapping::getRefinementNode)
+                .map(OTPrmMapping::getRefinementElement)
                 .collect(Collectors.toList());
     }
 
@@ -60,7 +60,7 @@ public abstract class RefinementUtils {
     public static List<TEntityTemplate> getStayPlaceholders(OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() == null ? new ArrayList<>() :
             prm.getStayMappings().stream()
-                .map(OTPrmMapping::getRefinementNode)
+                .map(OTPrmMapping::getRefinementElement)
                 .collect(Collectors.toList());
     }
 
@@ -73,7 +73,7 @@ public abstract class RefinementUtils {
     public static boolean permutabilityMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getPermutationMappings() != null &&
             prm.getPermutationMappings().stream()
-                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(entityTemplate));
+                .anyMatch(permutationMap -> permutationMap.getRefinementElement().equals(entityTemplate));
     }
 
     public static boolean noMappingExistsForRefinementNode(TNodeTemplate detectorNode,
@@ -87,7 +87,7 @@ public abstract class RefinementUtils {
     public static boolean stayMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() != null &&
             prm.getStayMappings().stream()
-                .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(entityTemplate));
+                .anyMatch(permutationMap -> permutationMap.getRefinementElement().equals(entityTemplate));
     }
 
     public static void addPermutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
@@ -134,7 +134,7 @@ public abstract class RefinementUtils {
         }
 
         mapping.setDetectorNode(detectorNode);
-        mapping.setRefinementNode(refinementNode);
+        mapping.setRefinementElement(refinementNode);
         mapping.setId(UUID.randomUUID().toString());
         mappings.add(mapping);
 
@@ -163,7 +163,7 @@ public abstract class RefinementUtils {
                                                                                                List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
-                .filter(mapping -> mapping.getRefinementNode().getId().equals(refinementNode.getId()))
+                .filter(mapping -> mapping.getRefinementElement().getId().equals(refinementNode.getId()))
                 .filter(mapping -> !mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                 .collect(Collectors.toList());
     }
@@ -203,14 +203,14 @@ public abstract class RefinementUtils {
             ) {
                 // change the source element to the new source defined in the relation mapping
                 if (Objects.nonNull(idMapping)) {
-                    String id = idMapping.get(relationMapping.getRefinementNode().getId());
+                    String id = idMapping.get(relationMapping.getRefinementElement().getId());
                     relationship.setTargetNodeTemplate(topology.getNodeTemplate(id));
                 }
                 return true;
             } else if (Objects.isNull(relationMapping.getValidSourceOrTarget())
                 || ModelUtilities.isOfType(relationMapping.getValidSourceOrTarget(), relationship.getTargetElement().getRef().getType(), nodeTypes)) {
                 if (Objects.nonNull(idMapping)) {
-                    String id = idMapping.get(relationMapping.getRefinementNode().getId());
+                    String id = idMapping.get(relationMapping.getRefinementElement().getId());
                     relationship.setSourceNodeTemplate(topology.getNodeTemplate(id));
                 }
                 return true;

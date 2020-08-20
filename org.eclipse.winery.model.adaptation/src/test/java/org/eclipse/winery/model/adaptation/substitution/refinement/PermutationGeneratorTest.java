@@ -116,7 +116,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         detector.addRelationshipTemplate(pattern2_hostedOn_pattern3);
         // endregion
 
-        // region refinement strucuture
+        // region refinement structure
         TNodeTemplate refinementNode_11 = new TNodeTemplate();
         refinementNode_11.setType("{http://ex.org}nodeType_11");
         refinementNode_11.setId("11");
@@ -205,33 +205,33 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         pattern1_to_node11.setRelationType(QName.valueOf("{http://ex.org}relType_connectsTo"));
         pattern1_to_node11.setDirection(OTRelationDirection.INGOING);
         pattern1_to_node11.setDetectorNode(pattern_1);
-        pattern1_to_node11.setRefinementNode(refinementNode_11);
+        pattern1_to_node11.setRefinementElement(refinementNode_11);
 
         OTDeploymentArtifactMapping pattern1_to_node12 = new OTDeploymentArtifactMapping();
         pattern1_to_node11.setId("p1_to_n12");
         pattern1_to_node12.setDetectorNode(pattern_1);
-        pattern1_to_node12.setRefinementNode(refinementNode_12);
+        pattern1_to_node12.setRefinementElement(refinementNode_12);
         pattern1_to_node12.setArtifactType(QName.valueOf("{http://ex.org}artType_war"));
 
         OTAttributeMapping pattern2_to_node13 = new OTAttributeMapping();
         pattern2_to_node13.setId("p2_to_n13");
         pattern2_to_node13.setType(OTAttributeMappingType.ALL);
         pattern2_to_node13.setDetectorNode(pattern_2);
-        pattern2_to_node13.setRefinementNode(refinementNode_13);
+        pattern2_to_node13.setRefinementElement(refinementNode_13);
 
         OTRelationMapping pattern2_to_node15 = new OTRelationMapping();
         pattern2_to_node15.setId("p2_to_n15");
         pattern2_to_node15.setRelationType(QName.valueOf("{http://ex.org}relType_connectsTo"));
         pattern2_to_node15.setDirection(OTRelationDirection.INGOING);
         pattern2_to_node15.setDetectorNode(pattern_2);
-        pattern2_to_node15.setRefinementNode(refinementNode_15);
+        pattern2_to_node15.setRefinementElement(refinementNode_15);
 
         OTRelationMapping pattern3_to_node15 = new OTRelationMapping();
         pattern3_to_node15.setId("p3_to_n15");
         pattern3_to_node15.setRelationType(QName.valueOf("{http://ex.org}relType_connectsTo"));
         pattern3_to_node15.setDirection(OTRelationDirection.INGOING);
         pattern3_to_node15.setDetectorNode(pattern_3);
-        pattern3_to_node15.setRefinementNode(refinementNode_15);
+        pattern3_to_node15.setRefinementElement(refinementNode_15);
         // endregion
 
         OTPatternRefinementModel refinementModel = new OTPatternRefinementModel();
@@ -250,15 +250,15 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         refinementModel.getPermutationMappings()
             .forEach(mapping -> {
                 assertFalse("1".equals(mapping.getDetectorElement().getId())
-                    && "14".equals(mapping.getRefinementNode().getId()));
+                    && "14".equals(mapping.getRefinementElement().getId()));
                 assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "14".equals(mapping.getRefinementNode().getId()));
+                    && "14".equals(mapping.getRefinementElement().getId()));
                 assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "15".equals(mapping.getRefinementNode().getId()));
+                    && "15".equals(mapping.getRefinementElement().getId()));
                 assertFalse("2".equals(mapping.getDetectorElement().getId())
-                    && "16".equals(mapping.getRefinementNode().getId()));
+                    && "16".equals(mapping.getRefinementElement().getId()));
                 assertFalse("3".equals(mapping.getDetectorElement().getId())
-                    && "15".equals(mapping.getRefinementNode().getId()));
+                    && "15".equals(mapping.getRefinementElement().getId()));
             });
     }
 }

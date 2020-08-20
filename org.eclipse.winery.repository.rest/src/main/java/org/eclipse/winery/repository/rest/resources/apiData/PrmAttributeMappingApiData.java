@@ -34,7 +34,7 @@ public class PrmAttributeMappingApiData extends AbstractPrmMappingElement {
         OTAttributeMapping mapping = new OTAttributeMapping();
         mapping.setId(this.id);
         mapping.setDetectorNode(detectorNodeTemplate);
-        mapping.setRefinementNode(refinementNodeTemplate);
+        mapping.setRefinementElement(refinementNodeTemplate);
         mapping.setType(this.type);
         mapping.setDetectorProperty(this.detectorProperty);
         mapping.setRefinementProperty(this.refinementProperty);

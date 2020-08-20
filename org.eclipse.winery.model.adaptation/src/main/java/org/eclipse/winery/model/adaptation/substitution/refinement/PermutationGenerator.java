@@ -94,8 +94,8 @@ public class PermutationGenerator {
         for (TNodeTemplate detectorNode : detectorNodeTemplates) {
             getAllMappingsForDetectorNode(detectorNode, refinementModel).stream()
                 .filter(mapping -> mapping.getDetectorElement().equals(detectorNode))
-                .filter(mapping -> mapping.getRefinementNode() instanceof TNodeTemplate)
-                .map(mapping -> (TNodeTemplate) mapping.getRefinementNode())
+                .filter(mapping -> mapping.getRefinementElement() instanceof TNodeTemplate)
+                .map(mapping -> (TNodeTemplate) mapping.getRefinementElement())
                 .forEach(refinementNode ->
                     this.checkComponentPermutability(refinementNode, detectorNode, refinementModel)
                 );
@@ -109,7 +109,7 @@ public class PermutationGenerator {
                             .filter(relMap -> RefinementUtils.canRedirectRelation(relMap, relation, this.relationshipTypes, this.nodeTypes))
                             .findFirst()
                             .ifPresent(relMap ->
-                                addPermutabilityMapping(relMap.getDetectorElement(), relMap.getRefinementNode(), refinementModel)
+                                addPermutabilityMapping(relMap.getDetectorElement(), relMap.getRefinementElement(), refinementModel)
                             );
                     }
                 });
@@ -162,7 +162,7 @@ public class PermutationGenerator {
                     .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
                         refinementModel.getPermutationMappings().stream()
                             .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
-                            .anyMatch(pm2 -> !pm.getRefinementNode().equals(pm2.getRefinementNode()))
+                            .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
                     );
                 if (detectorNodeRefinesToMultipleNodes) {
                     break;

@@ -39,7 +39,7 @@ public abstract class OTPrmMapping extends HasId implements Serializable {
     @XmlIDREF
     @XmlSchemaType(name = "IDREF")
     @NonNull
-    private TEntityTemplate refinementNode;
+    private TEntityTemplate refinementElement;
 
     public TEntityTemplate getDetectorElement() {
         return detectorElement;
@@ -49,12 +49,12 @@ public abstract class OTPrmMapping extends HasId implements Serializable {
         this.detectorElement = detectorNode;
     }
 
-    public TEntityTemplate getRefinementNode() {
-        return refinementNode;
+    public TEntityTemplate getRefinementElement() {
+        return refinementElement;
     }
 
-    public void setRefinementNode(TEntityTemplate refinementNode) {
-        this.refinementNode = refinementNode;
+    public void setRefinementElement(TEntityTemplate refinementElement) {
+        this.refinementElement = refinementElement;
     }
 
     @Override

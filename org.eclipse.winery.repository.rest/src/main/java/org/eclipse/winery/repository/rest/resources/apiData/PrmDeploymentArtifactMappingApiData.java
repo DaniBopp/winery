@@ -34,7 +34,7 @@ public class PrmDeploymentArtifactMappingApiData extends AbstractPrmMappingEleme
         artifactMapping.setId(this.id);
         artifactMapping.setDetectorNode(detectorNodeTemplate);
         artifactMapping.setArtifactType(this.artifactType);
-        artifactMapping.setRefinementNode(refinementNodeTemplate);
+        artifactMapping.setRefinementElement(refinementNodeTemplate);
 
         return artifactMapping;
     }

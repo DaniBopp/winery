@@ -313,14 +313,14 @@ public class AbstractRefinementTest {
         rm1.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm1.setDirection(OTRelationDirection.INGOING);
         rm1.setValidSourceOrTarget(QName.valueOf("{http://ex.org}nodeType_3"));
-        rm1.setRefinementNode(nt11);
+        rm1.setRefinementElement(nt11);
 
         OTRelationMapping rm2 = new OTRelationMapping();
         rm2.setDetectorNode(nt7);
         rm2.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm2.setDirection(OTRelationDirection.OUTGOING);
         rm2.setValidSourceOrTarget(QName.valueOf("{http://ex.org}nodeType_1"));
-        rm2.setRefinementNode(nt10);
+        rm2.setRefinementElement(nt10);
         // endregion
 
         OTPatternRefinementModel prmWithNt2HostedOnNt4AndIngoingRt1AtNt2AndOutgoingRt1AtNt2 = new OTPatternRefinementModel();
@@ -376,7 +376,7 @@ public class AbstractRefinementTest {
         deploymentArtifactMapping1.setId("daMap-1");
         deploymentArtifactMapping1.setArtifactType(artifactTypeFile);
         deploymentArtifactMapping1.setDetectorNode(nt8);
-        deploymentArtifactMapping1.setRefinementNode(nt13);
+        deploymentArtifactMapping1.setRefinementElement(nt13);
 
         OTPatternRefinementModel matchingPrmWithDa = new OTPatternRefinementModel();
         matchingPrmWithDa.setDetector(detector);
@@ -392,7 +392,7 @@ public class AbstractRefinementTest {
         deploymentArtifactMapping2.setId("daMap-1");
         deploymentArtifactMapping2.setArtifactType(artifactTypeZip);
         deploymentArtifactMapping2.setDetectorNode(nt7);
-        deploymentArtifactMapping2.setRefinementNode(nt11);
+        deploymentArtifactMapping2.setRefinementElement(nt11);
 
         OTPatternRefinementModel nonMatchingPrmWithDa = new OTPatternRefinementModel();
         nonMatchingPrmWithDa.setDetector(detector);
@@ -413,7 +413,7 @@ public class AbstractRefinementTest {
         rm3.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm3.setDirection(OTRelationDirection.INGOING);
         rm3.setDetectorNode(nt7);
-        rm3.setRefinementNode(nt11);
+        rm3.setRefinementElement(nt11);
 
         OTPatternRefinementModel prmWithNT2HostedOnNT4AndIngoingRT1AtNT2 = new OTPatternRefinementModel();
         prmWithNT2HostedOnNT4AndIngoingRT1AtNT2.setDetector(detector);
@@ -427,7 +427,7 @@ public class AbstractRefinementTest {
         rm4.setRelationType(QName.valueOf("{http://ex.org}relType_1"));
         rm4.setDirection(OTRelationDirection.INGOING);
         rm4.setDetectorNode(nt8);
-        rm4.setRefinementNode(nt13);
+        rm4.setRefinementElement(nt13);
 
         OTPatternRefinementModel prmWithNT2HostedOnNT4AndIngoingRT1AtNT2AndIngoingRT1AtNT4 = new OTPatternRefinementModel();
         prmWithNT2HostedOnNT4AndIngoingRT1AtNT2AndIngoingRT1AtNT4.setDetector(detector);

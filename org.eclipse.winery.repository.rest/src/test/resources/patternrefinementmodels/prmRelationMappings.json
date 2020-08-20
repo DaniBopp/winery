@@ -8,7 +8,7 @@
         },
         "id": "propMap0",
         "detectorElement": "d_NodeTypeWithTwoKVProperties",
-        "refinementNode": "rs_NodeTypeWithTwoKVProperties",
+        "refinementElement": "rs_NodeTypeWithTwoKVProperties",
         "type": "SELECTIVE",
         "detectorProperty": "key1",
         "refinementProperty": "key2"
@@ -22,7 +22,7 @@
         },
         "id": "propMap1",
         "detectorElement": "d_NodeTypeWithTwoKVProperties_2",
-        "refinementNode": "rs_NodeTypeWithTwoKVProperties_2",
+        "refinementElement": "rs_NodeTypeWithTwoKVProperties_2",
         "type": "ALL"
     }
 ]
