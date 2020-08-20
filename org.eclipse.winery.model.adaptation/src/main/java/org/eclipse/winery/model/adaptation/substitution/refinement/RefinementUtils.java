@@ -76,6 +76,14 @@ public abstract class RefinementUtils {
                 .anyMatch(permutationMap -> permutationMap.getRefinementNode().equals(entityTemplate));
     }
 
+    public static boolean noMappingExistsForRefinementNode(TNodeTemplate detectorNode,
+                                                           TEntityTemplate refinementNode,
+                                                           OTTopologyFragmentRefinementModel refinementModel) {
+        return !isStayPlaceholder(refinementNode, refinementModel) &&
+            !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
+            getAllMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel).size() == 0;
+    }
+
     public static boolean stayMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() != null &&
             prm.getStayMappings().stream()
@@ -150,13 +158,13 @@ public abstract class RefinementUtils {
         return mappings;
     }
 
-    private static <T extends OTPrmMapping> List<T> getMappingsForRefinementNodeButNotFromDetectorNode(TNodeTemplate detectorNode,
-                                                                                                       TEntityTemplate refinementNode,
-                                                                                                       List<T> mappings) {
+    static <T extends OTPrmMapping> List<T> getMappingsForRefinementNodeButNotFromDetectorNode(TNodeTemplate detectorNode,
+                                                                                               TEntityTemplate refinementNode,
+                                                                                               List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
-                .filter(mapping -> mapping.getRefinementNode().equals(refinementNode))
-                .filter(mapping -> !mapping.getDetectorElement().equals(detectorNode))
+                .filter(mapping -> mapping.getRefinementNode().getId().equals(refinementNode.getId()))
+                .filter(mapping -> !mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                 .collect(Collectors.toList());
     }
 
