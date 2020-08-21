@@ -150,6 +150,14 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
             permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("13")
         ));
+
+        assertEquals(1, refinementModel.getComponentSets().size());
+        assertEquals(2, refinementModel.getPermutationOptions().size());
+
+        assertTrue(refinementModel.getComponentSets().get(0).getComponentSet().containsAll(Arrays.asList("2", "3")));
+
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().contains("1")));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().containsAll(Arrays.asList("2", "3"))));
     }
 
     private OTPatternRefinementModel generatePrm() {
