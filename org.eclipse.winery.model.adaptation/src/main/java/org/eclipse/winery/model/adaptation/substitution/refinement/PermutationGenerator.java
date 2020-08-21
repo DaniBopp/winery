@@ -59,6 +59,9 @@ public class PermutationGenerator {
     protected final Map<QName, TRelationshipType> relationshipTypes = new HashMap<>();
     protected final Map<QName, TNodeType> nodeTypes = new HashMap<>();
 
+    protected final String errorMessage = "Permutations cannot be determined automatically! Reason: {}.";
+    protected String permutabilityErrorReason = "";
+
     public PermutationGenerator() {
         this.relationshipTypes.putAll(RepositoryFactory.getRepository().getQNameToElementMapping(RelationshipTypeId.class));
         this.nodeTypes.putAll(RepositoryFactory.getRepository().getQNameToElementMapping(NodeTypeId.class));
@@ -71,6 +74,8 @@ public class PermutationGenerator {
 
     public boolean checkPermutability(OTTopologyFragmentRefinementModel refinementModel) {
         logger.info("Starting permutability check of {}", refinementModel.getIdFromIdOrNameField());
+        this.permutabilityErrorReason = "";
+
         List<TNodeTemplate> detectorNodeTemplates = refinementModel.getDetector().getNodeTemplates();
         Set<TNodeTemplate> permutableNodes = detectorNodeTemplates.stream()
             .filter(nodeTemplate -> !isStayingElement(nodeTemplate, refinementModel))
@@ -116,8 +121,8 @@ public class PermutationGenerator {
         }
 
         if (refinementModel.getPermutationMappings() == null) {
-            logger.info("Permutations cannot be determined automatically! " +
-                "Reason: No permutation mappings could be identified.");
+            this.permutabilityErrorReason = "No permutation mappings could be identified";
+            logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
         }
 
@@ -128,9 +133,9 @@ public class PermutationGenerator {
             .collect(Collectors.toList());
 
         if (unmappedDetectorNodes.size() > 0) {
-            logger.info("Permutations cannot be determined automatically! " +
-                    "Reason: There are detector nodes which could not be mapped to a refinement node: {}",
-                String.join(", ", unmappedDetectorNodes));
+            this.permutabilityErrorReason = "There are detector nodes which could not be mapped to a refinement node: "
+                + String.join(", ", unmappedDetectorNodes);
+            logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
         }
 
@@ -141,9 +146,9 @@ public class PermutationGenerator {
             .collect(Collectors.toList());
 
         if (unmappedRefinementNodes.size() > 0) {
-            logger.info("Permutations cannot be determined automatically! " +
-                    "Reason: There are refinement nodes which could not be mapped to a detector node: {}",
-                String.join(", ", unmappedRefinementNodes));
+            this.permutabilityErrorReason = "There are refinement nodes which could not be mapped to a detector node: "
+                + String.join(", ", unmappedRefinementNodes);
+            logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
         }
 
@@ -171,8 +176,8 @@ public class PermutationGenerator {
         }
 
         if (detectorNodeRefinesToMultipleNodes) {
-            logger.info("Permutations cannot be determined automatically! " +
-                "Reason: There are relations that cannot be redirected during the generation.");
+            this.permutabilityErrorReason = "There are relations that cannot be redirected during the generation";
+            logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
         }
 
@@ -251,5 +256,9 @@ public class PermutationGenerator {
                     .anyMatch(source -> noMappingExistsForRefinementNode(detectorNode, source, refinementModel))
                 ).forEach(dependee -> this.checkComponentPermutability(dependee, detectorNode, refinementModel));
         }
+    }
+
+    public String getPermutabilityErrorReason() {
+        return permutabilityErrorReason;
     }
 }

@@ -65,6 +65,8 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertEquals("There are detector nodes which could not be mapped to a refinement node: 3",
+            permutationGenerator.getPermutabilityErrorReason());
 
         assertEquals(3, refinementModel.getPermutationMappings().size());
         refinementModel.getPermutationMappings()
@@ -106,6 +108,21 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertEquals("There are relations that cannot be redirected during the generation",
+            permutationGenerator.getPermutabilityErrorReason());
+    }
+
+    @Test
+    void checkPermutabilityOfNotPermuatablePrmBecauseOfANotMappableRefinementNode() {
+        OTPatternRefinementModel refinementModel = generatePrm();
+        addPermutationMappings(refinementModel);
+
+        refinementModel.getPermutationMappings().removeIf(map -> map.getId().equals("p2_to_n14"));
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertEquals("There are refinement nodes which could not be mapped to a detector node: 14",
+            permutationGenerator.getPermutabilityErrorReason());
     }
 
     @Test
@@ -121,6 +138,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertTrue(permutationGenerator.checkPermutability(refinementModel));
+        assertEquals("", permutationGenerator.getPermutabilityErrorReason());
 
         assertEquals(7, refinementModel.getPermutationMappings().size());
         assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
