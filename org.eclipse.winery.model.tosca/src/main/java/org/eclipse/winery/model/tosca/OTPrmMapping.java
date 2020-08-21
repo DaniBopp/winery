@@ -15,6 +15,7 @@
 package org.eclipse.winery.model.tosca;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlIDREF;
@@ -47,6 +48,7 @@ public abstract class OTPrmMapping extends HasId implements Serializable {
     public OTPrmMapping(TEntityTemplate detectorElement, TEntityTemplate refinementElement) {
         this.detectorElement = detectorElement;
         this.refinementElement = refinementElement;
+        this.setId(UUID.randomUUID().toString());
     }
 
     public TEntityTemplate getDetectorElement() {

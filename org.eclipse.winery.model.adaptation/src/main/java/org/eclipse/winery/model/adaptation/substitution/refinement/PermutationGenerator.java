@@ -16,6 +16,7 @@ package org.eclipse.winery.model.adaptation.substitution.refinement;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -170,14 +171,23 @@ public class PermutationGenerator {
                     .findFirst();
 
             if (unMappableRelation.isPresent()) {
-                // If there is no permutation mapping for the relation and there is more than one permutation
-                // mapping sourcing from the source node, the relation cannot be redirected automatically
-                detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
-                    .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
-                        refinementModel.getPermutationMappings().stream()
-                            .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
-                            .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
-                    );
+                TRelationshipTemplate unmappable = unMappableRelation.get();
+                boolean relationBetweenNodesInAComponentSet = refinementModel.getComponentSets().stream()
+                    .anyMatch(componentSet ->
+                        componentSet.getComponentSet().containsAll(Arrays.asList(
+                            unmappable.getSourceElement().getRef().getId(),
+                            unmappable.getTargetElement().getRef().getId())));
+
+                if (!relationBetweenNodesInAComponentSet) {
+                    // If there is no permutation mapping for the relation and there is more than one permutation
+                    // mapping sourcing from the source node, the relation cannot be redirected automatically
+                    detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
+                        .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
+                            refinementModel.getPermutationMappings().stream()
+                                .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
+                                .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
+                        );
+                }
                 if (detectorNodeRefinesToMultipleNodes) {
                     break;
                 }
@@ -279,7 +289,8 @@ public class PermutationGenerator {
         }
 
         for (OTPermutationOption options : refinementModel.getPermutationOptions()) {
-            String permutationName = VersionUtils.getNewComponentVersionId(refinementModelId, String.join("-", options.getOptions()));
+            String permutationName = VersionUtils.getNewComponentVersionId(refinementModelId,
+                "permutation-" + String.join("-", options.getOptions()));
             QName permutationQName = new QName(refinementModel.getTargetNamespace(), permutationName);
 
             DefinitionsChildId permutationModelId = new TopologyFragmentRefinementModelId(permutationQName);
@@ -391,6 +402,13 @@ public class PermutationGenerator {
                             || ((TRelationshipTemplate) template).getTargetElement().getRef().getId().equals(option))
                         || template.getId().equals(option)
                     );
+
+                try {
+                    RepositoryFactory.getRepository().setElement(permutationModelId, permutation);
+                } catch (IOException e) {
+                    logger.error("Error while saving permutation!", e);
+                    break;
+                }
             }
         }
 
