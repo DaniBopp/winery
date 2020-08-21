@@ -18,11 +18,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.naming.event.ObjectChangeListener;
 import javax.ws.rs.Path;
 
 import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
 import org.eclipse.winery.model.tosca.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.OTDeploymentArtifactMapping;
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTStayMapping;
@@ -83,5 +85,16 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
         }
 
         return new DeploymentArtifactMappingsResource(this, artifactMappings);
+    }
+
+    @Path("permutationmappings")
+    public PermutationMappingsRessource getPermutationMappings() {
+        List<OTPermutationMapping> permutationMappings = this.getTRefinementModel().getPermutationMappings();
+
+        if (Objects.isNull(permutationMappings)) {
+            permutationMappings = new ArrayList<>();
+            this.getTRefinementModel().setPermutationMappings(permutationMappings);
+        }
+        return new PermutationMappingsRessource(this, permutationMappings);
     }
 }
