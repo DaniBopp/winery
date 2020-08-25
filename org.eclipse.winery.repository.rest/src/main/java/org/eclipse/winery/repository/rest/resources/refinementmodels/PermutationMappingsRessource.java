@@ -14,6 +14,7 @@
 
 package org.eclipse.winery.repository.rest.resources.refinementmodels;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -36,10 +37,16 @@ public class PermutationMappingsRessource extends AbstractRefinementModelMapping
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<OTPermutationMapping> addPermutationMapping(PrmPermutationMappingApiData mapping) {
-        TEntityTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(mapping.detectorElement);
-        TEntityTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(mapping.refinementElement);
+    public List<OTPermutationMapping> addPermutationMapping(PrmPermutationMappingApiData[] mappings) {
 
-        return this.addMapping(mapping.createPermutationMapping(detectorElement, refinementElement));
+        List<OTPermutationMapping> mappingsList = new ArrayList();
+
+        for (PrmPermutationMappingApiData permutationMapping : mappings) {
+            TEntityTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(permutationMapping.detectorElement);
+            TEntityTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(permutationMapping.refinementElement);
+            mappingsList = this.addMapping(permutationMapping.createPermutationMapping(detectorElement, refinementElement));
+        }
+
+        return mappingsList;
     }
 }
