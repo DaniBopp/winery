@@ -39,7 +39,7 @@ export class PermutationMappingsComponent implements OnInit {
 
     detectorElements: WineryTemplate[];
 
-    constructor(private service: RefinementMappingsService, private notify: WineryNotificationService,) {
+    constructor(private service: RefinementMappingsService, private notify: WineryNotificationService, ) {
     }
 
     ngOnInit(): void {
@@ -59,11 +59,11 @@ export class PermutationMappingsComponent implements OnInit {
             data => this.handleData(data),
             error => this.handleError(error)
         );
-        
-        //TODO: fill the dynamicTable
-        //this.dynamicTableData = [
+
+        // TODO: fill the dynamicTable
+        // this.dynamicTableData = [
         //   new DynamicDropdownData<>()
-        //]
+        // ]
     }
 
     private handleError(error: any) {
