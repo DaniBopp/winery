@@ -58,15 +58,15 @@ public abstract class PermutationHelper {
 
         // region detector
         TNodeTemplate pattern_1 = new TNodeTemplate();
-        pattern_1.setType("{http://ex.org}nodeType_1");
+        pattern_1.setType("{http://ex.org}pattern_1");
         pattern_1.setId("1");
 
         TNodeTemplate pattern_2 = new TNodeTemplate();
-        pattern_2.setType("{http://ex.org}nodeType_2");
+        pattern_2.setType("{http://ex.org}pattern_2");
         pattern_2.setId("2");
 
         TNodeTemplate pattern_3 = new TNodeTemplate();
-        pattern_3.setType("{http://ex.org}nodeType_3");
+        pattern_3.setType("{http://ex.org}pattern_3");
         pattern_3.setId("3");
 
         TRelationshipTemplate pattern1_hostedOn_pattern2 = new TRelationshipTemplate();

@@ -81,7 +81,7 @@ public abstract class RefinementUtils {
                                                            OTTopologyFragmentRefinementModel refinementModel) {
         return !isStayPlaceholder(refinementNode, refinementModel) &&
             !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
-            getAllMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel).size() == 0;
+            getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel).size() == 0;
     }
 
     public static boolean stayMappingExistsForRefinementNode(TEntityTemplate entityTemplate, OTTopologyFragmentRefinementModel prm) {
@@ -164,7 +164,7 @@ public abstract class RefinementUtils {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
                 .filter(mapping -> mapping.getRefinementElement().getId().equals(refinementNode.getId()))
-                .filter(mapping -> !mapping.getDetectorElement().getId().equals(detectorNode.getId()))
+                .filter(mapping -> detectorNode == null || !mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                 .collect(Collectors.toList());
     }
 
@@ -175,12 +175,29 @@ public abstract class RefinementUtils {
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getRelationMappings()));
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getAttributeMappings()));
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getDeploymentArtifactMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getStayMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getPermutationMappings()));
         return mappings;
     }
 
     public static List<OTPrmMapping> getAllMappingsForRefinementNode(TEntityTemplate refinementNode,
                                                                      OTTopologyFragmentRefinementModel refinementModel) {
         return getAllMappingsForRefinementNodeWithoutDetectorNode(null, refinementNode, refinementModel);
+    }
+
+    public static List<OTPrmMapping> getAllContentMappingsForRefinementNodeWithoutDetectorNode(TNodeTemplate detectorNode,
+                                                                                               TEntityTemplate refinementNode,
+                                                                                               OTTopologyFragmentRefinementModel refinementModel) {
+        ArrayList<OTPrmMapping> mappings = new ArrayList<>();
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getRelationMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getAttributeMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getDeploymentArtifactMappings()));
+        return mappings;
+    }
+
+    public static List<OTPrmMapping> getAllContentMappingsForRefinementNode(TEntityTemplate refinementNode,
+                                                                            OTTopologyFragmentRefinementModel refinementModel) {
+        return getAllContentMappingsForRefinementNodeWithoutDetectorNode(null, refinementNode, refinementModel);
     }
 
     public static boolean canRedirectRelation(OTRelationMapping relationMapping,

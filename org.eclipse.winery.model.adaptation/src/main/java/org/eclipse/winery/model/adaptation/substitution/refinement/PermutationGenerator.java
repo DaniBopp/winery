@@ -54,8 +54,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.addPermutabilityMapping;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllContentMappingsForRefinementNodeWithoutDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForDetectorNode;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForRefinementNodeWithoutDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayPlaceholder;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayingElement;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.noMappingExistsForRefinementNode;
@@ -210,7 +210,7 @@ public class PermutationGenerator {
             detectorNode.getId(), refinementNode.getId());
 
         List<OTPrmMapping> mappingsWithoutDetectorNode =
-            getAllMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
+            getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
 
         if (noMappingExistsForRefinementNode(detectorNode, refinementNode, refinementModel)) {
             logger.debug("Adding PermutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
@@ -299,7 +299,9 @@ public class PermutationGenerator {
             }
 
             try {
-                repository.duplicate(refinementModelId, permutationModelId);
+                // To ensure that the permutationMaps are duplicated correctly, save the permutation first
+                repository.setElement(refinementModelId, refinementModel);
+                repository.setElement(permutationModelId, refinementModel);
             } catch (IOException e) {
                 logger.error("Error while creating permutation!", e);
                 break;
@@ -322,14 +324,17 @@ public class PermutationGenerator {
                             : addNodeFromRefinementStructureToDetector(refinementElement, permutation, alreadyAdded);
 
                         // region outgoing relations of the currently permuted refinementElement
-                        for (TRelationshipTemplate relation : permutation.getRefinementStructure().getRelationshipTemplates()) {
-                            if (relation.getSourceElement().getRef().getId().equals(refinementElement.getId())) {
+                        ModelUtilities.getOutgoingRelationshipTemplates(permutation.getRefinementStructure(), refinementElement)
+                            .forEach(relation -> {
                                 // using the permutation maps defined in the original model as we remove them in the permutation
-                                for (OTPermutationMapping permutationMap : refinementModel.getPermutationMappings()) {
-                                    if (permutationMap.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId())) {
+                                refinementModel.getPermutationMappings().stream()
+                                    .filter(permutationMap -> permutationMap.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId()))
+                                    .filter(permutationMap -> permutationMap.getDetectorElement() instanceof TNodeTemplate)
+                                    .forEach(permutationMap -> {
                                         // TODO: An der stelle nicht nur das aktuelle element anschauen, sondern alle aus einem pattern set?!?
                                         //       Oder sogar nochmal was neues einfuehren weil was is wenn ich 2 rels auf 1 hab?
                                         //       Bsp.: PermutationGeneratorTest 166-174 ohne 12 und 11 zeigt zusaetzlich auf 14
+                                        //       EGAL! => Permutation Maps dürfen immer nur auf genau ein Element zeigen?
                                         // Vielleicht war das already contains schon genug, zumindest fuer das pattern set
                                         // ausserdem umgehen wir damit die behandlung von eingehenden relations (algo 21-23) --> algo anpassen 
                                         if (permutationMap.getDetectorElement().getId().equals(option) || alreadyAdded.containsKey(option)) {
@@ -338,21 +343,29 @@ public class PermutationGenerator {
                                                 ? addNodeFromRefinementStructureToDetector((TNodeTemplate) relation.getTargetElement().getRef(), permutation, alreadyAdded)
                                                 : permutation.getDetector().getNodeTemplate(alreadyAddedElement);
                                             ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, target, relation.getType(), permutation.getDetector());
-                                        } else {
-                                            ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, (TNodeTemplate) permutationMap.getDetectorElement(), relation.getType(), permutation.getDetector());
+                                        } else if (!options.getOptions().contains(permutationMap.getDetectorElement().getId())) {
+                                            TNodeTemplate target = permutationMap.getDetectorElement() instanceof TNodeTemplate
+                                                ? (TNodeTemplate) permutationMap.getDetectorElement()
+                                                : (TNodeTemplate) ((TRelationshipTemplate) permutationMap.getDetectorElement()).getSourceElement().getRef();
+                                            ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, target, relation.getType(), permutation.getDetector());
                                         }
-                                    }
-                                }
+                                    });
 
                                 if (permutation.getStayMappings() != null) {
                                     for (OTStayMapping stayMapping : permutation.getStayMappings()) {
-                                        if (stayMapping.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId())) {
+                                        Optional<TRelationshipTemplate> relationExists = permutation.getDetector().getRelationshipTemplates().stream()
+                                            .filter(existingRelation -> existingRelation.getType().equals(relation.getType()))
+                                            .filter(existingRelation -> addedDetectorElement != null && existingRelation.getSourceElement().getRef().getId().equals(addedDetectorElement.getId()))
+                                            .filter(existingRelation -> existingRelation.getTargetElement().getRef().getId().equals(stayMapping.getDetectorElement().getId()))
+                                            .findFirst();
+
+                                        if (!relationExists.isPresent() && stayMapping.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId())) {
                                             ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, (TNodeTemplate) stayMapping.getDetectorElement(), relation.getType(), permutation.getDetector());
                                         }
                                     }
                                 }
-                            }
-                        }
+                            });
+
                         //endregion
 
                         // region handle ingoing relations in the detector
@@ -394,7 +407,10 @@ public class PermutationGenerator {
                         .removeIf(map -> map.getDetectorElement().getId().equals(option));
                 }
                 permutation.getPermutationMappings()
-                    .removeIf(permMap -> permMap.getDetectorElement().getId().equals(option));
+                    .removeIf(permMap -> permMap.getDetectorElement().getId().equals(option) ||
+                        permMap.getDetectorElement() instanceof TRelationshipTemplate &&
+                            (((TRelationshipTemplate) permMap.getDetectorElement()).getSourceElement().getRef().getId().equals(option)
+                                || ((TRelationshipTemplate) permMap.getDetectorElement()).getTargetElement().getRef().getId().equals(option)));
 
                 permutation.getDetector().getNodeTemplateOrRelationshipTemplate()
                     .removeIf(template -> template instanceof TRelationshipTemplate &&
@@ -402,13 +418,13 @@ public class PermutationGenerator {
                             || ((TRelationshipTemplate) template).getTargetElement().getRef().getId().equals(option))
                         || template.getId().equals(option)
                     );
+            }
 
-                try {
-                    RepositoryFactory.getRepository().setElement(permutationModelId, permutation);
-                } catch (IOException e) {
-                    logger.error("Error while saving permutation!", e);
-                    break;
-                }
+            try {
+                RepositoryFactory.getRepository().setElement(permutationModelId, permutation);
+            } catch (IOException e) {
+                logger.error("Error while saving permutation!", e);
+                break;
             }
         }
 
