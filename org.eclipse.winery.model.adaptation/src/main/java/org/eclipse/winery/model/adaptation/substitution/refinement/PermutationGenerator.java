@@ -14,7 +14,9 @@
 
 package org.eclipse.winery.model.adaptation.substitution.refinement;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,20 +26,29 @@ import java.util.stream.Collectors;
 
 import javax.xml.namespace.QName;
 
+import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
 import org.eclipse.winery.common.ids.definitions.NodeTypeId;
+import org.eclipse.winery.common.ids.definitions.PatternRefinementModelId;
 import org.eclipse.winery.common.ids.definitions.RelationshipTypeId;
+import org.eclipse.winery.common.ids.definitions.TopologyFragmentRefinementModelId;
+import org.eclipse.winery.common.version.VersionUtils;
 import org.eclipse.winery.model.tosca.HasId;
 import org.eclipse.winery.model.tosca.OTComponentSet;
+import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTPermutationOption;
 import org.eclipse.winery.model.tosca.OTPrmMapping;
+import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
 import org.eclipse.winery.model.tosca.TNodeType;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
+import org.eclipse.winery.repository.backend.IRepository;
 import org.eclipse.winery.repository.backend.RepositoryFactory;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.eclipse.collections.impl.factory.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +61,6 @@ import static org.eclipse.winery.model.adaptation.substitution.refinement.Refine
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.noMappingExistsForRefinementNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForDetectorElement;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForRefinementNode;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.stayMappingExistsForRefinementNode;
 
 public class PermutationGenerator {
 
@@ -161,14 +171,23 @@ public class PermutationGenerator {
                     .findFirst();
 
             if (unMappableRelation.isPresent()) {
-                // If there is no permutation mapping for the relation and there is more than one permutation
-                // mapping sourcing from the source node, the relation cannot be redirected automatically
-                detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
-                    .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
-                        refinementModel.getPermutationMappings().stream()
-                            .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
-                            .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
-                    );
+                TRelationshipTemplate unmappable = unMappableRelation.get();
+                boolean relationBetweenNodesInAComponentSet = refinementModel.getComponentSets().stream()
+                    .anyMatch(componentSet ->
+                        componentSet.getComponentSet().containsAll(Arrays.asList(
+                            unmappable.getSourceElement().getRef().getId(),
+                            unmappable.getTargetElement().getRef().getId())));
+
+                if (!relationBetweenNodesInAComponentSet) {
+                    // If there is no permutation mapping for the relation and there is more than one permutation
+                    // mapping sourcing from the source node, the relation cannot be redirected automatically
+                    detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
+                        .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
+                            refinementModel.getPermutationMappings().stream()
+                                .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
+                                .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
+                        );
+                }
                 if (detectorNodeRefinesToMultipleNodes) {
                     break;
                 }
@@ -193,51 +212,48 @@ public class PermutationGenerator {
         List<OTPrmMapping> mappingsWithoutDetectorNode =
             getAllMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
 
-        if (!permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
-            !stayMappingExistsForRefinementNode(refinementNode, refinementModel)) {
+        if (noMappingExistsForRefinementNode(detectorNode, refinementNode, refinementModel)) {
+            logger.debug("Adding PermutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
+                detectorNode.getId(), refinementNode.getId());
+            addPermutabilityMapping(detectorNode, refinementNode, refinementModel);
+        } else if (mappingsWithoutDetectorNode.size() > 0) {
+            // Determine the set of pattern which must be refined together as they define overlapping mappings
+            ArrayList<String> patternSet = new ArrayList<>();
+            patternSet.add(detectorNode.getId());
 
-            if (mappingsWithoutDetectorNode.size() == 0) {
-                logger.debug("Adding PermutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
-                    detectorNode.getId(), refinementNode.getId());
-                addPermutabilityMapping(detectorNode, refinementNode, refinementModel);
-            } else {
-                ArrayList<String> patternSet = new ArrayList<>();
-                patternSet.add(detectorNode.getId());
+            mappingsWithoutDetectorNode.stream()
+                .map(OTPrmMapping::getDetectorElement)
+                .forEach(node -> patternSet.add(node.getId()));
 
-                mappingsWithoutDetectorNode.stream()
-                    .map(OTPrmMapping::getDetectorElement)
-                    .forEach(node -> patternSet.add(node.getId()));
+            logger.debug("Found pattern set of components: {}", String.join(",", patternSet));
 
-                logger.debug("Found pattern set of components: {}", String.join(",", patternSet));
+            if (refinementModel.getComponentSets() == null) {
+                refinementModel.setComponentSets(new ArrayList<>());
+            }
 
-                if (refinementModel.getComponentSets() == null) {
-                    refinementModel.setComponentSets(new ArrayList<>());
+            refinementModel.getPermutationOptions()
+                .removeIf(permutationOption -> !(permutationOption.getOptions().containsAll(patternSet)
+                    || permutationOption.getOptions().stream().noneMatch(patternSet::contains))
+                );
+
+            boolean added = false;
+            for (OTComponentSet componentSet : refinementModel.getComponentSets()) {
+                List<String> existingPatternSet = componentSet.getComponentSet();
+                if (existingPatternSet.stream().anyMatch(patternSet::contains)) {
+                    added = true;
+                    patternSet.forEach(id -> {
+                        if (!existingPatternSet.contains(id)) {
+                            existingPatternSet.add(id);
+                        }
+                    });
+                    logger.debug("Added pattern set to existing set: {}",
+                        String.join(",", existingPatternSet));
+                    break;
                 }
+            }
 
-                refinementModel.getPermutationOptions()
-                    .removeIf(permutationOption -> !(permutationOption.getOptions().containsAll(patternSet)
-                        || permutationOption.getOptions().stream().noneMatch(patternSet::contains))
-                    );
-
-                boolean added = false;
-                for (OTComponentSet componentSet : refinementModel.getComponentSets()) {
-                    List<String> existingPatternSet = componentSet.getComponentSet();
-                    if (existingPatternSet.stream().anyMatch(patternSet::contains)) {
-                        added = true;
-                        patternSet.forEach(id -> {
-                            if (!existingPatternSet.contains(id)) {
-                                existingPatternSet.add(id);
-                            }
-                        });
-                        logger.debug("Added pattern set to existing set: {}",
-                            String.join(",", existingPatternSet));
-                        break;
-                    }
-                }
-
-                if (!added) {
-                    refinementModel.getComponentSets().add(new OTComponentSet(patternSet));
-                }
+            if (!added) {
+                refinementModel.getComponentSets().add(new OTComponentSet(patternSet));
             }
         }
 
@@ -258,7 +274,164 @@ public class PermutationGenerator {
         }
     }
 
+    public Map<String, OTTopologyFragmentRefinementModel> generatePermutations(OTTopologyFragmentRefinementModel refinementModel) {
+        Map<String, OTTopologyFragmentRefinementModel> permutations = new HashMap<>();
+        IRepository repository = RepositoryFactory.getRepository();
+
+        if (!checkPermutability(refinementModel)) {
+            throw new UnsupportedOperationException("The refinement model cannot be permuted!");
+        }
+
+        QName refinementModelQName = new QName(refinementModel.getTargetNamespace(), refinementModel.getName());
+        DefinitionsChildId refinementModelId = new TopologyFragmentRefinementModelId(refinementModelQName);
+        if (refinementModel instanceof OTPatternRefinementModel) {
+            refinementModelId = new PatternRefinementModelId(refinementModelQName);
+        }
+
+        for (OTPermutationOption options : refinementModel.getPermutationOptions()) {
+            String permutationName = VersionUtils.getNewComponentVersionId(refinementModelId,
+                "permutation-" + String.join("-", options.getOptions()));
+            QName permutationQName = new QName(refinementModel.getTargetNamespace(), permutationName);
+
+            DefinitionsChildId permutationModelId = new TopologyFragmentRefinementModelId(permutationQName);
+            if (refinementModel instanceof OTPatternRefinementModel) {
+                permutationModelId = new PatternRefinementModelId(permutationQName);
+            }
+
+            try {
+                repository.duplicate(refinementModelId, permutationModelId);
+            } catch (IOException e) {
+                logger.error("Error while creating permutation!", e);
+                break;
+            }
+
+            OTTopologyFragmentRefinementModel permutation = repository.getElement(permutationModelId);
+            permutations.put(permutationName, permutation);
+
+            // algo here
+            Map<String, String> alreadyAdded = new HashMap<>();
+            for (String option : options.getOptions()) {
+                permutation.getPermutationMappings().stream()
+                    .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(option))
+                    .map(OTPrmMapping::getRefinementElement)
+                    .filter(refinementElement -> refinementElement instanceof TNodeTemplate)
+                    .map(refinementElement -> (TNodeTemplate) refinementElement)
+                    .forEach(refinementElement -> {
+                        TNodeTemplate addedDetectorElement = alreadyAdded.containsKey(refinementElement.getId())
+                            ? permutation.getDetector().getNodeTemplate(alreadyAdded.get(refinementElement.getId()))
+                            : addNodeFromRefinementStructureToDetector(refinementElement, permutation, alreadyAdded);
+
+                        // region outgoing relations of the currently permuted refinementElement
+                        for (TRelationshipTemplate relation : permutation.getRefinementStructure().getRelationshipTemplates()) {
+                            if (relation.getSourceElement().getRef().getId().equals(refinementElement.getId())) {
+                                // using the permutation maps defined in the original model as we remove them in the permutation
+                                for (OTPermutationMapping permutationMap : refinementModel.getPermutationMappings()) {
+                                    if (permutationMap.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId())) {
+                                        // TODO: An der stelle nicht nur das aktuelle element anschauen, sondern alle aus einem pattern set?!?
+                                        //       Oder sogar nochmal was neues einfuehren weil was is wenn ich 2 rels auf 1 hab?
+                                        //       Bsp.: PermutationGeneratorTest 166-174 ohne 12 und 11 zeigt zusaetzlich auf 14
+                                        // Vielleicht war das already contains schon genug, zumindest fuer das pattern set
+                                        // ausserdem umgehen wir damit die behandlung von eingehenden relations (algo 21-23) --> algo anpassen 
+                                        if (permutationMap.getDetectorElement().getId().equals(option) || alreadyAdded.containsKey(option)) {
+                                            String alreadyAddedElement = alreadyAdded.get(relation.getTargetElement().getRef().getId());
+                                            TNodeTemplate target = alreadyAddedElement == null
+                                                ? addNodeFromRefinementStructureToDetector((TNodeTemplate) relation.getTargetElement().getRef(), permutation, alreadyAdded)
+                                                : permutation.getDetector().getNodeTemplate(alreadyAddedElement);
+                                            ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, target, relation.getType(), permutation.getDetector());
+                                        } else {
+                                            ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, (TNodeTemplate) permutationMap.getDetectorElement(), relation.getType(), permutation.getDetector());
+                                        }
+                                    }
+                                }
+
+                                if (permutation.getStayMappings() != null) {
+                                    for (OTStayMapping stayMapping : permutation.getStayMappings()) {
+                                        if (stayMapping.getRefinementElement().getId().equals(relation.getTargetElement().getRef().getId())) {
+                                            ModelUtilities.createRelationshipTemplateAndAddToTopology(addedDetectorElement, (TNodeTemplate) stayMapping.getDetectorElement(), relation.getType(), permutation.getDetector());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        //endregion
+
+                        // region handle ingoing relations in the detector
+                        for (TRelationshipTemplate relation : permutation.getDetector().getRelationshipTemplates()) {
+                            Optional<OTPermutationMapping> relationTarget = permutation.getPermutationMappings().stream()
+                                .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(relation.getId()))
+                                .filter(permutationMap -> permutationMap.getRefinementElement().getId().equals(refinementElement.getId()))
+                                .findFirst();
+
+                            long refinementEquivalents = permutation.getPermutationMappings().stream()
+                                .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(option))
+                                .map(OTPrmMapping::getRefinementElement)
+                                .distinct()
+                                .count();
+                            if (relationTarget.isPresent() || refinementEquivalents == 1) {
+                                ModelUtilities.createRelationshipTemplateAndAddToTopology(
+                                    (TNodeTemplate) relation.getSourceElement().getRef(),
+                                    addedDetectorElement,
+                                    relation.getType(),
+                                    permutation.getDetector()
+                                );
+                                break;
+                            }
+                        }
+                        // endregion
+                    });
+
+                // region remove permuted
+                if (permutation.getAttributeMappings() != null) {
+                    permutation.getRelationMappings()
+                        .removeIf(map -> map.getDetectorElement().getId().equals(option));
+                }
+                if (permutation.getAttributeMappings() != null) {
+                    permutation.getAttributeMappings()
+                        .removeIf(map -> map.getDetectorElement().getId().equals(option));
+                }
+                if (permutation.getDeploymentArtifactMappings() != null) {
+                    permutation.getDeploymentArtifactMappings()
+                        .removeIf(map -> map.getDetectorElement().getId().equals(option));
+                }
+                permutation.getPermutationMappings()
+                    .removeIf(permMap -> permMap.getDetectorElement().getId().equals(option));
+
+                permutation.getDetector().getNodeTemplateOrRelationshipTemplate()
+                    .removeIf(template -> template instanceof TRelationshipTemplate &&
+                        (((TRelationshipTemplate) template).getSourceElement().getRef().getId().equals(option)
+                            || ((TRelationshipTemplate) template).getTargetElement().getRef().getId().equals(option))
+                        || template.getId().equals(option)
+                    );
+
+                try {
+                    RepositoryFactory.getRepository().setElement(permutationModelId, permutation);
+                } catch (IOException e) {
+                    logger.error("Error while saving permutation!", e);
+                    break;
+                }
+            }
+        }
+
+        return permutations;
+    }
+
     public String getPermutabilityErrorReason() {
         return permutabilityErrorReason;
+    }
+
+    private TNodeTemplate addNodeFromRefinementStructureToDetector(TNodeTemplate refinementElement,
+                                                                   OTTopologyFragmentRefinementModel permutation,
+                                                                   Map<String, String> alreadyAdded) {
+        TNodeTemplate clone = SerializationUtils.clone(refinementElement);
+        ModelUtilities.generateNewIdOfTemplate(clone, permutation.getDetector());
+        permutation.getDetector().addNodeTemplate(clone);
+        alreadyAdded.put(refinementElement.getId(), clone.getId());
+
+        if (permutation.getStayMappings() == null) {
+            permutation.setStayMappings(new ArrayList<>());
+        }
+        permutation.getStayMappings().add(new OTStayMapping(clone, refinementElement));
+
+        return clone;
     }
 }
