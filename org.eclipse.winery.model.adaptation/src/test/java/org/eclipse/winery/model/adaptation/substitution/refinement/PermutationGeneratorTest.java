@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addSomePermutationMappings;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrm;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -50,8 +51,16 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
     }
 
     @Test
+    void checkSimplePrmPermutability() {
+        OTPatternRefinementModel refinementModel = generatePrmWithoutPermutationMaps();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertTrue(permutationGenerator.checkPermutability(refinementModel));
+    }
+
+    @Test
     void checkPermutabilityOfNotPermuatablePrmWithPatternSet() {
-        OTPatternRefinementModel refinementModel = generatePrm();
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertFalse(permutationGenerator.checkPermutability(refinementModel));
@@ -93,18 +102,18 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
     @Test
     void checkPermutabilityOfNotPermuatablePrmBecauseOfARelationThatCannotBeRedirected() {
-        OTPatternRefinementModel refinementModel = generatePrm();
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addSomePermutationMappings(refinementModel);
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertFalse(permutationGenerator.checkPermutability(refinementModel));
-        assertEquals("There are relations that cannot be redirected during the generation",
+        assertEquals("There are relations that cannot be redirected during the generation: 1--2",
             permutationGenerator.getPermutabilityErrorReason());
     }
 
     @Test
     void checkPermutabilityOfNotPermuatablePrmBecauseOfANotMappableRefinementNode() {
-        OTPatternRefinementModel refinementModel = generatePrm();
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addSomePermutationMappings(refinementModel);
 
         refinementModel.getPermutationMappings().removeIf(map -> map.getId().equals("p2_to_n14"));
@@ -117,7 +126,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
     @Test
     void checkPermutabilityOfPermuatablePrmWithPermutationMapping() {
-        OTPatternRefinementModel refinementModel = generatePrm();
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addAllPermutationMappings(refinementModel);
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();

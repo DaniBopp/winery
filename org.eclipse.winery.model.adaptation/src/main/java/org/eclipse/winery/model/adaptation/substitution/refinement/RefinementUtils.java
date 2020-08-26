@@ -141,7 +141,7 @@ public abstract class RefinementUtils {
         return mappings;
     }
 
-    private static <T extends OTPrmMapping> List<T> getMappingsForDetectorNode(TNodeTemplate detectorNode,
+    static <T extends OTPrmMapping> List<T> getMappingsForDetectorNode(TNodeTemplate detectorNode,
                                                                                List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()

@@ -134,6 +134,10 @@ public class PermutationGenerator {
             this.permutabilityErrorReason = "No permutation mappings could be identified";
             logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
+        } else {
+            refinementModel.setPermutationMappings(
+                refinementModel.getPermutationMappings().stream().distinct().collect(Collectors.toList())
+            );
         }
 
         List<String> unmappedDetectorNodes = refinementModel.getDetector().getNodeTemplates().stream()
@@ -162,40 +166,89 @@ public class PermutationGenerator {
             return false;
         }
 
-        boolean detectorNodeRefinesToMultipleNodes = false;
+        List<String> unmappableRelationIds = new ArrayList<>();
         // if there are incoming relations that cannot be redirected clearly during the generation of the permutations
         for (TNodeTemplate detectorNode : refinementModel.getDetector().getNodeTemplates()) {
-            Optional<TRelationshipTemplate> unMappableRelation =
+            List<TRelationshipTemplate> unMappableRelations =
                 ModelUtilities.getIncomingRelationshipTemplates(refinementModel.getDetector(), detectorNode).stream()
                     .filter(relation -> !permutabilityMappingExistsForDetectorElement(relation, refinementModel))
-                    .findFirst();
+                    .collect(Collectors.toList());
 
-            if (unMappableRelation.isPresent()) {
-                TRelationshipTemplate unmappable = unMappableRelation.get();
-                boolean relationBetweenNodesInAComponentSet = refinementModel.getComponentSets().stream()
-                    .anyMatch(componentSet ->
+            for (TRelationshipTemplate unmappable : unMappableRelations) {
+                boolean unmappableRelationExists = refinementModel.getComponentSets().stream()
+                    .noneMatch(componentSet ->
                         componentSet.getComponentSet().containsAll(Arrays.asList(
                             unmappable.getSourceElement().getRef().getId(),
                             unmappable.getTargetElement().getRef().getId())));
 
-                if (!relationBetweenNodesInAComponentSet) {
+                if (unmappableRelationExists) {
                     // If there is no permutation mapping for the relation and there is more than one permutation
                     // mapping sourcing from the source node, the relation cannot be redirected automatically
-                    detectorNodeRefinesToMultipleNodes = refinementModel.getPermutationMappings().stream()
-                        .anyMatch(pm -> pm.getDetectorElement().equals(detectorNode) &&
+                    unmappableRelationExists = refinementModel.getPermutationMappings().stream()
+                        .anyMatch(pm -> pm.getDetectorElement().getId().equals(detectorNode.getId()) &&
                             refinementModel.getPermutationMappings().stream()
-                                .filter(pm2 -> pm2.getDetectorElement().equals(detectorNode))
-                                .anyMatch(pm2 -> !pm.getRefinementElement().equals(pm2.getRefinementElement()))
+                                .filter(pm2 -> pm2.getDetectorElement().getId().equals(detectorNode.getId()))
+                                .anyMatch(pm2 -> !pm.getRefinementElement().getId().equals(pm2.getRefinementElement().getId()))
                         );
+                    if (!unmappableRelationExists) {
+                        Optional<OTPermutationMapping> first = refinementModel.getPermutationMappings().stream()
+                            .filter(pm -> pm.getDetectorElement().getId().equals(detectorNode.getId()))
+                            .findFirst();
+                        if (first.isPresent()) {
+                            addPermutabilityMapping(unmappable, first.get().getRefinementElement(), refinementModel);
+                            unmappableRelationExists = false;
+                        }
+                    } else {
+                        TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
+                        List<TRelationshipTemplate> outgoingRelations = ModelUtilities.getOutgoingRelationshipTemplates(
+                            refinementModel.getDetector(), source);
+                        List<TNodeTemplate> refinementNodes = refinementModel.getPermutationMappings().stream()
+                            .filter(pm -> pm.getDetectorElement().getId().equals(source.getId()))
+                            .map(OTPrmMapping::getRefinementElement)
+                            .filter(element -> element instanceof TNodeTemplate)
+                            .map(element -> (TNodeTemplate) element)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                        // do crazy shit -- if the corresponding refinement nodes only have relations that point to the
+                        // same node that can be mapped to the current detector node (except for relations among each other),
+                        // the relation can be redirected to this node.
+                        if (outgoingRelations.size() == 1) {
+                            // todo: more advanced: for each instead of only 1
+                            /*refinementNodes.stream().anyMatch(node -> {
+                                List<TRelationshipTemplate> outgoing = ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), node);
+                                refinementNodes.stream().allMatch(node2 ->
+                                    ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), node2).stream()
+                                        .filter(relation -> !relation.getTargetElement().getRef().getId().equals(node.getId())))
+                            });*/
+                            if (refinementNodes.size() == 1) {
+                                List<TRelationshipTemplate> outgoingAtRefinementNode = ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), refinementNodes.get(0));
+                                if (outgoingAtRefinementNode.size() == 1) {
+                                    TNodeTemplate target = (TNodeTemplate) outgoingAtRefinementNode.get(0).getTargetElement().getRef();
+                                    Optional<OTPermutationMapping> first = refinementModel.getPermutationMappings().stream()
+                                        .filter(pm -> pm.getDetectorElement().getId().equals(detectorNode.getId()))
+                                        .filter(pm -> pm.getRefinementElement().getId().equals(target.getId()))
+                                        .findFirst();
+                                    if (first.isPresent()) {
+                                        addPermutabilityMapping(unmappable, first.get().getRefinementElement(), refinementModel);
+                                        unmappableRelationExists = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                if (detectorNodeRefinesToMultipleNodes) {
+
+                if (unmappableRelationExists) {
+                    unmappableRelationIds.add(unmappable.getId());
                     break;
                 }
             }
         }
 
-        if (detectorNodeRefinesToMultipleNodes) {
-            this.permutabilityErrorReason = "There are relations that cannot be redirected during the generation";
+        if (unmappableRelationIds.size() > 0) {
+            this.permutabilityErrorReason = "There are relations that cannot be redirected during the generation: "
+                + String.join(", ", unmappableRelationIds);
             logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
         }
@@ -265,11 +318,16 @@ public class PermutationGenerator {
                 .stream()
                 .map(element -> (TNodeTemplate) element.getTargetElement().getRef())
                 .filter(dependee -> noMappingExistsForRefinementNode(detectorNode, dependee, refinementModel))
-                .filter(dependee -> ModelUtilities.getIncomingRelationshipTemplates(refinementModel.getRefinementTopology(), dependee)
-                    .stream()
-                    .filter(relation -> !relation.getSourceElement().getRef().getId().equals(refinementNode.getId()))
-                    .map(relationship -> (TNodeTemplate) relationship.getSourceElement().getRef())
-                    .anyMatch(source -> noMappingExistsForRefinementNode(detectorNode, source, refinementModel))
+                .filter(dependee -> {
+                        List<TRelationshipTemplate> incomingRelations = ModelUtilities.getIncomingRelationshipTemplates(
+                            refinementModel.getRefinementTopology(), dependee)
+                            .stream()
+                            .filter(relation -> !relation.getSourceElement().getRef().getId().equals(refinementNode.getId()))
+                            .collect(Collectors.toList());
+                        return incomingRelations.isEmpty() || incomingRelations.stream()
+                            .map(relationship -> (TNodeTemplate) relationship.getSourceElement().getRef())
+                            .anyMatch(source -> noMappingExistsForRefinementNode(detectorNode, source, refinementModel));
+                    }
                 ).forEach(dependee -> this.checkComponentPermutability(dependee, detectorNode, refinementModel));
         }
     }
@@ -279,7 +337,7 @@ public class PermutationGenerator {
         IRepository repository = RepositoryFactory.getRepository();
 
         if (!checkPermutability(refinementModel)) {
-            throw new UnsupportedOperationException("The refinement model cannot be permuted!");
+            throw new RuntimeException("The refinement model cannot be permuted!");
         }
 
         QName refinementModelQName = new QName(refinementModel.getTargetNamespace(), refinementModel.getName());

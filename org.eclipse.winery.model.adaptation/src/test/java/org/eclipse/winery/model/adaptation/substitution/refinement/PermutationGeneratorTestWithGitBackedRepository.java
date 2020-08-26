@@ -25,7 +25,8 @@ import org.eclipse.winery.repository.backend.RepositoryFactory;
 import org.junit.jupiter.api.Test;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrm;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,7 +37,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
     void testGeneration() throws Exception {
         this.setRevisionTo("origin/plain");
 
-        OTPatternRefinementModel refinementModel = generatePrm();
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addAllPermutationMappings(refinementModel);
 
         PatternRefinementModelId id = new PatternRefinementModelId(refinementModel.getTargetNamespace(), refinementModel.getIdFromIdOrNameField(), false);
@@ -47,7 +48,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
 
         assertEquals(2, permutations.size());
 
-        OTTopologyFragmentRefinementModel permutation_1 = permutations.get("1_permutation-1-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_1 = permutations.get("ComplexPrmWithPatternSet_permutation-1-w1-wip1");
         assertNotNull(permutation_1);
         assertEquals(4, permutation_1.getDetector().getNodeTemplates().size());
         assertEquals(4, permutation_1.getDetector().getRelationshipTemplates().size());
@@ -95,7 +96,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
             permutation_1.getRefinementTopology().getNodeTemplate("16"),
             permutation_1).size());
 
-        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("1_permutation-3-2-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("ComplexPrmWithPatternSet_permutation-3-2-w1-wip1");
         assertNotNull(permutation_2);
         assertEquals(5, permutation_2.getDetector().getNodeTemplates().size());
         assertEquals(5, permutation_2.getDetector().getRelationshipTemplates().size());
@@ -147,5 +148,24 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
         assertEquals(0, RefinementUtils.getAllMappingsForRefinementNode(
             permutation_2.getRefinementTopology().getNodeTemplate("16"),
             permutation_2).size());
+    }
+    
+    @Test
+    void simplePrmTest() throws Exception {
+        this.setRevisionTo("origin/plain");
+
+        OTPatternRefinementModel refinementModel = generatePrmWithoutPermutationMaps();
+        PatternRefinementModelId id = new PatternRefinementModelId(refinementModel.getTargetNamespace(), refinementModel.getIdFromIdOrNameField(), false);
+        RepositoryFactory.getRepository().setElement(id, refinementModel);
+        
+        PermutationGenerator generator = new PermutationGenerator();
+        Map<String, OTTopologyFragmentRefinementModel> permutations = generator.generatePermutations(refinementModel);
+
+        assertEquals(6, permutations.size());
+
+        OTTopologyFragmentRefinementModel permutation_1 = permutations.get("SimplePrm_permutation-1-w1-wip1");
+        assertNotNull(permutation_1);
+        
+        // todo: relations are broken again 
     }
 }
