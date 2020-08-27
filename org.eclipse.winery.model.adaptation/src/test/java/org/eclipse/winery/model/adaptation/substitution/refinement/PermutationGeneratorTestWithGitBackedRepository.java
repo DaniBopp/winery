@@ -149,7 +149,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
             permutation_2.getRefinementTopology().getNodeTemplate("16"),
             permutation_2).size());
     }
-    
+
     @Test
     void simplePrmTest() throws Exception {
         this.setRevisionTo("origin/plain");
@@ -157,7 +157,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
         OTPatternRefinementModel refinementModel = generatePrmWithoutPermutationMaps();
         PatternRefinementModelId id = new PatternRefinementModelId(refinementModel.getTargetNamespace(), refinementModel.getIdFromIdOrNameField(), false);
         RepositoryFactory.getRepository().setElement(id, refinementModel);
-        
+
         PermutationGenerator generator = new PermutationGenerator();
         Map<String, OTTopologyFragmentRefinementModel> permutations = generator.generatePermutations(refinementModel);
 
@@ -165,7 +165,32 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
 
         OTTopologyFragmentRefinementModel permutation_1 = permutations.get("SimplePrm_permutation-1-w1-wip1");
         assertNotNull(permutation_1);
-        
-        // todo: relations are broken again 
+        assertEquals(4, permutation_1.getDetector().getNodeTemplates().size());
+        assertEquals(4, permutation_1.getDetector().getRelationshipTemplates().size());
+
+        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("SimplePrm_permutation-2-w1-wip1");
+        assertNotNull(permutation_2);
+        assertEquals(3, permutation_2.getDetector().getNodeTemplates().size());
+        assertEquals(2, permutation_2.getDetector().getRelationshipTemplates().size());
+
+        OTTopologyFragmentRefinementModel permutation_3 = permutations.get("SimplePrm_permutation-3-w1-wip1");
+        assertNotNull(permutation_3);
+        assertEquals(4, permutation_3.getDetector().getNodeTemplates().size());
+        assertEquals(3, permutation_3.getDetector().getRelationshipTemplates().size());
+
+        OTTopologyFragmentRefinementModel permutation_1_2 = permutations.get("SimplePrm_permutation-2-1-w1-wip1");
+        assertNotNull(permutation_1_2);
+        assertEquals(4, permutation_1_2.getDetector().getNodeTemplates().size());
+        assertEquals(4, permutation_1_2.getDetector().getRelationshipTemplates().size());
+
+        OTTopologyFragmentRefinementModel permutation_1_3 = permutations.get("SimplePrm_permutation-3-1-w1-wip1");
+        assertNotNull(permutation_1_3);
+        assertEquals(5, permutation_1_3.getDetector().getNodeTemplates().size());
+        assertEquals(5, permutation_1_3.getDetector().getRelationshipTemplates().size());
+
+        OTTopologyFragmentRefinementModel permutation_2_3 = permutations.get("SimplePrm_permutation-3-2-w1-wip1");
+        assertNotNull(permutation_2_3);
+        assertEquals(4, permutation_2_3.getDetector().getNodeTemplates().size());
+        assertEquals(3, permutation_2_3.getDetector().getRelationshipTemplates().size());
     }
 }

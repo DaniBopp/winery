@@ -92,9 +92,13 @@ public abstract class RefinementUtils {
 
     public static void addPermutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
                                                OTTopologyFragmentRefinementModel prm) {
-        prm.setPermutationMappings(
-            addMapping(detectorNode, refinementNode, new OTPermutationMapping(), prm.getPermutationMappings())
-        );
+        if (prm.getPermutationMappings() == null || prm.getPermutationMappings().stream()
+            .noneMatch(map -> map.getDetectorElement().getId().equals(detectorNode.getId())
+                && map.getRefinementElement().getId().equals(refinementNode.getId()))) {
+            prm.setPermutationMappings(
+                addMapping(detectorNode, refinementNode, new OTPermutationMapping(), prm.getPermutationMappings())
+            );
+        }
     }
 
     public static void addStayMapping(TNodeTemplate detectorNode, TEntityTemplate refinementNode,
@@ -142,7 +146,7 @@ public abstract class RefinementUtils {
     }
 
     static <T extends OTPrmMapping> List<T> getMappingsForDetectorNode(TNodeTemplate detectorNode,
-                                                                               List<T> mappings) {
+                                                                       List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
                 .filter(mapping -> mapping.getDetectorElement().equals(detectorNode))

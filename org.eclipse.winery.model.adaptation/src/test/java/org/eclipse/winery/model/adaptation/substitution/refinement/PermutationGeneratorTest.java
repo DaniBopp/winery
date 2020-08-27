@@ -56,6 +56,8 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertTrue(permutationGenerator.checkPermutability(refinementModel));
+        assertEquals(6, refinementModel.getPermutationOptions().size());
+        assertEquals(7, refinementModel.getPermutationMappings().size());
     }
 
     @Test

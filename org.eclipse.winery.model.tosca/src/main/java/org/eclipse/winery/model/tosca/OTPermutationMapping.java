@@ -24,4 +24,13 @@ public class OTPermutationMapping extends OTPrmMapping {
 
     public OTPermutationMapping() {
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof OTPermutationMapping)) return false;
+        OTPermutationMapping that = (OTPermutationMapping) o;
+        return this.getRefinementElement().getId().equals(that.getRefinementElement().getId())
+            && this.getDetectorElement().getId().equals(that.getDetectorElement().getId());
+    }
 }

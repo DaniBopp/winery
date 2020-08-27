@@ -134,10 +134,6 @@ public class PermutationGenerator {
             this.permutabilityErrorReason = "No permutation mappings could be identified";
             logger.info(this.errorMessage, this.permutabilityErrorReason);
             return false;
-        } else {
-            refinementModel.setPermutationMappings(
-                refinementModel.getPermutationMappings().stream().distinct().collect(Collectors.toList())
-            );
         }
 
         List<String> unmappedDetectorNodes = refinementModel.getDetector().getNodeTemplates().stream()
@@ -196,7 +192,8 @@ public class PermutationGenerator {
                             .findFirst();
                         if (first.isPresent()) {
                             addPermutabilityMapping(unmappable, first.get().getRefinementElement(), refinementModel);
-                            unmappableRelationExists = false;
+                        } else {
+                            unmappableRelationExists = true;
                         }
                     } else {
                         TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
