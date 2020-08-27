@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -11,15 +11,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
+import { RefinementMappings } from '../RefinementMappings';
 
-package org.eclipse.winery.repository.rest.resources.apiData;
+export class PermutationMapping extends RefinementMappings {
 
-public abstract class AbstractPrmMappingElement {
+    public static readonly idPrefix = 'permutationMap';
 
-    public String detectorElement;
-    public String id;
-    public String refinementElement;
-
-    public AbstractPrmMappingElement() {
+    constructor(id: number) {
+        super(id);
     }
+
+    idPrefix(): string {
+        return PermutationMapping.idPrefix;
+    }
+
 }

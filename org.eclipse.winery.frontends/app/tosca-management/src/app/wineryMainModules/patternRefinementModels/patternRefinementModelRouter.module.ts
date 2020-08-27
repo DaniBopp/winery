@@ -26,6 +26,7 @@ import { TopologyTemplateComponent } from '../../instance/sharedComponents/topol
 import { StayMappingsComponent } from '../../instance/refinementModels/stayMappings/stayMappings.component';
 import { AttributeMappingsComponent } from '../../instance/refinementModels/attributeMappings/attributeMappings.component';
 import { DeploymentArtifactsMappingsComponent } from '../../instance/refinementModels/deploymentArtifactsMappings/deploymentArtifactsMappings.component';
+import { PermutationMappingsComponent } from '../../instance/refinementModels/permutationMappings/permutationMappings.component';
 
 const toscaType = ToscaTypes.PatternRefinementModel;
 
@@ -45,6 +46,7 @@ const patternRefinementRoutes: Routes = [
             { path: 'attributemappings', component: AttributeMappingsComponent },
             { path: 'staymappings', component: StayMappingsComponent },
             { path: 'deploymentartifactmappings', component: DeploymentArtifactsMappingsComponent },
+            { path: 'permutationmappings', component: PermutationMappingsComponent },
             { path: 'xml', component: EditXMLComponent },
             { path: '', redirectTo: 'readme', pathMatch: 'full' }
         ]

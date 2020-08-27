@@ -166,7 +166,7 @@ export class WineryDynamicTableComponent implements OnInit, DoCheck {
             const data = array[index];
             const tmp = { 'uuid': data['uuid'] };
             for (const key of Object.keys(data)) {
-                if (this.dynamicDataMap[key]) {
+                if (this.dynamicDataMap && this.dynamicDataMap[key]) {
                     tmp[key] = this.dynamicDataMap[key].toHumanReadable(data[key]);
                 } else {
                     tmp[key] = data[key];
