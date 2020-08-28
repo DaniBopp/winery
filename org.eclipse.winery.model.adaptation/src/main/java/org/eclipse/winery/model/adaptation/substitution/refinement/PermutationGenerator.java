@@ -345,7 +345,7 @@ public class PermutationGenerator {
 
         for (OTPermutationOption options : refinementModel.getPermutationOptions()) {
             String permutationName = VersionUtils.getNewComponentVersionId(refinementModelId,
-                "permutation-" + String.join("-", options.getOptions()));
+                "permutation-" + String.join("-", options.getOptions()).replaceAll("_", "-"));
             QName permutationQName = new QName(refinementModel.getTargetNamespace(), permutationName);
 
             DefinitionsChildId permutationModelId = new TopologyFragmentRefinementModelId(permutationQName);
@@ -425,24 +425,26 @@ public class PermutationGenerator {
 
                         // region handle ingoing relations in the detector
                         for (TRelationshipTemplate relation : permutation.getDetector().getRelationshipTemplates()) {
-                            Optional<OTPermutationMapping> relationTarget = permutation.getPermutationMappings().stream()
-                                .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(relation.getId()))
-                                .filter(permutationMap -> permutationMap.getRefinementElement().getId().equals(refinementElement.getId()))
-                                .findFirst();
+                            if (relation.getTargetElement().getRef().getId().equals(option)) {
+                                Optional<OTPermutationMapping> relationTarget = permutation.getPermutationMappings().stream()
+                                    .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(relation.getId()))
+                                    .filter(permutationMap -> permutationMap.getRefinementElement().getId().equals(refinementElement.getId()))
+                                    .findFirst();
 
-                            long refinementEquivalents = permutation.getPermutationMappings().stream()
-                                .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(option))
-                                .map(OTPrmMapping::getRefinementElement)
-                                .distinct()
-                                .count();
-                            if (relationTarget.isPresent() || refinementEquivalents == 1) {
-                                ModelUtilities.createRelationshipTemplateAndAddToTopology(
-                                    (TNodeTemplate) relation.getSourceElement().getRef(),
-                                    addedDetectorElement,
-                                    relation.getType(),
-                                    permutation.getDetector()
-                                );
-                                break;
+                                long refinementEquivalents = permutation.getPermutationMappings().stream()
+                                    .filter(permutationMap -> permutationMap.getDetectorElement().getId().equals(option))
+                                    .map(OTPrmMapping::getRefinementElement)
+                                    .distinct()
+                                    .count();
+                                if (relationTarget.isPresent() || refinementEquivalents == 1) {
+                                    ModelUtilities.createRelationshipTemplateAndAddToTopology(
+                                        (TNodeTemplate) relation.getSourceElement().getRef(),
+                                        addedDetectorElement,
+                                        relation.getType(),
+                                        permutation.getDetector()
+                                    );
+                                    break;
+                                }
                             }
                         }
                         // endregion
