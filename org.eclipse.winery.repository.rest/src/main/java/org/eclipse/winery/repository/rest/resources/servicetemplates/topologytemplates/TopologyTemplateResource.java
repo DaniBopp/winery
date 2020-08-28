@@ -329,7 +329,8 @@ public class TopologyTemplateResource {
             .filter(template -> template.getProperties() != null)
             .findFirst();
 
-        if (foundTemplate.isPresent() && Objects.nonNull(foundTemplate.get().getProperties().getKVProperties())) {
+        if (foundTemplate.isPresent() && Objects.nonNull(foundTemplate.get().getProperties()) &&
+            Objects.nonNull(foundTemplate.get().getProperties().getKVProperties())) {
             HashMap<String, String> oldKvs = foundTemplate.get().getProperties().getKVProperties();
 
             QName qNameType = QName.valueOf(updateInfo.getNewComponentType());
@@ -378,7 +379,8 @@ public class TopologyTemplateResource {
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
     public TTopologyTemplate updateVersionOfNodeTemplate(UpdateInfo updateInfo) {
-        if (topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId()).getProperties() != null) {
+        if (topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId()) != null
+            && topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId()).getProperties() != null) {
             Map<String, String> propertyMappings = new LinkedHashMap<>();
             updateInfo.getMappingList().forEach(
                 propertyMatching -> propertyMappings.put(propertyMatching.getOldKey(), propertyMatching.getNewKey())
@@ -519,18 +521,20 @@ public class TopologyTemplateResource {
         Map<QName, List<WineryVersion>> versionElements = new HashMap<>();
 
         for (TNodeTemplate node : this.topologyTemplate.getNodeTemplates()) {
-            NodeTypeId nodeTypeId = new NodeTypeId(node.getType());
-            if (!versionElements.containsKey(nodeTypeId.getQName())) {
-                List<WineryVersion> versionList = BackendUtils.getAllVersionsOfOneDefinition(nodeTypeId).stream()
-                    .filter(wineryVersion -> {
-                        QName qName = VersionUtils.getDefinitionInTheGivenVersion(nodeTypeId, wineryVersion).getQName();
-                        NamespaceProperties namespaceProperties = repository.getNamespaceManager().getNamespaceProperties(qName.getNamespaceURI());
-                        return !(namespaceProperties.isGeneratedNamespace()
-                            || ModelUtilities.isFeatureType(qName, nodeTypes));
-                    })
-                    .collect(Collectors.toList());
+            if (nodeTypes.containsKey(node.getType())) {
+                NodeTypeId nodeTypeId = new NodeTypeId(node.getType());
+                if (!versionElements.containsKey(nodeTypeId.getQName())) {
+                    List<WineryVersion> versionList = BackendUtils.getAllVersionsOfOneDefinition(nodeTypeId).stream()
+                        .filter(wineryVersion -> {
+                            QName qName = VersionUtils.getDefinitionInTheGivenVersion(nodeTypeId, wineryVersion).getQName();
+                            NamespaceProperties namespaceProperties = repository.getNamespaceManager().getNamespaceProperties(qName.getNamespaceURI());
+                            return !(namespaceProperties.isGeneratedNamespace()
+                                || ModelUtilities.isFeatureType(qName, nodeTypes));
+                        })
+                        .collect(Collectors.toList());
 
-                versionElements.put(nodeTypeId.getQName(), versionList);
+                    versionElements.put(nodeTypeId.getQName(), versionList);
+                }
             }
         }
 
