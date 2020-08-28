@@ -142,7 +142,7 @@ export class InstanceService {
             case ToscaTypes.TopologyFragmentRefinementModel:
                 subMenu = [SubMenuItems.readme, SubMenuItems.license, SubMenuItems.detector, SubMenuItems.refinementStructure, SubMenuItems.relationMappings,
                     SubMenuItems.attributeMappings, SubMenuItems.stayMappings, SubMenuItems.deploymentArtifactMappings, SubMenuItems.permutationMappings,
-                    SubMenuItems.xml];
+                    SubMenuItems.permutations, SubMenuItems.xml];
                 break;
             case ToscaTypes.TestRefinementModel:
                 subMenu = [SubMenuItems.readme, SubMenuItems.license, SubMenuItems.detector, SubMenuItems.testFragment, SubMenuItems.relationMappings,

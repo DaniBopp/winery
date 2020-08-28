@@ -90,7 +90,7 @@ public abstract class RefinementUtils {
                 .anyMatch(permutationMap -> permutationMap.getRefinementElement().equals(entityTemplate));
     }
 
-    public static void addPermutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
+    public static void addMutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
                                                OTTopologyFragmentRefinementModel prm) {
         if (prm.getPermutationMappings() == null || prm.getPermutationMappings().stream()
             .noneMatch(map -> map.getDetectorElement().getId().equals(detectorNode.getId())

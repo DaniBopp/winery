@@ -18,16 +18,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
+import org.eclipse.winery.model.adaptation.substitution.refinement.PermutationGenerator;
 import org.eclipse.winery.model.tosca.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.OTDeploymentArtifactMapping;
-import org.eclipse.winery.model.tosca.OTPermutationMapping;
-import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
+import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
+import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
 
 public class TopologyFragmentRefinementModelResource extends AbstractRefinementModelResource {
@@ -95,5 +99,33 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
             this.getTRefinementModel().setPermutationMappings(permutationMappings);
         }
         return new PermutationMappingsRessource(this, permutationMappings);
+    }
+
+    @Path("generatePermutations")
+    @POST
+    public PermutationsResponse generatePermutations() {
+        PermutationsResponse permutationsResponse = new PermutationsResponse();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        try {
+            permutationsResponse.setPermutations(permutationGenerator.generatePermutations(this.getTRefinementModel()));
+            permutationsResponse.setMutable(true);
+        } catch (Exception e) {
+            permutationsResponse.setError(permutationGenerator.getMutabilityErrorReason());
+        }
+
+        return permutationsResponse;
+    }
+
+    @Path("checkMutability")
+    @GET
+    public PermutationsResponse getMutability() {
+        PermutationsResponse permutationsResponse = new PermutationsResponse();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        permutationsResponse.setMutable(permutationGenerator.checkMutability(this.getTRefinementModel()));
+        permutationsResponse.setError(permutationGenerator.getMutabilityErrorReason());
+
+        return permutationsResponse;
     }
 }

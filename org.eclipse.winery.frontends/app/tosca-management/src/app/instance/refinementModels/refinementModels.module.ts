@@ -28,9 +28,12 @@ import { DeploymentArtifactsMappingsComponent } from './deploymentArtifactsMappi
 import { FormsModule } from '@angular/forms';
 import { PermutationMappingsComponent } from './permutationMappings/permutationMappings.component';
 import { WineryDynamicTableModule } from '../../wineryDynamicTable/wineryDynamicTable.module';
+import { PermutationsComponent } from './permutations/permutations.component';
+import { AlertModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
+        AlertModule.forRoot(),
         CommonModule,
         FormsModule,
         HttpClientModule,
@@ -56,6 +59,7 @@ import { WineryDynamicTableModule } from '../../wineryDynamicTable/wineryDynamic
         StayMappingsComponent,
         DeploymentArtifactsMappingsComponent,
         PermutationMappingsComponent,
+        PermutationsComponent,
     ]
 })
 export class RefinementModelsModule {

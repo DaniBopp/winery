@@ -35,13 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PermutationGeneratorTest extends AbstractRefinementTest {
 
     @Test
-    void checkSimplePermutabilityTest() {
+    void checkSimpleMutabilityTest() {
         setUp();
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         OTTopologyFragmentRefinementModel refinementModel = (OTTopologyFragmentRefinementModel) candidateForTopology3WithDa.getRefinementModel();
 
-        assertTrue(permutationGenerator.checkPermutability(refinementModel));
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
 
         List<OTPermutationOption> options = refinementModel.getPermutationOptions();
         assertNotNull(options);
@@ -51,23 +51,23 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
     }
 
     @Test
-    void checkSimplePrmPermutability() {
+    void checkSimplePrmMutability() {
         OTPatternRefinementModel refinementModel = generatePrmWithoutPermutationMaps();
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        assertTrue(permutationGenerator.checkPermutability(refinementModel));
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
         assertEquals(6, refinementModel.getPermutationOptions().size());
         assertEquals(7, refinementModel.getPermutationMappings().size());
     }
 
     @Test
-    void checkPermutabilityOfNotPermuatablePrmWithPatternSet() {
+    void checkMutabilityOfNotMutablePrmWithPatternSet() {
         OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertFalse(permutationGenerator.checkMutability(refinementModel));
         assertEquals("There are detector nodes which could not be mapped to a refinement node: 3",
-            permutationGenerator.getPermutabilityErrorReason());
+            permutationGenerator.getMutabilityErrorReason());
 
         assertEquals(3, refinementModel.getPermutationMappings().size());
         refinementModel.getPermutationMappings()
@@ -103,37 +103,37 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
     }
 
     @Test
-    void checkPermutabilityOfNotPermuatablePrmBecauseOfARelationThatCannotBeRedirected() {
+    void checkMutabilityOfNotMutablePrmBecauseOfARelationThatCannotBeRedirected() {
         OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addSomePermutationMappings(refinementModel);
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertFalse(permutationGenerator.checkMutability(refinementModel));
         assertEquals("There are relations that cannot be redirected during the generation: 1--2",
-            permutationGenerator.getPermutabilityErrorReason());
+            permutationGenerator.getMutabilityErrorReason());
     }
 
     @Test
-    void checkPermutabilityOfNotPermuatablePrmBecauseOfANotMappableRefinementNode() {
+    void checkMutabilityOfNotMutablePrmBecauseOfANotMappableRefinementNode() {
         OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addSomePermutationMappings(refinementModel);
 
         refinementModel.getPermutationMappings().removeIf(map -> map.getId().equals("p2_to_n14"));
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        assertFalse(permutationGenerator.checkPermutability(refinementModel));
+        assertFalse(permutationGenerator.checkMutability(refinementModel));
         assertEquals("There are refinement nodes which could not be mapped to a detector node: 14",
-            permutationGenerator.getPermutabilityErrorReason());
+            permutationGenerator.getMutabilityErrorReason());
     }
 
     @Test
-    void checkPermutabilityOfPermuatablePrmWithPermutationMapping() {
+    void checkMutabilityOfMutablePrmWithPermutationMapping() {
         OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addAllPermutationMappings(refinementModel);
 
         PermutationGenerator permutationGenerator = new PermutationGenerator();
-        assertTrue(permutationGenerator.checkPermutability(refinementModel));
-        assertEquals("", permutationGenerator.getPermutabilityErrorReason());
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
+        assertEquals("", permutationGenerator.getMutabilityErrorReason());
 
         assertEquals(7, refinementModel.getPermutationMappings().size());
         assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
