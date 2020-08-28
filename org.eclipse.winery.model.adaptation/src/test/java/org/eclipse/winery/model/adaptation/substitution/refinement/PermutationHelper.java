@@ -27,12 +27,113 @@ import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTRelationDirection;
 import org.eclipse.winery.model.tosca.OTRelationMapping;
+import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 
 public abstract class PermutationHelper {
+
+    static OTPatternRefinementModel generatePrmWithStayMapping() {
+        /*                                             
+                                                      
+        ########                 ######## 
+        #  (1) #----stay-------> # (11) # 
+        ########                 ######## 
+            |                    (2) |
+            | (2)                   \/ 
+           \/                    ########
+        ########---------------> # (13) #
+        #  (2) #--------+        ########
+        ########        |            | (2)
+            |           |           \/   
+            | (2        +------> ########
+           \/                    # (15) #
+        ########                 ########
+        #  (3) #--------+            | (2)
+        ########        |           \/   
+                        |        ########
+                        +------> # (16) #
+                                 ########
+         */
+
+        TTopologyTemplate detector = generateDetectorWithThreePatterns();
+
+        // region refinement structure
+        TNodeTemplate refinementNode_11 = new TNodeTemplate();
+        refinementNode_11.setType("{http://ex.org}nodeType_11");
+        refinementNode_11.setId("11");
+
+        TNodeTemplate refinementNode_13 = new TNodeTemplate();
+        refinementNode_13.setType("{http://ex.org}nodeType_13");
+        refinementNode_13.setId("13");
+
+        TNodeTemplate refinementNode_15 = new TNodeTemplate();
+        refinementNode_15.setType("{http://ex.org}nodeType_14");
+        refinementNode_15.setId("14");
+
+        TNodeTemplate refinementNode_16 = new TNodeTemplate();
+        refinementNode_16.setType("{http://ex.org}nodeType_15");
+        refinementNode_16.setId("15");
+
+        TRelationshipTemplate node11_hostedOn_node13 = ModelUtilities.createRelationshipTemplate(
+            refinementNode_11, refinementNode_13, QName.valueOf("{http://ex.org}relType_hostedOn"));
+        TRelationshipTemplate node13_hostedOn_node15 = ModelUtilities.createRelationshipTemplate(
+            refinementNode_13, refinementNode_15, QName.valueOf("{http://ex.org}relType_hostedOn"));
+        TRelationshipTemplate node15_hostedOn_node16 = ModelUtilities.createRelationshipTemplate(
+            refinementNode_15, refinementNode_16, QName.valueOf("{http://ex.org}relType_hostedOn"));
+
+        TTopologyTemplate refinementStructure = new TTopologyTemplate();
+        refinementStructure.addNodeTemplate(refinementNode_11);
+        refinementStructure.addNodeTemplate(refinementNode_13);
+        refinementStructure.addNodeTemplate(refinementNode_15);
+        refinementStructure.addNodeTemplate(refinementNode_16);
+        refinementStructure.addRelationshipTemplate(node11_hostedOn_node13);
+        refinementStructure.addRelationshipTemplate(node13_hostedOn_node15);
+        refinementStructure.addRelationshipTemplate(node15_hostedOn_node16);
+        // endregion
+
+        // region mappings
+        OTStayMapping pattern1_to_node11 = new OTStayMapping();
+        pattern1_to_node11.setId("p1_to_n11");
+        pattern1_to_node11.setDetectorElement(detector.getNodeTemplate("1"));
+        pattern1_to_node11.setRefinementElement(refinementNode_11);
+
+        OTRelationMapping pattern2_to_node13 = new OTRelationMapping();
+        pattern2_to_node13.setId("p2_to_n13");
+        pattern2_to_node13.setRelationType(QName.valueOf("{http://ex.org}relType_hostedOn"));
+        pattern2_to_node13.setDirection(OTRelationDirection.INGOING);
+        pattern2_to_node13.setDetectorElement(detector.getNodeTemplate("2"));
+        pattern2_to_node13.setRefinementElement(refinementNode_13);
+
+        OTPermutationMapping pattern2_to_node15 = new OTPermutationMapping();
+        pattern2_to_node15.setId("p2_to_n15");
+        pattern2_to_node15.setDetectorElement(detector.getNodeTemplate("2"));
+        pattern2_to_node15.setRefinementElement(refinementNode_15);
+
+        OTRelationMapping pattern3_to_node16 = new OTRelationMapping();
+        pattern3_to_node16.setId("p3_to_n16");
+        pattern3_to_node16.setRelationType(QName.valueOf("{http://ex.org}relType_connectsTo"));
+        pattern3_to_node16.setDirection(OTRelationDirection.INGOING);
+        pattern3_to_node16.setDetectorElement(detector.getNodeTemplate("3"));
+        pattern3_to_node16.setRefinementElement(refinementNode_16);
+        // endregion
+
+        OTPatternRefinementModel refinementModel = new OTPatternRefinementModel();
+        refinementModel.setId("PrmWithStaying");
+        refinementModel.setName("PrmWithStaying");
+        refinementModel.setTargetNamespace("http://ex.org");
+        refinementModel.setDetector(detector);
+        refinementModel.setRefinementTopology(refinementStructure);
+        refinementModel.setRelationMappings(Arrays.asList(pattern2_to_node13, pattern3_to_node16));
+        refinementModel.setStayMappings(Collections.singletonList(pattern1_to_node11));
+        ArrayList<OTPermutationMapping> mappings = new ArrayList<>();
+        mappings.add(pattern2_to_node15);
+        refinementModel.setPermutationMappings(mappings);
+
+        return refinementModel;
+    }
 
     static OTPatternRefinementModel generatePrmWithoutPermutationMaps() {
         /*                                             
@@ -50,11 +151,8 @@ public abstract class PermutationHelper {
             | (2)                ########
            \/                    # (15) #
         ########---------------> ########
-        #  (3) #                     | (2)
-        ########                    \/   
-                                 ########
-                                 # (16) #
-                                 ########
+        #  (3) #
+        ########
          */
 
         TTopologyTemplate detector = generateDetectorWithThreePatterns();

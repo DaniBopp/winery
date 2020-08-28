@@ -104,7 +104,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
 
         // determine the elements that are staying
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        List<TEntityTemplate> stayingRefinementElements = RefinementUtils.getStayingModelElements(prm);
+        List<TEntityTemplate> stayingRefinementElements = RefinementUtils.getStayingRefinementElements(prm);
 
         // import the refinement structure
         Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(

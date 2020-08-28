@@ -56,8 +56,9 @@ import org.slf4j.LoggerFactory;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.addMutabilityMapping;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllContentMappingsForRefinementNodeWithoutDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getAllMappingsForDetectorNode;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getStayAndPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayPlaceholder;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayingElement;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayingRefinementElement;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.noMappingExistsForRefinementNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForDetectorElement;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForRefinementNode;
@@ -88,14 +89,14 @@ public class PermutationGenerator {
 
         List<TNodeTemplate> detectorNodeTemplates = refinementModel.getDetector().getNodeTemplates();
         Set<TNodeTemplate> mutableNodes = detectorNodeTemplates.stream()
-            .filter(nodeTemplate -> !isStayingElement(nodeTemplate, refinementModel))
+            .filter(nodeTemplate -> !isStayPlaceholder(nodeTemplate, refinementModel))
             .collect(Collectors.toSet());
 
         ArrayList<OTPermutationOption> permutationOptions = new ArrayList<>();
         refinementModel.setPermutationOptions(permutationOptions);
         Sets.powerSet(mutableNodes).stream()
             .filter(set -> !(
-                set.size() == 0 || set.size() == refinementModel.getDetector().getNodeTemplates().size()
+                set.size() == 0 || set.size() == mutableNodes.size()
             )).forEach(permutation -> permutationOptions.add(
             new OTPermutationOption(
                 permutation.stream()
@@ -137,7 +138,7 @@ public class PermutationGenerator {
         }
 
         List<String> unmappedDetectorNodes = refinementModel.getDetector().getNodeTemplates().stream()
-            .filter(detectorNode -> !isStayingElement(detectorNode, refinementModel))
+            .filter(detectorNode -> !isStayPlaceholder(detectorNode, refinementModel))
             .filter(detectorNode -> !permutabilityMappingExistsForDetectorElement(detectorNode, refinementModel))
             .map(HasId::getId)
             .collect(Collectors.toList());
@@ -150,7 +151,7 @@ public class PermutationGenerator {
         }
 
         List<String> unmappedRefinementNodes = refinementModel.getRefinementStructure().getNodeTemplates().stream()
-            .filter(refinementNode -> !isStayPlaceholder(refinementNode, refinementModel))
+            .filter(refinementNode -> !isStayingRefinementElement(refinementNode, refinementModel))
             .filter(refinementNode -> !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel))
             .map(HasId::getId)
             .collect(Collectors.toList());
@@ -199,7 +200,7 @@ public class PermutationGenerator {
                         TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
                         List<TRelationshipTemplate> outgoingRelations = ModelUtilities.getOutgoingRelationshipTemplates(
                             refinementModel.getDetector(), source);
-                        List<TNodeTemplate> refinementNodes = refinementModel.getPermutationMappings().stream()
+                        List<TNodeTemplate> refinementNodes = getStayAndPermutationMappings(refinementModel).stream()
                             .filter(pm -> pm.getDetectorElement().getId().equals(source.getId()))
                             .map(OTPrmMapping::getRefinementElement)
                             .filter(element -> element instanceof TNodeTemplate)
@@ -254,8 +255,8 @@ public class PermutationGenerator {
     }
 
     private void checkComponentMutability(TNodeTemplate refinementNode,
-                                             TNodeTemplate detectorNode,
-                                             OTTopologyFragmentRefinementModel refinementModel) {
+                                          TNodeTemplate detectorNode,
+                                          OTTopologyFragmentRefinementModel refinementModel) {
         logger.debug("Checking component mutability of detectorNode \"{}\" to refinementNode \"{}\"",
             detectorNode.getId(), refinementNode.getId());
 
@@ -363,6 +364,7 @@ public class PermutationGenerator {
             }
 
             OTTopologyFragmentRefinementModel permutation = repository.getElement(permutationModelId);
+            permutation.setName(permutationName);
             permutations.put(permutationName, permutation);
 
             // algo here

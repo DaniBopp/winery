@@ -40,12 +40,12 @@ import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 
 public abstract class RefinementUtils {
 
-    public static boolean isStayingElement(TEntityTemplate element, OTTopologyFragmentRefinementModel prm) {
-        return getStayingModelElements(prm).stream()
+    public static boolean isStayingRefinementElement(TEntityTemplate element, OTTopologyFragmentRefinementModel prm) {
+        return getStayingRefinementElements(prm).stream()
             .anyMatch(stayingElement -> stayingElement.getId().equals(element.getId()));
     }
 
-    public static List<TEntityTemplate> getStayingModelElements(OTTopologyFragmentRefinementModel prm) {
+    public static List<TEntityTemplate> getStayingRefinementElements(OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() == null ? new ArrayList<>() :
             prm.getStayMappings().stream()
                 .map(OTPrmMapping::getRefinementElement)
@@ -60,7 +60,7 @@ public abstract class RefinementUtils {
     public static List<TEntityTemplate> getStayPlaceholders(OTTopologyFragmentRefinementModel prm) {
         return prm.getStayMappings() == null ? new ArrayList<>() :
             prm.getStayMappings().stream()
-                .map(OTPrmMapping::getRefinementElement)
+                .map(OTPrmMapping::getDetectorElement)
                 .collect(Collectors.toList());
     }
 
@@ -91,7 +91,7 @@ public abstract class RefinementUtils {
     }
 
     public static void addMutabilityMapping(TEntityTemplate detectorNode, TEntityTemplate refinementNode,
-                                               OTTopologyFragmentRefinementModel prm) {
+                                            OTTopologyFragmentRefinementModel prm) {
         if (prm.getPermutationMappings() == null || prm.getPermutationMappings().stream()
             .noneMatch(map -> map.getDetectorElement().getId().equals(detectorNode.getId())
                 && map.getRefinementElement().getId().equals(refinementNode.getId()))) {
@@ -167,7 +167,7 @@ public abstract class RefinementUtils {
                                                                                                List<T> mappings) {
         return mappings == null ? new ArrayList<>() :
             mappings.stream()
-                .filter(mapping -> mapping.getRefinementElement().getId().equals(refinementNode.getId()))
+                .filter(mapping -> refinementNode == null || mapping.getRefinementElement().getId().equals(refinementNode.getId()))
                 .filter(mapping -> detectorNode == null || !mapping.getDetectorElement().getId().equals(detectorNode.getId()))
                 .collect(Collectors.toList());
     }
@@ -196,6 +196,13 @@ public abstract class RefinementUtils {
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getRelationMappings()));
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getAttributeMappings()));
         mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(detectorNode, refinementNode, refinementModel.getDeploymentArtifactMappings()));
+        return mappings;
+    }
+
+    public static List<OTPrmMapping> getStayAndPermutationMappings(OTTopologyFragmentRefinementModel refinementModel) {
+        ArrayList<OTPrmMapping> mappings = new ArrayList<>();
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(null, null, refinementModel.getStayMappings()));
+        mappings.addAll(getMappingsForRefinementNodeButNotFromDetectorNode(null, null, refinementModel.getPermutationMappings()));
         return mappings;
     }
 

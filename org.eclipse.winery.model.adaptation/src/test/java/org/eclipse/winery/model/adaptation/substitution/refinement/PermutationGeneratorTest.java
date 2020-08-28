@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addSomePermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithStayMapping;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -58,6 +59,16 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertTrue(permutationGenerator.checkMutability(refinementModel));
         assertEquals(6, refinementModel.getPermutationOptions().size());
         assertEquals(7, refinementModel.getPermutationMappings().size());
+    }
+
+    @Test
+    void checkPrmWithStayingMutability() {
+        OTPatternRefinementModel refinementModel = generatePrmWithStayMapping();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
+        assertEquals(2, refinementModel.getPermutationOptions().size());
+        assertEquals(5, refinementModel.getPermutationMappings().size());
     }
 
     @Test
