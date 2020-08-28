@@ -22,8 +22,8 @@
             <i class="fa fa-check-circle"></i>
             <span>&nbsp;&nbsp;Permutations of the refinement model can be generated automatically!</span>
         </alert>
-        <alert *ngIf="permutationsResponse?.error" [type]="'error'" [dismissible]="false">
-            <i class="fa fa-check-circle"></i>
+        <alert *ngIf="permutationsResponse?.error" [type]="'danger'" [dismissible]="false">
+            <i class="fa fa-times"></i>
             <span>&nbsp;&nbsp;Permutations cannot be determined automatically!</span><br>
             <span>{{ permutationsResponse.error }}</span>
         </alert>
