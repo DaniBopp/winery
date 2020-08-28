@@ -96,7 +96,7 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
             permutation_1.getRefinementTopology().getNodeTemplate("16"),
             permutation_1).size());
 
-        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("ComplexPrmWithPatternSet_permutation-3-2-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("ComplexPrmWithPatternSet_permutation-2-3-w1-wip1");
         assertNotNull(permutation_2);
         assertEquals(5, permutation_2.getDetector().getNodeTemplates().size());
         assertEquals(5, permutation_2.getDetector().getRelationshipTemplates().size());
@@ -178,17 +178,17 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
         assertEquals(4, permutation_3.getDetector().getNodeTemplates().size());
         assertEquals(3, permutation_3.getDetector().getRelationshipTemplates().size());
 
-        OTTopologyFragmentRefinementModel permutation_1_2 = permutations.get("SimplePrm_permutation-2-1-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_1_2 = permutations.get("SimplePrm_permutation-1-2-w1-wip1");
         assertNotNull(permutation_1_2);
         assertEquals(4, permutation_1_2.getDetector().getNodeTemplates().size());
         assertEquals(4, permutation_1_2.getDetector().getRelationshipTemplates().size());
 
-        OTTopologyFragmentRefinementModel permutation_1_3 = permutations.get("SimplePrm_permutation-3-1-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_1_3 = permutations.get("SimplePrm_permutation-1-3-w1-wip1");
         assertNotNull(permutation_1_3);
         assertEquals(5, permutation_1_3.getDetector().getNodeTemplates().size());
         assertEquals(5, permutation_1_3.getDetector().getRelationshipTemplates().size());
 
-        OTTopologyFragmentRefinementModel permutation_2_3 = permutations.get("SimplePrm_permutation-3-2-w1-wip1");
+        OTTopologyFragmentRefinementModel permutation_2_3 = permutations.get("SimplePrm_permutation-2-3-w1-wip1");
         assertNotNull(permutation_2_3);
         assertEquals(4, permutation_2_3.getDetector().getNodeTemplates().size());
         assertEquals(3, permutation_2_3.getDetector().getRelationshipTemplates().size());

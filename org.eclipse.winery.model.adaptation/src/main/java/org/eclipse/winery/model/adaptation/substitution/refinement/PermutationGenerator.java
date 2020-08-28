@@ -392,7 +392,7 @@ public class PermutationGenerator {
                                         //       EGAL! => Permutation Maps dürfen immer nur auf genau ein Element zeigen?
                                         // Vielleicht war das already contains schon genug, zumindest fuer das pattern set
                                         // ausserdem umgehen wir damit die behandlung von eingehenden relations (algo 21-23) --> algo anpassen 
-                                        if (permutationMap.getDetectorElement().getId().equals(option) || alreadyAdded.containsKey(option)) {
+                                        if (permutationMap.getDetectorElement().getId().equals(option) || options.getOptions().contains(permutationMap.getDetectorElement().getId())) {
                                             String alreadyAddedElement = alreadyAdded.get(relation.getTargetElement().getRef().getId());
                                             TNodeTemplate target = alreadyAddedElement == null
                                                 ? addNodeFromRefinementStructureToDetector((TNodeTemplate) relation.getTargetElement().getRef(), permutation, alreadyAdded)
