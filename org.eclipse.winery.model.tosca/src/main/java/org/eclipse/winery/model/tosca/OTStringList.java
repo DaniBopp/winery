@@ -18,30 +18,28 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlList;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "otPermutationOption")
-public class OTPermutationOption {
+public class OTStringList {
 
-    @XmlElement(name = "PermutationOption")
+    @XmlValue
     @XmlList
-    protected List<String> options;
+    protected List<String> values;
 
-    public OTPermutationOption() {
+    public OTStringList() {
     }
 
-    public OTPermutationOption(List<String> options) {
-        this.options = options;
+    public OTStringList(List<String> options) {
+        this.values = options;
     }
 
-    public List<String> getOptions() {
-        return options;
+    public List<String> getValues() {
+        return values;
     }
 
-    public void setOptions(List<String> options) {
-        this.options = options;
+    public void setValues(List<String> values) {
+        this.values = values;
     }
 }

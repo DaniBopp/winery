@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
-import org.eclipse.winery.model.tosca.OTPermutationOption;
+import org.eclipse.winery.model.tosca.OTStringList;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 
 import org.junit.jupiter.api.Test;
@@ -47,11 +47,11 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         assertTrue(permutationGenerator.checkMutability(refinementModel));
 
-        List<OTPermutationOption> options = refinementModel.getPermutationOptions();
+        List<OTStringList> options = refinementModel.getPermutationOptions();
         assertNotNull(options);
         assertEquals(2, options.size());
 
-        options.forEach(permutationOption -> assertEquals(1, permutationOption.getOptions().size()));
+        options.forEach(permutationOption -> assertEquals(1, permutationOption.getValues().size()));
     }
 
     @Test
@@ -110,10 +110,10 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertEquals(1, refinementModel.getComponentSets().size());
         assertEquals(2, refinementModel.getPermutationOptions().size());
 
-        assertTrue(refinementModel.getComponentSets().get(0).getComponentSet().containsAll(Arrays.asList("2", "3")));
+        assertTrue(refinementModel.getComponentSets().get(0).getValues().containsAll(Arrays.asList("2", "3")));
 
-        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().contains("1")));
-        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().containsAll(Arrays.asList("2", "3"))));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().contains("1")));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().containsAll(Arrays.asList("2", "3"))));
     }
 
     @Test
@@ -220,9 +220,9 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertEquals(1, refinementModel.getComponentSets().size());
         assertEquals(2, refinementModel.getPermutationOptions().size());
 
-        assertTrue(refinementModel.getComponentSets().get(0).getComponentSet().containsAll(Arrays.asList("2", "3")));
+        assertTrue(refinementModel.getComponentSets().get(0).getValues().containsAll(Arrays.asList("2", "3")));
 
-        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().contains("1")));
-        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getOptions().containsAll(Arrays.asList("2", "3"))));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().contains("1")));
+        assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().containsAll(Arrays.asList("2", "3"))));
     }
 }
