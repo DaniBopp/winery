@@ -30,6 +30,7 @@ import static org.eclipse.winery.model.adaptation.substitution.refinement.Permut
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithComplexRelationMaps;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithComplexRelationMaps2;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithStayMapping;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithTwoPatternsHostedOnAThird;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -148,7 +149,7 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertTrue(permutationGenerator.checkMutability(refinementModel));
 
         assertEquals(2, refinementModel.getPermutationOptions().size());
-        
+
         List<OTPermutationMapping> mappings = refinementModel.getPermutationMappings();
         assertEquals(5, mappings.size());
         assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
@@ -224,5 +225,15 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
 
         assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().contains("1")));
         assertTrue(refinementModel.getPermutationOptions().removeIf(option -> option.getValues().containsAll(Arrays.asList("2", "3"))));
+    }
+
+    @Test
+    void checkMutabilityOfPrmWithTwoPatternsHostedOnOne() {
+        OTPatternRefinementModel refinementModel = generatePrmWithTwoPatternsHostedOnAThird();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
+
+//        assertEquals(7, refinementModel.getPermutationMappings().size());
     }
 }

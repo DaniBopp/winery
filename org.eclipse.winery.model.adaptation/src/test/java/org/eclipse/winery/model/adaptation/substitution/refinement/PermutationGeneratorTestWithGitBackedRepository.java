@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithTwoPatternsHostedOnAThird;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -192,5 +193,21 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
         assertNotNull(permutation_2_3);
         assertEquals(4, permutation_2_3.getDetector().getNodeTemplates().size());
         assertEquals(3, permutation_2_3.getDetector().getRelationshipTemplates().size());
+    }
+
+    @Test
+    void prmWithTwoHostedOnOneTest() throws Exception {
+        this.setRevisionTo("origin/plain");
+
+        OTPatternRefinementModel refinementModel = generatePrmWithTwoPatternsHostedOnAThird();
+        PatternRefinementModelId id = new PatternRefinementModelId(refinementModel.getTargetNamespace(), refinementModel.getIdFromIdOrNameField(), false);
+        RepositoryFactory.getRepository().setElement(id, refinementModel);
+
+        PermutationGenerator generator = new PermutationGenerator();
+        Map<String, OTTopologyFragmentRefinementModel> permutations = generator.generatePermutations(refinementModel);
+
+        assertEquals(6, permutations.size());
+
+        // todo: relation between pattern1 and 12 is missing after mutating the prm
     }
 }
