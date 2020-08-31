@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTPermutationOption;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 
@@ -26,6 +27,8 @@ import org.junit.jupiter.api.Test;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addSomePermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithComplexRelationMaps;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithComplexRelationMaps2;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithStayMapping;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -135,6 +138,63 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         assertFalse(permutationGenerator.checkMutability(refinementModel));
         assertEquals("There are refinement nodes which could not be mapped to a detector node: 14",
             permutationGenerator.getMutabilityErrorReason());
+    }
+
+    @Test
+    void checkMutabilityOfPrmWithAutomaticallyDeterminableComplexRelationMapping() {
+        OTPatternRefinementModel refinementModel = generatePrmWithComplexRelationMaps();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
+
+        assertEquals(2, refinementModel.getPermutationOptions().size());
+        
+        List<OTPermutationMapping> mappings = refinementModel.getPermutationMappings();
+        assertEquals(5, mappings.size());
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("11")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("12")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("13")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("14")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1--2") && permutationMap.getRefinementElement().getId().equals("13")
+        ));
+    }
+
+    @Test
+    void checkMutabilityOfPrmWithAutomaticallyDeterminableComplexRelationMapping2() {
+        OTPatternRefinementModel refinementModel = generatePrmWithComplexRelationMaps2();
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertTrue(permutationGenerator.checkMutability(refinementModel));
+
+        List<OTPermutationMapping> mappings = refinementModel.getPermutationMappings();
+        assertEquals(6, mappings.size());
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("11")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("12")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1") && permutationMap.getRefinementElement().getId().equals("13")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("14")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("2") && permutationMap.getRefinementElement().getId().equals("15")
+        ));
+        assertTrue(refinementModel.getPermutationMappings().removeIf(permutationMap ->
+            permutationMap.getDetectorElement().getId().equals("1--2") && permutationMap.getRefinementElement().getId().equals("14")
+        ));
     }
 
     @Test

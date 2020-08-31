@@ -79,7 +79,7 @@ public abstract class RefinementUtils {
     public static boolean noMappingExistsForRefinementNode(TNodeTemplate detectorNode,
                                                            TEntityTemplate refinementNode,
                                                            OTTopologyFragmentRefinementModel refinementModel) {
-        return !isStayPlaceholder(refinementNode, refinementModel) &&
+        return !isStayPlaceholder(detectorNode, refinementModel) &&
             !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
             getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel).size() == 0;
     }
@@ -159,6 +159,8 @@ public abstract class RefinementUtils {
         mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getRelationMappings()));
         mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getAttributeMappings()));
         mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getDeploymentArtifactMappings()));
+        mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getStayMappings()));
+        mappings.addAll(getMappingsForDetectorNode(detectorNode, refinementModel.getPermutationMappings()));
         return mappings;
     }
 
