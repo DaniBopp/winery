@@ -28,7 +28,7 @@
             <div class="form-group">
                 <label for="detectorNode" class="control-label">Detector Node</label>
                 <ng-select id="detectorNode" [items]="detectorNodes" [textField]="'name'"
-                           (selected)="mapping.detectorNode = $event.id">
+                           (selected)="mapping.detectorElement = $event.id">
                 </ng-select>
             </div>
 
@@ -42,7 +42,7 @@
             <div class="form-group">
                 <label for="refinementNode" class="control-label">Refinement Structure Node</label>
                 <ng-select id="refinementNode" [items]="refinementNodes" [textField]="'name'"
-                           (selected)="mapping.refinementNode = $event.id">
+                           (selected)="mapping.refinementElement = $event.id">
                 </ng-select>
             </div>
             <hr>
@@ -50,7 +50,7 @@
     </winery-modal-body>
     <winery-modal-footer [modalRef]="addModalRef"
                          [okButtonLabel]="'Add'"
-                         [disableOkButton]="!mapping.detectorNode || !mapping.refinementNode || !mapping.artifactType"
+                         [disableOkButton]="!mapping.detectorElement || !mapping.refinementElement || !mapping.artifactType"
                          (onOk)="onAddRelationMapping()">
     </winery-modal-footer>
 </ng-template>

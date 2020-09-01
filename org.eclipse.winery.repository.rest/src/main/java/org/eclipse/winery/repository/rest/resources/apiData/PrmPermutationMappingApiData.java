@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018 Contributors to the Eclipse Foundation
+ * Copyright (c) 2020 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -14,12 +14,16 @@
 
 package org.eclipse.winery.repository.rest.resources.apiData;
 
-public abstract class AbstractPrmMappingElement {
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
+import org.eclipse.winery.model.tosca.TEntityTemplate;
 
-    public String detectorElement;
-    public String id;
-    public String refinementElement;
+public class PrmPermutationMappingApiData extends AbstractPrmMappingElement {
+    public OTPermutationMapping createPermutationMapping(TEntityTemplate detectorElement, TEntityTemplate refinementElement) {
+        OTPermutationMapping permutationMapping = new OTPermutationMapping();
+        permutationMapping.setId(this.id);
+        permutationMapping.setDetectorElement(detectorElement);
+        permutationMapping.setRefinementElement(refinementElement);
 
-    public AbstractPrmMappingElement() {
+        return permutationMapping;
     }
 }
