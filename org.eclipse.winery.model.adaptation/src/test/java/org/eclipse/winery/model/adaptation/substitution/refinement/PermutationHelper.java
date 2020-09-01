@@ -318,7 +318,6 @@ public abstract class PermutationHelper {
     }
 
     static OTPatternRefinementModel generatePrmWithTwoPatternsHostedOnAThird() {
-        
        /*                   +----------------------------------+
             +---------------(------------------+               |
             |               |                 \/              \/ 
@@ -670,11 +669,14 @@ public abstract class PermutationHelper {
         pattern_3.setType("{http://ex.org/patterns}pattern_3");
         pattern_3.setId("3");
 
-        TRelationshipTemplate pattern3_hostedOn_pattern1 = ModelUtilities.createRelationshipTemplate(
+        TRelationshipTemplate pattern3_hostedOn_pattern2 = ModelUtilities.createRelationshipTemplate(
             pattern_3, detector.getNodeTemplate("2"), QName.valueOf("{http://ex.org}relType_hostedOn"));
+        TRelationshipTemplate pattern1_connectsTo_pattern3 = ModelUtilities.createRelationshipTemplate(
+            detector.getNodeTemplate("1"), pattern_3, QName.valueOf("{http://ex.org}relType_connectsTo"));
 
         detector.addNodeTemplate(pattern_3);
-        detector.addRelationshipTemplate(pattern3_hostedOn_pattern1);
+        detector.addRelationshipTemplate(pattern3_hostedOn_pattern2);
+        detector.addRelationshipTemplate(pattern1_connectsTo_pattern3);
 
         return detector;
     }

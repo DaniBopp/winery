@@ -234,6 +234,22 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
         PermutationGenerator permutationGenerator = new PermutationGenerator();
         assertTrue(permutationGenerator.checkMutability(refinementModel));
 
-//        assertEquals(7, refinementModel.getPermutationMappings().size());
+        List<OTPermutationMapping> permutationMappings = refinementModel.getPermutationMappings();
+        assertEquals(7, permutationMappings.size());
+        
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("1")
+            && mapping.getRefinementElement().getId().equals("11")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("3")
+            && mapping.getRefinementElement().getId().equals("12")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("2")
+            && mapping.getRefinementElement().getId().equals("13")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("2")
+            && mapping.getRefinementElement().getId().equals("14")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("1--3")
+            && mapping.getRefinementElement().getId().equals("12")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("1--2")
+            && mapping.getRefinementElement().getId().equals("13")));
+        assertTrue(permutationMappings.removeIf(mapping -> mapping.getDetectorElement().getId().equals("3--2")
+            && mapping.getRefinementElement().getId().equals("13")));
     }
 }
