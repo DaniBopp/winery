@@ -110,7 +110,6 @@ public class PermutationGenerator {
 
         for (TNodeTemplate detectorNode : detectorNodeTemplates) {
             getAllMappingsForDetectorNode(detectorNode, refinementModel).stream()
-                .filter(mapping -> mapping.getDetectorElement().equals(detectorNode))
                 .filter(mapping -> mapping.getRefinementElement() instanceof TNodeTemplate)
                 .map(mapping -> (TNodeTemplate) mapping.getRefinementElement())
                 .forEach(refinementNode ->
@@ -274,62 +273,45 @@ public class PermutationGenerator {
                 if (unmappableRelationExists) {
                     // If there is only one permutation mapping sourcing from the current detector node,
                     // the relation can be redirected directly to the corresponding refinement node.
-                    unmappableRelationExists = refinementModel.getPermutationMappings().stream()
-                        .anyMatch(pm -> pm.getDetectorElement().getId().equals(detectorNode.getId()) &&
-                            refinementModel.getPermutationMappings().stream()
-                                .filter(pm2 -> pm2.getDetectorElement().getId().equals(detectorNode.getId()))
-                                .anyMatch(pm2 -> !pm.getRefinementElement().getId().equals(pm2.getRefinementElement().getId()))
-                        );
-                    if (!unmappableRelationExists) {
-                        Optional<OTPermutationMapping> first = refinementModel.getPermutationMappings().stream()
-                            .filter(pm -> pm.getDetectorElement().getId().equals(detectorNode.getId()))
-                            .findFirst();
-                        if (first.isPresent()) {
-                            addMutabilityMapping(unmappable, first.get().getRefinementElement(), refinementModel);
-                        } else {
-                            unmappableRelationExists = true;
-                        }
-                    } else {
-                        // If there are multiple permutations mappings sourcing from the relation's source detector node,
-                        // do crazy shit: If the corresponding refinement nodes of the relation's source have relations
-                        // that point to the same node that can be mapped to the current detector node (except for
-                        // relations among each other), the relation can be redirected to this node.
-                        TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
-                        List<TNodeTemplate> refinementNodes = getStayAndPermutationMappings(refinementModel).stream()
-                            .filter(pm -> pm.getDetectorElement().getId().equals(source.getId()))
-                            .map(OTPrmMapping::getRefinementElement)
-                            .filter(element -> element instanceof TNodeTemplate)
-                            .map(element -> (TNodeTemplate) element)
-                            .distinct()
-                            .collect(Collectors.toList());
+                    // If there are multiple permutations mappings sourcing from the relation's source detector node,
+                    // do crazy shit: If the corresponding refinement nodes of the relation's source have relations
+                    // that point to the same node that can be mapped to the current detector node (except for
+                    // relations among each other), the relation can be redirected to this node.
+                    TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
+                    List<TNodeTemplate> refinementNodes = getStayAndPermutationMappings(refinementModel).stream()
+                        .filter(pm -> pm.getDetectorElement().getId().equals(source.getId()))
+                        .map(OTPrmMapping::getRefinementElement)
+                        .filter(element -> element instanceof TNodeTemplate)
+                        .map(element -> (TNodeTemplate) element)
+                        .distinct()
+                        .collect(Collectors.toList());
 
-                        Set<TNodeTemplate> dependeeList = new HashSet<>();
-                        refinementNodes.forEach(node -> dependeeList.addAll(
-                            ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), node).stream()
-                                .map(outgoing -> outgoing.getTargetElement().getRef())
-                                .filter(target -> target instanceof TNodeTemplate)
-                                .map(target -> (TNodeTemplate) target)
-                                .filter(target -> !refinementNodes.contains(target))
-                                .filter(target -> refinementModel.getPermutationMappings().stream().anyMatch(pm -> pm.getRefinementElement().getId().equals(target.getId()) && (pm.getDetectorElement().getId().equals(source.getId()) || pm.getDetectorElement().getId().equals(detectorNode.getId()))))
-                                .collect(Collectors.toList())
-                        ));
-                        // If the current detectorNode refines to multiple refinement nodes, we cannot determine
-                        // which one should be the respective target.
-                        if (dependeeList.size() == 1) {
-                            List<TNodeTemplate> filteredDependeeList = dependeeList.stream()
-                                .map(dependee -> getStayAndPermutationMappings(refinementModel).stream()
-                                    .filter(mapping -> mapping.getRefinementElement().getId().equals(dependee.getId()))
-                                    .map(OTPrmMapping::getDetectorElement)
-                                    .filter(detector -> detector instanceof TNodeTemplate)
-                                    .map(detector -> (TNodeTemplate) detector)
-                                    .findFirst()
-                                    .orElse(null))
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList());
-                            if (filteredDependeeList.size() == 1) {
-                                addMutabilityMapping(unmappable, dependeeList.iterator().next(), refinementModel);
-                                unmappableRelationExists = false;
-                            }
+                    Set<TNodeTemplate> dependeeList = new HashSet<>();
+                    refinementNodes.forEach(node -> dependeeList.addAll(
+                        ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), node).stream()
+                            .map(outgoing -> outgoing.getTargetElement().getRef())
+                            .filter(target -> target instanceof TNodeTemplate)
+                            .map(target -> (TNodeTemplate) target)
+                            .filter(target -> !refinementNodes.contains(target))
+                            .filter(target -> refinementModel.getPermutationMappings().stream().anyMatch(pm -> pm.getRefinementElement().getId().equals(target.getId()) && (pm.getDetectorElement().getId().equals(source.getId()) || pm.getDetectorElement().getId().equals(detectorNode.getId()))))
+                            .collect(Collectors.toList())
+                    ));
+                    // If the current detectorNode refines to multiple refinement nodes, we cannot determine
+                    // which one should be the respective target.
+                    if (dependeeList.size() == 1) {
+                        List<TNodeTemplate> filteredDependeeList = dependeeList.stream()
+                            .map(dependee -> getStayAndPermutationMappings(refinementModel).stream()
+                                .filter(mapping -> mapping.getRefinementElement().getId().equals(dependee.getId()))
+                                .map(OTPrmMapping::getDetectorElement)
+                                .filter(detector -> detector instanceof TNodeTemplate)
+                                .map(detector -> (TNodeTemplate) detector)
+                                .findFirst()
+                                .orElse(null))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
+                        if (filteredDependeeList.size() == 1) {
+                            addMutabilityMapping(unmappable, dependeeList.iterator().next(), refinementModel);
+                            unmappableRelationExists = false;
                         }
                     }
                 }
