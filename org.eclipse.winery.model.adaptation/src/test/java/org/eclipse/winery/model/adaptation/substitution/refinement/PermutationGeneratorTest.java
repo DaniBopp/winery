@@ -118,6 +118,20 @@ class PermutationGeneratorTest extends AbstractRefinementTest {
     }
 
     @Test
+    void checkMutabilityOfComplexPrmWithoutPatternSet() {
+        OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
+        addAllPermutationMappings(refinementModel);
+        refinementModel.getRelationMappings().removeIf(map -> map.getId().equals("p2_to_n15"));
+
+        PermutationGenerator permutationGenerator = new PermutationGenerator();
+        assertFalse(permutationGenerator.checkMutability(refinementModel));
+        
+        assertEquals("There are relations that cannot be redirected during the generation: 2--3",
+            permutationGenerator.getMutabilityErrorReason());
+        assertEquals(6, refinementModel.getPermutationOptions().size());
+    }
+    
+    @Test
     void checkMutabilityOfNotMutablePrmBecauseOfARelationThatCannotBeRedirected() {
         OTPatternRefinementModel refinementModel = generateComplexPrmWithPatternSet();
         addSomePermutationMappings(refinementModel);

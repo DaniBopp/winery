@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -163,7 +162,7 @@ public class PermutationGenerator {
             return false;
         }
 
-        List<String> unmappableRelationIds = resolveDetectorRelations(refinementModel);
+        List<String> unmappableRelationIds = chekMutabilityOfDetectorRelations(refinementModel);
 
         if (unmappableRelationIds.size() > 0) {
             this.mutabilityErrorReason = "There are relations that cannot be redirected during the generation: "
@@ -251,7 +250,7 @@ public class PermutationGenerator {
         }
     }
 
-    private List<String> resolveDetectorRelations(OTTopologyFragmentRefinementModel refinementModel) {
+    private List<String> chekMutabilityOfDetectorRelations(OTTopologyFragmentRefinementModel refinementModel) {
         List<String> unmappableRelationIds = new ArrayList<>();
         // If there are incoming relations that cannot be redirected during the generation of the permutations,
         // try to generate permutation maps.
@@ -278,7 +277,7 @@ public class PermutationGenerator {
                     // that point to the same node that can be mapped to the current detector node (except for
                     // relations among each other), the relation can be redirected to this node.
                     TNodeTemplate source = (TNodeTemplate) unmappable.getSourceElement().getRef();
-                    List<TNodeTemplate> refinementNodes = getStayAndPermutationMappings(refinementModel).stream()
+                    List<TNodeTemplate> nodesTheSourceRefinesTo = getStayAndPermutationMappings(refinementModel).stream()
                         .filter(pm -> pm.getDetectorElement().getId().equals(source.getId()))
                         .map(OTPrmMapping::getRefinementElement)
                         .filter(element -> element instanceof TNodeTemplate)
@@ -286,33 +285,27 @@ public class PermutationGenerator {
                         .distinct()
                         .collect(Collectors.toList());
 
-                    Set<TNodeTemplate> dependeeList = new HashSet<>();
-                    refinementNodes.forEach(node -> dependeeList.addAll(
+                    Set<TNodeTemplate> nodesTheRefinementNodesAreDependingOn = new HashSet<>();
+                    nodesTheSourceRefinesTo.forEach(node -> nodesTheRefinementNodesAreDependingOn.addAll(
                         ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementStructure(), node).stream()
                             .map(outgoing -> outgoing.getTargetElement().getRef())
                             .filter(target -> target instanceof TNodeTemplate)
                             .map(target -> (TNodeTemplate) target)
-                            .filter(target -> !refinementNodes.contains(target))
-                            .filter(target -> refinementModel.getPermutationMappings().stream().anyMatch(pm -> pm.getRefinementElement().getId().equals(target.getId()) && (pm.getDetectorElement().getId().equals(source.getId()) || pm.getDetectorElement().getId().equals(detectorNode.getId()))))
-                            .collect(Collectors.toList())
+                            .filter(target -> !nodesTheSourceRefinesTo.contains(target))
+                            // As we are trying to redirect the relation between the detectorNode and the source,
+                            // we can filter the other refinement nodes that are corresponding to other detector nodes.
+                            .filter(target -> refinementModel.getPermutationMappings().stream().anyMatch(pm ->
+                                    pm.getRefinementElement().getId().equals(target.getId()) &&
+                                        pm.getDetectorElement().getId().equals(detectorNode.getId())
+                                )
+                            ).collect(Collectors.toList())
                     ));
-                    // If the current detectorNode refines to multiple refinement nodes, we cannot determine
-                    // which one should be the respective target.
-                    if (dependeeList.size() == 1) {
-                        List<TNodeTemplate> filteredDependeeList = dependeeList.stream()
-                            .map(dependee -> getStayAndPermutationMappings(refinementModel).stream()
-                                .filter(mapping -> mapping.getRefinementElement().getId().equals(dependee.getId()))
-                                .map(OTPrmMapping::getDetectorElement)
-                                .filter(detector -> detector instanceof TNodeTemplate)
-                                .map(detector -> (TNodeTemplate) detector)
-                                .findFirst()
-                                .orElse(null))
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList());
-                        if (filteredDependeeList.size() == 1) {
-                            addMutabilityMapping(unmappable, dependeeList.iterator().next(), refinementModel);
-                            unmappableRelationExists = false;
-                        }
+                    // If the current detectorNode refines to multiple refinement nodes and the nodesTheSourceRefinesTo
+                    // are depending on multiple of these refinement nodes, we cannot determine which one should be the
+                    // respective target of the relation automatically.
+                    if (nodesTheRefinementNodesAreDependingOn.size() == 1) {
+                        addMutabilityMapping(unmappable, nodesTheRefinementNodesAreDependingOn.iterator().next(), refinementModel);
+                        unmappableRelationExists = false;
                     }
                 }
 
