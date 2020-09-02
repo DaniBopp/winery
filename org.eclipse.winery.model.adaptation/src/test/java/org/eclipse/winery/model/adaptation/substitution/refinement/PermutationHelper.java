@@ -38,7 +38,6 @@ public abstract class PermutationHelper {
 
     static OTPatternRefinementModel generatePrmWithStayMapping() {
         /*                                             
-                                                      
         ########                 ######## 
         #  (1) #----stay-------> # (11) # 
         ########                 ######## 
@@ -139,8 +138,7 @@ public abstract class PermutationHelper {
     }
 
     static OTPatternRefinementModel generatePrmWithoutPermutationMaps() {
-        /*                                             
-                                                      
+        /*
         ########                 ########        ######## 
         #  (1) #---------------> # (11) # -----> # (12) # 
         ########                 ########        ######## 

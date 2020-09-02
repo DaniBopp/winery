@@ -177,14 +177,14 @@ public class PermutationGenerator {
     private void checkComponentMutability(TNodeTemplate refinementNode,
                                           TNodeTemplate detectorNode,
                                           OTTopologyFragmentRefinementModel refinementModel) {
-        logger.debug("Checking component mutability of detectorNode \"{}\" to refinementNode \"{}\"",
+        logger.info("Checking component mutability of detectorNode \"{}\" to refinementNode \"{}\"",
             detectorNode.getId(), refinementNode.getId());
 
         List<OTPrmMapping> mappingsWithoutDetectorNode =
             getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
 
         if (noMappingExistsForRefinementNode(detectorNode, refinementNode, refinementModel)) {
-            logger.debug("Adding MutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
+            logger.info("Adding MutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
                 detectorNode.getId(), refinementNode.getId());
             addMutabilityMapping(detectorNode, refinementNode, refinementModel);
         } else if (mappingsWithoutDetectorNode.size() > 0) {
@@ -196,7 +196,7 @@ public class PermutationGenerator {
                 .map(OTPrmMapping::getDetectorElement)
                 .forEach(node -> patternSet.add(node.getId()));
 
-            logger.debug("Found pattern set of components: {}", String.join(",", patternSet));
+            logger.info("Found pattern set of components: {}", String.join(",", patternSet));
 
             if (refinementModel.getComponentSets() == null) {
                 refinementModel.setComponentSets(new ArrayList<>());
@@ -217,7 +217,7 @@ public class PermutationGenerator {
                             existingPatternSet.add(id);
                         }
                     });
-                    logger.debug("Added pattern set to existing set: {}",
+                    logger.info("Added pattern set to existing set: {}",
                         String.join(",", existingPatternSet));
                     break;
                 }
@@ -261,6 +261,7 @@ public class PermutationGenerator {
                     .collect(Collectors.toList());
 
             for (TRelationshipTemplate unmappable : unMappableRelations) {
+                logger.info("Checking unmapped relation \"{}\"", unmappable.getId());
                 // If the relation exists between two components in a component set we ignore it, as there is no
                 // case in which the relation has to be redirected while creating a permutation.
                 boolean unmappableRelationExists = refinementModel.getComponentSets().stream()
@@ -291,7 +292,6 @@ public class PermutationGenerator {
                             .map(outgoing -> outgoing.getTargetElement().getRef())
                             .filter(target -> target instanceof TNodeTemplate)
                             .map(target -> (TNodeTemplate) target)
-                            .filter(target -> !nodesTheSourceRefinesTo.contains(target))
                             // As we are trying to redirect the relation between the detectorNode and the source,
                             // we can filter the other refinement nodes that are corresponding to other detector nodes.
                             .filter(target -> refinementModel.getPermutationMappings().stream().anyMatch(pm ->
@@ -304,9 +304,14 @@ public class PermutationGenerator {
                     // are depending on multiple of these refinement nodes, we cannot determine which one should be the
                     // respective target of the relation automatically.
                     if (nodesTheRefinementNodesAreDependingOn.size() == 1) {
-                        addMutabilityMapping(unmappable, nodesTheRefinementNodesAreDependingOn.iterator().next(), refinementModel);
+                        TNodeTemplate target = nodesTheRefinementNodesAreDependingOn.iterator().next();
+                        logger.info("Found possibility to redirect relation \"{}\" to refinement node \"{}\"",
+                            unmappable.getId(), target.getId());
+                        addMutabilityMapping(unmappable, target, refinementModel);
                         unmappableRelationExists = false;
                     }
+                } else {
+                    logger.info("Relation \"{}\" is part of a component set", unmappable.getId());
                 }
 
                 if (unmappableRelationExists) {
