@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.addAllPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generateComplexPrmWithPatternSet;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithTwoPatternsHostedOnAThird;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.PermutationHelper.generatePrmWithoutPermutationMaps;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -192,5 +193,79 @@ class PermutationGeneratorTestWithGitBackedRepository extends TestWithGitBackedR
         assertNotNull(permutation_2_3);
         assertEquals(4, permutation_2_3.getDetector().getNodeTemplates().size());
         assertEquals(3, permutation_2_3.getDetector().getRelationshipTemplates().size());
+    }
+
+    @Test
+    void prmWithTwoHostedOnOneTest() throws Exception {
+        this.setRevisionTo("origin/plain");
+
+        OTPatternRefinementModel refinementModel = generatePrmWithTwoPatternsHostedOnAThird();
+        PatternRefinementModelId id = new PatternRefinementModelId(refinementModel.getTargetNamespace(), refinementModel.getIdFromIdOrNameField(), false);
+        RepositoryFactory.getRepository().setElement(id, refinementModel);
+
+        PermutationGenerator generator = new PermutationGenerator();
+        Map<String, OTTopologyFragmentRefinementModel> permutations = generator.generatePermutations(refinementModel);
+
+        assertEquals(6, permutations.size());
+
+        OTTopologyFragmentRefinementModel permutation_1 = permutations.get("PrmWithComplexRelationMappings_permutation-1-w1-wip1");
+        assertNotNull(permutation_1);
+        assertEquals(3, permutation_1.getDetector().getNodeTemplates().size());
+        assertEquals(3, permutation_1.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_1.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("2")));
+        assertTrue(permutation_1.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("3")));
+
+        OTTopologyFragmentRefinementModel permutation_2 = permutations.get("PrmWithComplexRelationMappings_permutation-2-w1-wip1");
+        assertNotNull(permutation_2);
+        assertEquals(4, permutation_2.getDetector().getNodeTemplates().size());
+        assertEquals(4, permutation_2.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_2.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("1") && relation.getTargetElement().getRef().getId().equals("13")));
+        assertTrue(permutation_2.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("3") && relation.getTargetElement().getRef().getId().equals("13")));
+
+        OTTopologyFragmentRefinementModel permutation_3 = permutations.get("PrmWithComplexRelationMappings_permutation-3-w1-wip1");
+        assertNotNull(permutation_3);
+        assertEquals(3, permutation_3.getDetector().getNodeTemplates().size());
+        assertEquals(3, permutation_3.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("12") && relation.getTargetElement().getRef().getId().equals("2")));
+        assertTrue(permutation_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("1") && relation.getTargetElement().getRef().getId().equals("12")));
+
+        OTTopologyFragmentRefinementModel permutation_1_2 = permutations.get("PrmWithComplexRelationMappings_permutation-1-2-w1-wip1");
+        assertNotNull(permutation_1_2);
+        assertEquals(4, permutation_1_2.getDetector().getNodeTemplates().size());
+        assertEquals(4, permutation_1_2.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_1_2.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("13")));
+        assertTrue(permutation_1_2.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("3")));
+        assertTrue(permutation_1_2.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("3") && relation.getTargetElement().getRef().getId().equals("13")));
+
+        OTTopologyFragmentRefinementModel permutation_1_3 = permutations.get("PrmWithComplexRelationMappings_permutation-1-3-w1-wip1");
+        assertNotNull(permutation_1_3);
+        assertEquals(3, permutation_1_3.getDetector().getNodeTemplates().size());
+        assertEquals(3, permutation_1_3.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_1_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("2")));
+        assertTrue(permutation_1_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("11") && relation.getTargetElement().getRef().getId().equals("12")));
+        assertTrue(permutation_1_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("12") && relation.getTargetElement().getRef().getId().equals("2")));
+
+        OTTopologyFragmentRefinementModel permutation_2_3 = permutations.get("PrmWithComplexRelationMappings_permutation-2-3-w1-wip1");
+        assertNotNull(permutation_2_3);
+        assertEquals(4, permutation_2_3.getDetector().getNodeTemplates().size());
+        assertEquals(4, permutation_2_3.getDetector().getRelationshipTemplates().size());
+        assertTrue(permutation_2_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("1") && relation.getTargetElement().getRef().getId().equals("12")));
+        assertTrue(permutation_2_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("1") && relation.getTargetElement().getRef().getId().equals("13")));
+        assertTrue(permutation_2_3.getDetector().getRelationshipTemplates().removeIf(relation ->
+            relation.getSourceElement().getRef().getId().equals("12") && relation.getTargetElement().getRef().getId().equals("13")));
     }
 }
