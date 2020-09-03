@@ -32,6 +32,7 @@ import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
+import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
 
 public class TopologyFragmentRefinementModelResource extends AbstractRefinementModelResource {
@@ -52,6 +53,11 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     @Path("refinementstructure")
     public TopologyTemplateResource getRefinementTopology() {
         return new TopologyTemplateResource(this, this.getTRefinementModel().getRefinementTopology(), REFINEMENT_TOPOLOGY);
+    }
+
+    @Path("grafikprmmodelling")
+    public TopologyTemplateResource getPrmModelling() {
+        return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
     }
 
     @Path("attributemappings")
