@@ -59,7 +59,7 @@ import static org.eclipse.winery.model.adaptation.substitution.refinement.Refine
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.getStayAndPermutationMappings;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayPlaceholder;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.isStayingRefinementElement;
-import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.noMappingExistsForRefinementNode;
+import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.noMappingExistsForRefinementNodeExeptForGivenDetectorNode;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForDetectorElement;
 import static org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils.permutabilityMappingExistsForRefinementNode;
 
@@ -76,11 +76,6 @@ public class PermutationGenerator {
     public PermutationGenerator() {
         this.relationshipTypes.putAll(RepositoryFactory.getRepository().getQNameToElementMapping(RelationshipTypeId.class));
         this.nodeTypes.putAll(RepositoryFactory.getRepository().getQNameToElementMapping(NodeTypeId.class));
-    }
-
-    public PermutationGenerator(Map<QName, TRelationshipType> relationshipTypes, Map<QName, TNodeType> nodeTypes) {
-        this.relationshipTypes.putAll(relationshipTypes);
-        this.nodeTypes.putAll(nodeTypes);
     }
 
     public boolean checkMutability(OTTopologyFragmentRefinementModel refinementModel) {
@@ -183,7 +178,7 @@ public class PermutationGenerator {
         List<OTPrmMapping> mappingsWithoutDetectorNode =
             getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel);
 
-        if (noMappingExistsForRefinementNode(detectorNode, refinementNode, refinementModel)) {
+        if (noMappingExistsForRefinementNodeExeptForGivenDetectorNode(detectorNode, refinementNode, refinementModel)) {
             logger.info("Adding MutabilityMapping between detector Node \"{}\" and refinement node \"{}\"",
                 detectorNode.getId(), refinementNode.getId());
             addMutabilityMapping(detectorNode, refinementNode, refinementModel);
@@ -235,7 +230,7 @@ public class PermutationGenerator {
             ModelUtilities.getOutgoingRelationshipTemplates(refinementModel.getRefinementTopology(), refinementNode)
                 .stream()
                 .map(element -> (TNodeTemplate) element.getTargetElement().getRef())
-                .filter(dependee -> noMappingExistsForRefinementNode(detectorNode, dependee, refinementModel))
+                .filter(dependee -> noMappingExistsForRefinementNodeExeptForGivenDetectorNode(detectorNode, dependee, refinementModel))
                 .filter(dependee -> {
                         List<TRelationshipTemplate> incomingRelations = ModelUtilities.getIncomingRelationshipTemplates(
                             refinementModel.getRefinementTopology(), dependee)
@@ -244,7 +239,7 @@ public class PermutationGenerator {
                             .collect(Collectors.toList());
                         return incomingRelations.isEmpty() || incomingRelations.stream()
                             .map(relationship -> (TNodeTemplate) relationship.getSourceElement().getRef())
-                            .anyMatch(source -> noMappingExistsForRefinementNode(detectorNode, source, refinementModel));
+                            .anyMatch(source -> noMappingExistsForRefinementNodeExeptForGivenDetectorNode(detectorNode, source, refinementModel));
                     }
                 ).forEach(dependee -> this.checkComponentMutability(dependee, detectorNode, refinementModel));
         }
@@ -393,7 +388,7 @@ public class PermutationGenerator {
                                             ModelUtilities.createRelationshipTemplateAndAddToTopology(
                                                 addedDetectorElement, target, relation.getType(), permutation.getDetector());
                                         } else if (!options.getValues().contains(permutationMap.getDetectorElement().getId())) {
-                                            // Else if the target is part of the detecor, add the relation between the
+                                            // Else if the target is part of the detector, add the relation between the
                                             // added element and the detector element.
                                             // No need to check instance of again, as we filter them in line 383.
                                             TNodeTemplate target = (TNodeTemplate) permutationMap.getDetectorElement();
@@ -454,6 +449,7 @@ public class PermutationGenerator {
                             || ((TRelationshipTemplate) template).getTargetElement().getRef().getId().equals(option))
                         || template.getId().equals(option)
                     );
+                // endregion
             }
 
             try {

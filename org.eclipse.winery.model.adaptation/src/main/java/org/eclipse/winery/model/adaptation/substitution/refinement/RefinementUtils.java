@@ -76,9 +76,9 @@ public abstract class RefinementUtils {
                 .anyMatch(permutationMap -> permutationMap.getRefinementElement().equals(entityTemplate));
     }
 
-    public static boolean noMappingExistsForRefinementNode(TNodeTemplate detectorNode,
-                                                           TEntityTemplate refinementNode,
-                                                           OTTopologyFragmentRefinementModel refinementModel) {
+    public static boolean noMappingExistsForRefinementNodeExeptForGivenDetectorNode(TNodeTemplate detectorNode,
+                                                                                    TEntityTemplate refinementNode,
+                                                                                    OTTopologyFragmentRefinementModel refinementModel) {
         return !isStayPlaceholder(detectorNode, refinementModel) &&
             !permutabilityMappingExistsForRefinementNode(refinementNode, refinementModel) &&
             getAllContentMappingsForRefinementNodeWithoutDetectorNode(detectorNode, refinementNode, refinementModel).size() == 0;
