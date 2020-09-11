@@ -21,6 +21,7 @@ import { Validators } from '@angular/forms';
 import { DynamicDropdownData } from '../../../wineryDynamicTable/formComponents/dynamicDropdown.component';
 import { NodeTemplate, RelationshipTemplate, WineryTemplate } from '../../../model/wineryComponent';
 import { forkJoin } from 'rxjs';
+import { DynamicTextData } from '../../../wineryDynamicTable/formComponents/dynamicText.component';
 
 @Component({
     templateUrl: 'permutationMappings.component.html',
@@ -35,7 +36,7 @@ export class PermutationMappingsComponent implements OnInit {
     permutationMappings: PermutationMapping[] = [];
 
     tableTitle = 'Permutation Mappings';
-    public modalTitle: 'Add Permutation Mapping';
+    modalTitle = 'Add Permutation Mapping';
 
     detectorElements: WineryTemplate[];
     refinementElements: NodeTemplate[];
@@ -46,8 +47,6 @@ export class PermutationMappingsComponent implements OnInit {
     constructor(private service: RefinementMappingsService,
                 private notify: WineryNotificationService) {
     }
-
-    // TODO: show empty Table + Modal Title + Delete
 
     ngOnInit(): void {
         forkJoin(
@@ -76,32 +75,47 @@ export class PermutationMappingsComponent implements OnInit {
                 1,
                 '',
                 [Validators.required],
-            )
+            ),
+            new DynamicTextData(
+                'id',
+                'ID',
+                3,
+                [],
+                '',
+                false,
+                false,
+                false
+            ),
         ]
         ;
     }
 
-    private handleError(error: any) {
-        this.loading = false;
-        this.notify.error(error.message);
-    }
-
-    save(): void {
+    save(mapping: PermutationMapping): void {
         this.loading = true;
-        this.service.addPermutationMappings(this.permutationMappings)
+        const id = this.service.getNewMappingsId(this.permutationMappings, PermutationMapping.idPrefix);
+        const newMapping = new PermutationMapping(id);
+        newMapping.detectorElement = mapping.detectorElement;
+        newMapping.refinementElement = mapping.refinementElement;
+
+        this.service.addPermutationMappings(newMapping)
             .subscribe(
                 data => this.handleSave('Added', data),
                 error => this.handleError(error)
             );
     }
 
-    onChangeProperty() {
-        this.save();
+    remove(mapping: PermutationMapping) {
+        this.loading = true;
+        this.service.deletePermutationMappings(mapping)
+            .subscribe(
+                data => this.handleSave('Removed', data),
+                error => this.handleError(error)
+            );
     }
 
     private handleData(data: [PermutationMapping[], NodeTemplate[], RelationshipTemplate[], NodeTemplate[]]) {
         this.permutationMappings = data[0];
-        console.log(data[0]);
+
         this.detectorElements = data[1];
         this.detectorElements.concat(data[2]);
 
@@ -110,12 +124,12 @@ export class PermutationMappingsComponent implements OnInit {
         this.detectorElements.forEach((element) => {
                 this.detectorElementsTableData.push({ label: element.name, value: element.id }
                 );
-            }, this
+            }
         );
         this.refinementElements.forEach((element) => {
                 this.refinementElementsTableData.push({ label: element.name, value: element.id }
                 );
-            }, this
+            }
         );
         this.loading = false;
     }
@@ -124,5 +138,10 @@ export class PermutationMappingsComponent implements OnInit {
         this.notify.success(added + ' Permutation Mapping ');
         this.permutationMappings = data;
         this.loading = false;
+    }
+
+    private handleError(error: any) {
+        this.loading = false;
+        this.notify.error(error.message);
     }
 }

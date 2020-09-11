@@ -41,11 +41,11 @@ public class StayMappingsResource extends AbstractRefinementModelMappingsResourc
         TEntityTemplate detectorElement, refinementElement;
 
         if (mapping.modelElementType == OTPrmModelElementType.NODE) {
-            detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(mapping.detectorElement);
-            refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(mapping.refinementElement);
+            detectorElement = this.res.getDetectorResource().getTopologyTemplate().getNodeTemplate(mapping.detectorElement);
+            refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getNodeTemplate(mapping.refinementElement);
         } else {
-            detectorElement = this.res.getDetector().getComponentInstanceJSON().getRelationshipTemplate(mapping.detectorElement);
-            refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getRelationshipTemplate(mapping.refinementElement);
+            detectorElement = this.res.getDetectorResource().getTopologyTemplate().getRelationshipTemplate(mapping.detectorElement);
+            refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getRelationshipTemplate(mapping.refinementElement);
         }
 
         return this.addMapping(mapping.createOTPrmStayMapping(detectorElement, refinementElement));

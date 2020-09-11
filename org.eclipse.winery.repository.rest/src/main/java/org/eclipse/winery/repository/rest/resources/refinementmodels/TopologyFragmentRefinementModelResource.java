@@ -51,7 +51,7 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     }
 
     @Path("refinementstructure")
-    public TopologyTemplateResource getRefinementTopology() {
+    public TopologyTemplateResource getRefinementTopologyResource() {
         return new TopologyTemplateResource(this, this.getTRefinementModel().getRefinementTopology(), REFINEMENT_TOPOLOGY);
     }
 
@@ -97,14 +97,14 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     }
 
     @Path("permutationmappings")
-    public PermutationMappingsRessource getPermutationMappings() {
+    public PermutationMappingsResource getPermutationMappings() {
         List<OTPermutationMapping> permutationMappings = this.getTRefinementModel().getPermutationMappings();
 
         if (Objects.isNull(permutationMappings)) {
             permutationMappings = new ArrayList<>();
             this.getTRefinementModel().setPermutationMappings(permutationMappings);
         }
-        return new PermutationMappingsRessource(this, permutationMappings);
+        return new PermutationMappingsResource(this, permutationMappings);
     }
 
     @Path("generatePermutations")

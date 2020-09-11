@@ -120,8 +120,8 @@ export class RefinementMappingsService {
         return this.http.get<DeploymentArtifactMapping[]>(this.path + '/deploymentartifactmappings');
     }
 
-    public addPermutationMappings(element: PermutationMapping[]): Observable<PermutationMapping[]> {
-        return this.http.put<PermutationMapping[]>(this.path + '/permutationmappings', element);
+    public addPermutationMappings(mapping: PermutationMapping): Observable<PermutationMapping[]> {
+        return this.http.put<PermutationMapping[]>(this.path + '/permutationmappings', mapping);
     }
 
     public deletePermutationMappings(mapping: PermutationMapping): Observable<PermutationMapping[]> {

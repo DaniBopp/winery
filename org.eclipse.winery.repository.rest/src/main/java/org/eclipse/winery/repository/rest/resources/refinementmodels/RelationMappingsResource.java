@@ -42,8 +42,8 @@ public class RelationMappingsResource extends AbstractRefinementModelMappingsRes
       Therefore, we do it manually.
      */
     public List<OTRelationMapping> addRelationMappingFromApi(RelationMappingApiData mapping) {
-        TNodeTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(mapping.detectorElement);
-        TNodeTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(mapping.refinementElement);
+        TNodeTemplate detectorElement = this.res.getDetectorResource().getTopologyTemplate().getNodeTemplate(mapping.detectorElement);
+        TNodeTemplate refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getNodeTemplate(mapping.refinementElement);
         return this.addMapping(mapping.createTRelationMapping(detectorElement, refinementElement));
     }
 }

@@ -14,7 +14,6 @@
 
 package org.eclipse.winery.repository.rest.resources.refinementmodels;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -28,8 +27,8 @@ import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementM
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PrmPermutationMappingApiData;
 
-public class PermutationMappingsRessource extends AbstractRefinementModelMappingsResource<OTPermutationMapping> {
-    public PermutationMappingsRessource(AbstractRefinementModelResource res, List<OTPermutationMapping> artifactMappings) {
+public class PermutationMappingsResource extends AbstractRefinementModelMappingsResource<OTPermutationMapping> {
+    public PermutationMappingsResource(AbstractRefinementModelResource res, List<OTPermutationMapping> artifactMappings) {
         super(res);
         this.mappings = artifactMappings;
     }
@@ -37,16 +36,9 @@ public class PermutationMappingsRessource extends AbstractRefinementModelMapping
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public List<OTPermutationMapping> addPermutationMapping(PrmPermutationMappingApiData[] mappings) {
-
-        List<OTPermutationMapping> mappingsList = new ArrayList();
-
-        for (PrmPermutationMappingApiData permutationMapping : mappings) {
-            TEntityTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(permutationMapping.detectorElement);
-            TEntityTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(permutationMapping.refinementElement);
-            mappingsList = this.addMapping(permutationMapping.createPermutationMapping(detectorElement, refinementElement));
-        }
-
-        return mappingsList;
+    public List<OTPermutationMapping> addPermutationMapping(PrmPermutationMappingApiData mapping) {
+        TEntityTemplate detectorElement = this.res.getDetectorResource().getTopologyTemplate().getNodeTemplate(mapping.detectorElement);
+        TEntityTemplate refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getNodeTemplate(mapping.refinementElement);
+        return this.addMapping(mapping.createPermutationMapping(detectorElement, refinementElement));
     }
 }

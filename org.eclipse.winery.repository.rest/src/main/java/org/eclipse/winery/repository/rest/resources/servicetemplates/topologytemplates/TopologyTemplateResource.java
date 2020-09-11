@@ -143,7 +143,7 @@ public class TopologyTemplateResource {
         "@return The JSON representation of the topology template <em>without</em> associated artifacts and without the parent service template")
     @Produces(MediaType.APPLICATION_JSON)
     // @formatter:on
-    public TTopologyTemplate getComponentInstanceJSON() {
+    public TTopologyTemplate getTopologyTemplate() {
         return this.topologyTemplate;
     }
 
@@ -379,39 +379,33 @@ public class TopologyTemplateResource {
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
     public TTopologyTemplate updateVersionOfNodeTemplate(UpdateInfo updateInfo) {
-        if (topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId()) != null
-            && topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId()).getProperties() != null) {
+        TNodeTemplate nodeTemplate = topologyTemplate.getNodeTemplate(updateInfo.getNodeTemplateId());
+        if (nodeTemplate != null && nodeTemplate.getProperties() != null) {
             Map<String, String> propertyMappings = new LinkedHashMap<>();
             updateInfo.getMappingList().forEach(
                 propertyMatching -> propertyMappings.put(propertyMatching.getOldKey(), propertyMatching.getNewKey())
             );
 
             LinkedHashMap<String, String> resultKvs = new LinkedHashMap<>();
-
-            topologyTemplate.getNodeTemplateOrRelationshipTemplate().stream()
-                .filter(template -> template.getId().equals(updateInfo.getNodeTemplateId()))
-                .filter(template -> template.getProperties() != null)
-                .findFirst()
-                .ifPresent(nodeTemplate -> {
-                    Map<String, String> oldKvs = nodeTemplate.getProperties().getKVProperties();
-                    oldKvs.forEach((key, value) -> {
-                        if (propertyMappings.containsKey(key)) {
-                            resultKvs.put(propertyMappings.get(key), value);
-                        }
-                        if (updateInfo.getResolvedList().contains(key)) {
-                            resultKvs.put(key, value);
-                        }
-                    });
-                    updateInfo.getNewList().forEach(key -> {
-                        if (!resultKvs.containsKey(key)) {
-                            resultKvs.put(key, "");
-                        }
-                    });
-
-                    TEntityTemplate.Properties oldProps = nodeTemplate.getProperties();
-                    oldProps.setAny(null);
-                    oldProps.setKVProperties(resultKvs);
+            if ( nodeTemplate.getProperties().getKVProperties() != null) {
+                nodeTemplate.getProperties().getKVProperties().forEach((key, value) -> {
+                    if (propertyMappings.containsKey(key)) {
+                        resultKvs.put(propertyMappings.get(key), value);
+                    }
+                    if (updateInfo.getResolvedList().contains(key)) {
+                        resultKvs.put(key, value);
+                    }
                 });
+                updateInfo.getNewList().forEach(key -> {
+                    if (!resultKvs.containsKey(key)) {
+                        resultKvs.put(key, "");
+                    }
+                });
+
+                TEntityTemplate.Properties oldProps = nodeTemplate.getProperties();
+                oldProps.setAny(null);
+                oldProps.setKVProperties(resultKvs);
+            }
         }
 
         BackendUtils.updateVersionOfNodeTemplate(this.topologyTemplate, updateInfo.getNodeTemplateId(), updateInfo.getNewComponentType());

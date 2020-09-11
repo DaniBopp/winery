@@ -38,8 +38,8 @@ public class DeploymentArtifactMappingsResource extends AbstractRefinementModelM
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<OTDeploymentArtifactMapping> addDeploymentArtifactMapping(PrmDeploymentArtifactMappingApiData mapping) {
-        TEntityTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplate(mapping.detectorElement);
-        TEntityTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplate(mapping.refinementElement);
+        TEntityTemplate detectorElement = this.res.getDetectorResource().getTopologyTemplate().getNodeTemplate(mapping.detectorElement);
+        TEntityTemplate refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getNodeTemplate(mapping.refinementElement);
 
         return this.addMapping(mapping.createDeploymentArtifactMapping(detectorElement, refinementElement));
     }

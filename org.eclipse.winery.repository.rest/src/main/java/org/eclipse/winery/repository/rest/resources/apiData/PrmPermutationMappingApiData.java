@@ -18,6 +18,7 @@ import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 
 public class PrmPermutationMappingApiData extends AbstractPrmMappingElement {
+
     public OTPermutationMapping createPermutationMapping(TEntityTemplate detectorElement, TEntityTemplate refinementElement) {
         OTPermutationMapping permutationMapping = new OTPermutationMapping();
         permutationMapping.setId(this.id);

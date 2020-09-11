@@ -18,7 +18,6 @@
                           [tableTitle]="tableTitle"
                           [modalTitle]="modalTitle"
                           [data]="permutationMappings"
-                          (entryAdded)="onChangeProperty()"
-                          (entryEdited)="onChangeProperty()"
-                          (entryRemoved)="onChangeProperty()"></winery-dynamic-table>
+                          (entryAdded)="save($event)"
+                          (entryRemoved)="remove($event)"></winery-dynamic-table>
 </ng-template>

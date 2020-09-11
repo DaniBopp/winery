@@ -37,14 +37,14 @@ public class AttributeMappingsResource extends AbstractRefinementModelMappingsRe
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public List<OTAttributeMapping> addPropertyMappingFromApi(PrmAttributeMappingApiData mapping) {
-        TEntityTemplate refinementElement = this.res.getRefinementTopology().getComponentInstanceJSON().getNodeTemplateOrRelationshipTemplate().stream()
+        TEntityTemplate refinementElement = this.res.getRefinementTopologyResource().getTopologyTemplate().getNodeTemplateOrRelationshipTemplate().stream()
             .filter(entityTemplate -> entityTemplate.getId().equals(mapping.refinementElement))
             .findFirst()
-            .orElseGet(null);
-        TEntityTemplate detectorElement = this.res.getDetector().getComponentInstanceJSON().getNodeTemplateOrRelationshipTemplate().stream()
+            .orElse(null);
+        TEntityTemplate detectorElement = this.res.getDetectorResource().getTopologyTemplate().getNodeTemplateOrRelationshipTemplate().stream()
             .filter(entityTemplate -> entityTemplate.getId().equals(mapping.detectorElement))
             .findFirst()
-            .orElseGet(null);
+            .orElse(null);
         return this.addMapping(mapping.createTPrmPropertyMapping(detectorElement, refinementElement));
     }
 }
