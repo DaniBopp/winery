@@ -28,6 +28,7 @@ import { AttributeMappingsComponent } from '../../instance/refinementModels/attr
 import { DeploymentArtifactsMappingsComponent } from '../../instance/refinementModels/deploymentArtifactsMappings/deploymentArtifactsMappings.component';
 import { PermutationMappingsComponent } from '../../instance/refinementModels/permutationMappings/permutationMappings.component';
 import { PermutationsComponent } from '../../instance/refinementModels/permutations/permutations.component';
+import { SubMenuItems } from '../../model/subMenuItem';
 
 const toscaType = ToscaTypes.PatternRefinementModel;
 
@@ -43,7 +44,7 @@ const patternRefinementRoutes: Routes = [
             { path: 'license', component: WineryLicenseComponent },
             { path: 'detector', component: TopologyTemplateComponent },
             { path: 'refinementstructure', component: TopologyTemplateComponent },
-            { path: 'grafikprmmodelling', component: TopologyTemplateComponent },
+            { path: SubMenuItems.graphicPrmModelling.urlFragment, component: TopologyTemplateComponent },
             { path: 'relationmappings', component: RelationMappingsComponent },
             { path: 'attributemappings', component: AttributeMappingsComponent },
             { path: 'staymappings', component: StayMappingsComponent },

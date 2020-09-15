@@ -55,9 +55,9 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
         return new TopologyTemplateResource(this, this.getTRefinementModel().getRefinementTopology(), REFINEMENT_TOPOLOGY);
     }
 
-    @Path("grafikprmmodelling")
+    @Path("graphicprmmodelling")
     public TopologyTemplateResource getPrmModelling() {
-        return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
+        return new PrmTemplateResource(this, this.getTRefinementModel(), GRAPHIC_PRM_MODEL);
     }
 
     @Path("attributemappings")
