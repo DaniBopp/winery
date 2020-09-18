@@ -44,7 +44,7 @@ const patternRefinementRoutes: Routes = [
             { path: 'license', component: WineryLicenseComponent },
             { path: 'detector', component: TopologyTemplateComponent },
             { path: 'refinementstructure', component: TopologyTemplateComponent },
-            { path: SubMenuItems.graphicPrmModelling.urlFragment, component: TopologyTemplateComponent },
+            { path: SubMenuItems.graficPrmModelling.urlFragment, component: TopologyTemplateComponent },
             { path: 'relationmappings', component: RelationMappingsComponent },
             { path: 'attributemappings', component: AttributeMappingsComponent },
             { path: 'staymappings', component: StayMappingsComponent },

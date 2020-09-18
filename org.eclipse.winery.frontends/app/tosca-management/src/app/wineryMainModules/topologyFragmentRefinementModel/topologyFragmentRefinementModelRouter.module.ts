@@ -26,6 +26,7 @@ import { TopologyTemplateComponent } from '../../instance/sharedComponents/topol
 import { StayMappingsComponent } from '../../instance/refinementModels/stayMappings/stayMappings.component';
 import { AttributeMappingsComponent } from '../../instance/refinementModels/attributeMappings/attributeMappings.component';
 import { DeploymentArtifactsMappingsComponent } from '../../instance/refinementModels/deploymentArtifactsMappings/deploymentArtifactsMappings.component';
+import { SubMenuItems } from '../../model/subMenuItem';
 
 const toscaType = ToscaTypes.TopologyFragmentRefinementModel;
 
@@ -41,6 +42,7 @@ const topologyFragmentRefinementRoutes: Routes = [
             { path: 'license', component: WineryLicenseComponent },
             { path: 'detector', component: TopologyTemplateComponent },
             { path: 'refinementstructure', component: TopologyTemplateComponent },
+            { path: SubMenuItems.graficPrmModelling.urlFragment, component: TopologyTemplateComponent },
             { path: 'relationmappings', component: RelationMappingsComponent },
             { path: 'attributemappings', component: AttributeMappingsComponent },
             { path: 'staymappings', component: StayMappingsComponent },

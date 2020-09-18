@@ -39,7 +39,7 @@ export class SubMenuItems {
     static readonly documentation: SubMenuItem = { displayName: 'Documentation', urlFragment: 'documentation' };
     static readonly edmmTypeMappings: SubMenuItem = { displayName: 'EDMM Type Mappings', urlFragment: 'edmmtypemappings' };
     static readonly files: SubMenuItem = { displayName: 'Files', urlFragment: 'files' };
-    static readonly graphicPrmModelling: SubMenuItem = { displayName: 'Graphic PRM Modelling', urlFragment: 'graphicprmmodelling' };
+    static readonly graficPrmModelling: SubMenuItem = { displayName: 'Grafic PRM Modelling', urlFragment: 'grafikprmmodelling' };
     static readonly identifier: SubMenuItem = { displayName: 'Identifier', urlFragment: 'identifier' };
     static readonly implementationArtifacts: SubMenuItem = { displayName: 'Implementation Artifacts', urlFragment: 'implementationartifacts' };
     static readonly implementations: SubMenuItem = { displayName: 'Implementations', urlFragment: 'implementations' };

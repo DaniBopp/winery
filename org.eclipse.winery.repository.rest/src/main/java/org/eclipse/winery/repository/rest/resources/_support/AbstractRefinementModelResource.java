@@ -33,7 +33,7 @@ public abstract class AbstractRefinementModelResource extends AbstractComponentI
 
     protected static final String REFINEMENT_TOPOLOGY = "refinement-structure";
     protected static final String DETECTOR = "detector";
-    protected static final String GRAPHIC_PRM_MODEL = "graphic-prm-model";
+    protected static final String GRAFIC_PRM_MODEL = "grafic-prm-model";
 
     protected AbstractRefinementModelResource(DefinitionsChildId id) {
         super(id);
