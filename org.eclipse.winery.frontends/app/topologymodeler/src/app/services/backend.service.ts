@@ -238,6 +238,13 @@ export class BackendService {
     }
 
     /**
+     * Request all Prm Mapping Types as Relationship Types fot graphic prm modelling
+     */
+    requestPrmMappingTypes(): Observable<any> {
+        return this.http.get(this.configuration.parentElementUrl + 'prmmappingtypes');
+    }
+
+    /**
      * Requests all namespaces from the backend
      */
     requestNamespaces(all: boolean = false): Observable<any> {

@@ -30,6 +30,7 @@ import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
+import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
@@ -58,6 +59,18 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     @Path("grafikprmmodelling")
     public TopologyTemplateResource getPrmModelling() {
         return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
+    }
+
+    @Path("prmmappingtypes")
+    public List<TRelationshipType> getPrmMappingTypes() {
+        return createRelationshipTypesForMappingTypes();
+    }
+
+    private List<TRelationshipType> createRelationshipTypesForMappingTypes() {
+        List<TRelationshipType> templates = new ArrayList<>();
+        TRelationshipType permutationMapping = new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping"));
+        templates.add(permutationMapping);
+        return templates;
     }
 
     @Path("attributemappings")

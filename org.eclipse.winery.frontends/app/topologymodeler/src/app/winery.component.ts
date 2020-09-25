@@ -14,7 +14,8 @@
 
 import { AfterViewInit, Component, Input, OnInit } from '@angular/core';
 import {
-    Entity, EntityType, TArtifactType, TNodeTemplate, TPolicyType, TRelationshipTemplate, TTopologyTemplate, VisualEntityType
+    Entity, EntityType, TArtifactType, TNodeTemplate, TPolicyType, TRelationshipTemplate, TTopologyTemplate,
+    VisualEntityType
 } from './models/ttopology-template';
 import { ILoaded, LoadedService } from './services/loaded.service';
 import { AppReadyEventService } from './services/app-ready-event.service';
@@ -35,6 +36,7 @@ import { TopologyRendererActions } from './redux/actions/topologyRenderer.action
 import { WineryRepositoryConfigurationService } from '../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
 import { TPolicy } from './models/policiesModalData';
 import { GroupedNodeTypeModel } from './models/groupedNodeTypeModel';
+import { SubMenuItems } from '../../../tosca-management/src/app/model/subMenuItem';
 
 /**
  * This is the root component of the topology modeler.
@@ -57,6 +59,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
     hideNavBarState: boolean;
     subscriptions: Array<Subscription> = [];
     someNodeMissingCoordinates = false;
+    templateParameter: TopologyModelerConfiguration;
 
     // This variable is set via the topologyModelerData input and decides if the editing functionalities are enabled
     readonly: boolean;
@@ -105,6 +108,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
                 } else {
                     this.activatedRoute.queryParams.subscribe((params: TopologyModelerConfiguration) => {
                         this.backendService.endpointConfiguration.next(params);
+                        this.templateParameter = params;
                     });
                     this.initiateData();
                 }
@@ -112,6 +116,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
         } else {
             this.activatedRoute.queryParams.subscribe((params: TopologyModelerConfiguration) => {
                 this.backendService.endpointConfiguration.next(params);
+                this.templateParameter = params;
             });
             this.initiateData();
         }
@@ -337,8 +342,10 @@ export class WineryComponent implements OnInit, AfterViewInit {
             // PolicyTemplates
             this.initEntityType(JSON[7], 'policyTemplates');
 
-            // Relationship Types
-            this.initEntityType(JSON[8], 'relationshipTypes');
+            if (this.templateParameter.elementPath !== SubMenuItems.graficPrmModelling.urlFragment) {
+                // Relationship Types
+                this.initEntityType(JSON[8], 'relationshipTypes');
+            }
 
             // NodeTypes
             this.initEntityType(JSON[9], 'unGroupedNodeTypes');
@@ -350,6 +357,12 @@ export class WineryComponent implements OnInit, AfterViewInit {
             this.initTopologyTemplateForRendering(topologyTemplate.nodeTemplates, topologyTemplate.relationshipTemplates);
 
             this.triggerLoaded('everything');
+
+            if (this.templateParameter.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+                this.backendService.requestPrmMappingTypes().subscribe(JSON2 => {
+                    this.initEntityType(JSON2, 'relationshipTypes');
+                });
+            }
         });
     }
 
