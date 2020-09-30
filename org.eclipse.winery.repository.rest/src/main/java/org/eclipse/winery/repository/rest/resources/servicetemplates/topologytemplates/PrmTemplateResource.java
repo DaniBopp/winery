@@ -14,9 +14,11 @@
 
 package org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates;
 
+import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
+import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources._support.AbstractComponentInstanceResourceContainingATopology;
 
@@ -47,6 +49,19 @@ public class PrmTemplateResource extends TopologyTemplateResource {
         }
         for (TRelationshipTemplate relationshipTemplate : refinementModel.getRefinementTopology().getRelationshipTemplates()) {
             prmModellingTopologyTemplate.addRelationshipTemplate(relationshipTemplate);
+        }
+        createRelationshipsForMappings(refinementModel);
+    }
+
+    private void createRelationshipsForMappings(OTTopologyFragmentRefinementModel refinementModel) {
+        for (OTPermutationMapping mapping : refinementModel.getPermutationMappings()) {
+            TRelationshipType permutationMapping = new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping"));
+            TRelationshipTemplate.SourceOrTargetElement sourceElement = new TRelationshipTemplate.SourceOrTargetElement();
+            sourceElement.setRef(new TNodeTemplate(mapping.getDetectorElement().getId()));
+            TRelationshipTemplate.SourceOrTargetElement targetElement = new TRelationshipTemplate.SourceOrTargetElement();
+            targetElement.setRef(new TNodeTemplate(mapping.getRefinementElement().getId()));
+            TRelationshipTemplate templateForMapping = new TRelationshipTemplate(new TRelationshipTemplate.Builder("Permutation Mapping", permutationMapping.getQName(), sourceElement, targetElement));
+            prmModellingTopologyTemplate.addRelationshipTemplate(templateForMapping);
         }
     }
 }
