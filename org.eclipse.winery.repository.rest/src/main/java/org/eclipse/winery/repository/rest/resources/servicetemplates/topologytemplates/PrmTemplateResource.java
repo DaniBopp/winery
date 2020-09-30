@@ -14,18 +14,11 @@
 
 package org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.ws.rs.Path;
-
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
-import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources._support.AbstractComponentInstanceResourceContainingATopology;
-import org.eclipse.winery.repository.rest.resources.entitytypes.relationshiptypes.RelationshipTypesResource;
 
 public class PrmTemplateResource extends TopologyTemplateResource {
     private static final TTopologyTemplate prmModellingTopologyTemplate = new TTopologyTemplate();
