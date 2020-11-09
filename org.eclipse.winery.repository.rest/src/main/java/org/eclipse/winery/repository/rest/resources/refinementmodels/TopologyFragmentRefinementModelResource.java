@@ -69,7 +69,9 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     private List<TRelationshipType> createRelationshipTypesForMappingTypes() {
         List<TRelationshipType> templates = new ArrayList<>();
         TRelationshipType permutationMapping = new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping"));
+        TRelationshipType deploymentArtifactMapping = new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping"));
         templates.add(permutationMapping);
+        templates.add(deploymentArtifactMapping);
         return templates;
     }
 

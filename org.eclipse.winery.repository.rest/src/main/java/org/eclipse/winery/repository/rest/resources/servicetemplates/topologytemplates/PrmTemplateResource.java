@@ -14,6 +14,8 @@
 
 package org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates;
 
+import javax.xml.namespace.QName;
+
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
@@ -34,7 +36,6 @@ public class PrmTemplateResource extends TopologyTemplateResource {
     }
 
     private void createPrmTopologyTemplate(OTTopologyFragmentRefinementModel refinementModel) {
-
         for (TNodeTemplate nodeTemplate : refinementModel.getDetector().getNodeTemplates()) {
             prmModellingTopologyTemplate.addNodeTemplate(nodeTemplate);
         }
@@ -60,7 +61,8 @@ public class PrmTemplateResource extends TopologyTemplateResource {
             sourceElement.setRef(new TNodeTemplate(mapping.getDetectorElement().getId()));
             TRelationshipTemplate.SourceOrTargetElement targetElement = new TRelationshipTemplate.SourceOrTargetElement();
             targetElement.setRef(new TNodeTemplate(mapping.getRefinementElement().getId()));
-            TRelationshipTemplate templateForMapping = new TRelationshipTemplate(new TRelationshipTemplate.Builder("Permutation Mapping", permutationMapping.getQName(), sourceElement, targetElement));
+            TRelationshipTemplate templateForMapping = new TRelationshipTemplate(new TRelationshipTemplate.Builder("Permutation Mapping", new QName(permutationMapping.getName()), sourceElement, targetElement));
+            templateForMapping.setName(permutationMapping.getName());
             prmModellingTopologyTemplate.addRelationshipTemplate(templateForMapping);
         }
     }
