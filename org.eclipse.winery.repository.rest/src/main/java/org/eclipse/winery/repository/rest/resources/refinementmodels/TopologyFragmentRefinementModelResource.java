@@ -21,6 +21,8 @@ import java.util.Objects;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
 import org.eclipse.winery.model.adaptation.substitution.refinement.PermutationGenerator;
@@ -60,18 +62,13 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     public TopologyTemplateResource getPrmModelling() {
         return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
     }
-
+//TODO
     @Path("prmmappingtypes")
+    @Produces(MediaType.APPLICATION_JSON)
     public List<TRelationshipType> getPrmMappingTypes() {
-        return createRelationshipTypesForMappingTypes();
-    }
-
-    private List<TRelationshipType> createRelationshipTypesForMappingTypes() {
         List<TRelationshipType> templates = new ArrayList<>();
-        TRelationshipType permutationMapping = new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping"));
-        TRelationshipType deploymentArtifactMapping = new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping"));
-        templates.add(permutationMapping);
-        templates.add(deploymentArtifactMapping);
+        templates.add(new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping")));
+        templates.add(new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping")));
         return templates;
     }
 

@@ -360,6 +360,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
 
             if (this.templateParameter.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
                 this.backendService.requestPrmMappingTypes().subscribe(JSON2 => {
+                    console.log(JSON2);
                     this.initEntityType(JSON2, 'relationshipTypes');
                 });
             }

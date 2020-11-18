@@ -231,7 +231,7 @@ export class BackendService {
     /**
      * Requests all relationship types from the backend
      */
-    private requestRelationshipTypes(): Observable<any> {
+private requestRelationshipTypes(): Observable<any> {
         if (this.configuration) {
             return this.http.get(this.configuration.repositoryURL + '/relationshiptypes?full', { headers: this.headers });
         }
@@ -241,6 +241,7 @@ export class BackendService {
      * Request all Prm Mapping Types as Relationship Types fot graphic prm modelling
      */
     requestPrmMappingTypes(): Observable<any> {
+        console.log(this.configuration.parentElementUrl + 'prmmappingtypes');
         return this.http.get(this.configuration.parentElementUrl + 'prmmappingtypes');
     }
 
