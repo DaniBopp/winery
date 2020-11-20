@@ -18,11 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
 import org.eclipse.winery.model.adaptation.substitution.refinement.PermutationGenerator;
@@ -33,6 +36,7 @@ import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TRelationshipType;
+import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
@@ -62,14 +66,24 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     public TopologyTemplateResource getPrmModelling() {
         return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
     }
-//TODO
+
+    //TODO
+    @GET
     @Path("prmmappingtypes")
     @Produces(MediaType.APPLICATION_JSON)
     public List<TRelationshipType> getPrmMappingTypes() {
-        List<TRelationshipType> templates = new ArrayList<>();
-        templates.add(new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping")));
-        templates.add(new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping")));
-        return templates;
+        List<TRelationshipType> prmMappingTypes = new ArrayList<>();
+        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping")));
+        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping")));
+        return prmMappingTypes;
+    }
+
+    @PUT
+    @Path("graphicPrmTopology")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response savePrmMappingTopology(TTopologyTemplate topologyTemplate) {
+        //TODO
+        return null;
     }
 
     @Path("attributemappings")

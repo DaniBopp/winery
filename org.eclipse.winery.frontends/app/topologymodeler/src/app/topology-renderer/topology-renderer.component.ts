@@ -25,6 +25,7 @@ import { Subscription } from 'rxjs';
 import { TopologyTemplateUtil } from '../models/topologyTemplateUtil';
 import { EntityTypesModel } from '../models/entityTypesModel';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
+import { TopologyModelerConfiguration } from '../models/topologyModelerConfiguration';
 
 /**
  * This is the parent component of the canvas and navbar component.
@@ -42,6 +43,7 @@ export class TopologyRendererComponent implements OnInit, OnDestroy {
     @Input() nodeTemplates: Array<TNodeTemplate>;
     @Input() relationshipTemplates: Array<TRelationshipTemplate>;
     @Input() sidebarDeleteButtonClickEvent: any;
+    @Input() templateParameter: TopologyModelerConfiguration;
     @Output() generatedReduxState = new EventEmitter();
     hideNavBarState: boolean;
     subscriptions: Array<Subscription> = [];

@@ -14,7 +14,8 @@
 <div *ngIf="loader?.generatedReduxState">
     <winery-navbar
         [readonly]="readonly"
-        [hideNavBarState]="hideNavBarState">
+        [hideNavBarState]="hideNavBarState"
+        [templateParameter]="templateParameter">
     </winery-navbar>
 
     <winery-canvas [readonly]="readonly"

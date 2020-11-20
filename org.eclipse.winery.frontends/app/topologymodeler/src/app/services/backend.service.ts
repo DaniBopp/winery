@@ -231,7 +231,7 @@ export class BackendService {
     /**
      * Requests all relationship types from the backend
      */
-private requestRelationshipTypes(): Observable<any> {
+    private requestRelationshipTypes(): Observable<any> {
         if (this.configuration) {
             return this.http.get(this.configuration.repositoryURL + '/relationshiptypes?full', { headers: this.headers });
         }
@@ -241,7 +241,6 @@ private requestRelationshipTypes(): Observable<any> {
      * Request all Prm Mapping Types as Relationship Types fot graphic prm modelling
      */
     requestPrmMappingTypes(): Observable<any> {
-        console.log(this.configuration.parentElementUrl + 'prmmappingtypes');
         return this.http.get(this.configuration.parentElementUrl + 'prmmappingtypes');
     }
 
@@ -312,6 +311,41 @@ private requestRelationshipTypes(): Observable<any> {
                 { headers: headers, responseType: 'text', observe: 'response' }
             );
         }
+    }
+
+    saveTopologyTemplateToCreatePrmMappings(topologyTemplate: TTopologyTemplate): Observable<HttpResponse<string>> {
+
+        if (this.configuration) {
+            // Initialization
+            const topologySkeleton = {
+                documentation: [],
+                any: [],
+                otherAttributes: {},
+                relationshipTemplates: [],
+                nodeTemplates: [],
+                policies: { policy: new Array<TPolicy>() }
+            };
+            // Prepare for saving by updating the existing topology with the current topology state inside the Redux store
+            topologySkeleton.nodeTemplates = topologyTemplate.nodeTemplates;
+            topologySkeleton.relationshipTemplates = topologyTemplate.relationshipTemplates;
+            topologySkeleton.relationshipTemplates.map(relationship => {
+                delete relationship.state;
+            });
+            // remove the 'Color' field from all nodeTemplates as the REST Api does not recognize it.
+            topologySkeleton.nodeTemplates.map(nodeTemplate => {
+                delete nodeTemplate.visuals;
+                delete nodeTemplate._state;
+            });
+            topologySkeleton.policies = topologyTemplate.policies;
+            console.log(topologySkeleton);
+
+            const headers = new HttpHeaders().set('Content-Type', 'application/json');
+            return this.http.put(this.configuration.parentElementUrl + 'graphicPrmTopology',
+                topologySkeleton,
+                { headers: headers, responseType: 'text', observe: 'response' }
+            );
+        }
+
     }
 
     saveYamlArtifact(topology: TTopologyTemplate,

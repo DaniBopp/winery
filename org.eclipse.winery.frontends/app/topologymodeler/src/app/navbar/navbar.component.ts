@@ -27,6 +27,8 @@ import { StatefulAnnotationsService } from '../services/statefulAnnotations.serv
 import { FeatureEnum } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/wineryRepository.feature.direct';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
 import { TTopologyTemplate } from '../models/ttopology-template';
+import { TopologyModelerConfiguration } from '../models/topologyModelerConfiguration';
+import { SubMenuItems } from '../../../../tosca-management/src/app/model/subMenuItem';
 
 /**
  * The navbar of the topologymodeler.
@@ -51,6 +53,7 @@ export class NavbarComponent implements OnDestroy {
 
     @Input() hideNavBarState: boolean;
     @Input() readonly: boolean;
+    @Input() templateParameter: TopologyModelerConfiguration;
 
     @ViewChild('exportCsarButton')
     private exportCsarButtonRef: ElementRef;
@@ -253,13 +256,23 @@ export class NavbarComponent implements OnDestroy {
      */
     saveTopologyTemplateToRepository() {
         // The topology gets saved here.
-        this.backendService.saveTopologyTemplate(this.currentTopologyTemplate)
-            .subscribe(res => {
-                res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
-                    + res.statusText + ' ' + res.status + '</p>')
-                    : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
-                    + res.statusText + ' ' + res.status + '</p>');
-            }, err => this.alert.error(err.error));
+        if (this.templateParameter.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+            this.backendService.saveTopologyTemplateToCreatePrmMappings(this.currentTopologyTemplate)
+                .subscribe(res => {
+                    res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
+                        + res.statusText + ' ' + res.status + '</p>')
+                        : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
+                        + res.statusText + ' ' + res.status + '</p>');
+                }, err => this.alert.error(err.error));
+        } else {
+            this.backendService.saveTopologyTemplate(this.currentTopologyTemplate)
+                .subscribe(res => {
+                    res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
+                        + res.statusText + ' ' + res.status + '</p>')
+                        : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
+                        + res.statusText + ' ' + res.status + '</p>');
+                }, err => this.alert.error(err.error));
+        }
     }
 
     /**
