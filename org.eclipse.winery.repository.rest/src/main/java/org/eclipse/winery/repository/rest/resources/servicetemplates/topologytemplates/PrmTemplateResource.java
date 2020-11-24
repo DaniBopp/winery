@@ -50,7 +50,7 @@ public class PrmTemplateResource extends TopologyTemplateResource {
             TNodeTemplate newNodeTemplate = nodeTemplate;
             int newX = Integer.parseInt(newNodeTemplate.getX()) + 500;
             newNodeTemplate.setX(String.valueOf(newX));
-            prmModellingTopologyTemplate.addNodeTemplate(nodeTemplate);
+            prmModellingTopologyTemplate.addNodeTemplate(newNodeTemplate);
         }
         for (TRelationshipTemplate relationshipTemplate : refinementModel.getDetector().getRelationshipTemplates()) {
             prmModellingTopologyTemplate.addRelationshipTemplate(relationshipTemplate);

@@ -60,6 +60,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
     subscriptions: Array<Subscription> = [];
     someNodeMissingCoordinates = false;
     templateParameter: TopologyModelerConfiguration;
+    prmModellingUrlFragment = SubMenuItems.graficPrmModelling.urlFragment;
 
     // This variable is set via the topologyModelerData input and decides if the editing functionalities are enabled
     readonly: boolean;
@@ -258,6 +259,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
             case 'relationshipTypes': {
                 this.entityTypes.relationshipTypes = [];
                 entityTypeJSON.forEach((relationshipType: EntityType) => {
+                    console.log(relationshipType);
                     const visuals = this.entityTypes.relationshipVisuals
                         .find(value => value.typeId === relationshipType.qName);
                     this.entityTypes.relationshipTypes
@@ -344,9 +346,10 @@ export class WineryComponent implements OnInit, AfterViewInit {
             // PolicyTemplates
             this.initEntityType(JSON[7], 'policyTemplates');
 
-            if (this.templateParameter.elementPath !== SubMenuItems.graficPrmModelling.urlFragment) {
+            if (this.templateParameter.elementPath !== this.prmModellingUrlFragment) {
                 // Relationship Types
                 this.initEntityType(JSON[8], 'relationshipTypes');
+                console.log(JSON[8]);
             }
 
             // NodeTypes
@@ -360,7 +363,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
 
             this.triggerLoaded('everything');
 
-            if (this.templateParameter.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+            if (this.templateParameter.elementPath === this.prmModellingUrlFragment) {
                 this.backendService.requestPrmMappingTypes().subscribe(JSON2 => {
                     console.log(JSON2);
                     this.initEntityType(JSON2, 'relationshipTypes');
