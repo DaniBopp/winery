@@ -15,10 +15,7 @@
 package org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.xml.namespace.QName;
 
