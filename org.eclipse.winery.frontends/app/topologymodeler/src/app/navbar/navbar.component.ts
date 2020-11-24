@@ -27,6 +27,7 @@ import { StatefulAnnotationsService } from '../services/statefulAnnotations.serv
 import { FeatureEnum } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/wineryRepository.feature.direct';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
 import { TTopologyTemplate } from '../models/ttopology-template';
+import { VersionSliderService } from '../version-slider/version-slider.service';
 import { TopologyModelerConfiguration } from '../models/topologyModelerConfiguration';
 import { SubMenuItems } from '../../../../tosca-management/src/app/model/subMenuItem';
 
@@ -65,6 +66,7 @@ export class NavbarComponent implements OnDestroy {
     splittingOngoing: boolean;
     matchingOngoing: boolean;
     placingOngoing: boolean;
+    showVersionSliderButton: boolean;
     configEnum = FeatureEnum;
 
     constructor(private alert: ToastrService,
@@ -74,6 +76,7 @@ export class NavbarComponent implements OnDestroy {
                 private backendService: BackendService,
                 private statefulService: StatefulAnnotationsService,
                 private hotkeysService: HotkeysService,
+                private versionSliderService: VersionSliderService,
                 public configurationService: WineryRepositoryConfigurationService) {
         this.subscriptions.push(ngRedux.select(state => state.topologyRendererState)
             .subscribe(newButtonsState => this.setButtonsState(newButtonsState)));
@@ -90,6 +93,8 @@ export class NavbarComponent implements OnDestroy {
             return false; // Prevent bubbling
         }, undefined, 'Apply the layout directive to the Node Templates'));
         this.exportCsarUrl = this.backendService.serviceTemplateURL + '/?csar';
+        this.versionSliderService.hasMultipleVersions()
+            .subscribe(hasMultipleVersions => this.showVersionSliderButton = hasMultipleVersions);
     }
 
     /**
@@ -247,6 +252,11 @@ export class NavbarComponent implements OnDestroy {
                 break;
             case 'manageYamlPolicies':
                 this.ngRedux.dispatch(this.actions.manageYamlPolicies());
+                break;
+            case 'versionSlider':
+                this.readonly = true;
+                this.ngRedux.dispatch(this.wineryActions.sendPaletteOpened(false));
+                this.ngRedux.dispatch(this.actions.toggleVersionSlider());
                 break;
         }
     }
