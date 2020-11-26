@@ -34,6 +34,7 @@ export interface WineryConfiguration {
         edmmModeling: boolean;
         updateTemplates: boolean;
         yaml: boolean;
+        patternDetection: boolean;
     };
     endpoints: {
         container: string;
