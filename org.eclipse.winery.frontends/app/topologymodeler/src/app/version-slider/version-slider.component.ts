@@ -24,6 +24,7 @@ import { TopologyRendererActions } from '../redux/actions/topologyRenderer.actio
 import { WineryActions } from '../redux/actions/winery.actions';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
 import { EntityTypesModel } from '../models/entityTypesModel';
+import { Utils } from '../../../../tosca-management/src/app/wineryUtils/utils';
 
 @Component({
     selector: 'winery-version-slider',
@@ -35,7 +36,7 @@ export class VersionSliderComponent implements OnInit {
     private static readonly LEGEND_CHAR_LIMIT = 15;
 
     private versions: WineryVersion[];
-    private originalSliderValue: number;
+    private initialSliderValue: number;
     private entityTypes: EntityTypesModel;
 
     sliderValue: number;
@@ -66,11 +67,10 @@ export class VersionSliderComponent implements OnInit {
 
     private init(versions: WineryVersion[]) {
         this.versions = versions;
-
         const id = this.backendService.configuration.id;
-        this.originalSliderValue = this.versions
+        this.initialSliderValue = this.versions
             .findIndex(v => this.toId(v) === id);
-        this.sliderValue = this.originalSliderValue;
+        this.sliderValue = this.initialSliderValue;
 
         const stepsArray = [];
         this.versions.forEach((version, index) => {
@@ -110,7 +110,7 @@ export class VersionSliderComponent implements OnInit {
 
     private reset() {
         this.updateTopologyTemplate(this.backendService.configuration.id);
-        this.sliderValue = this.originalSliderValue;
+        this.sliderValue = this.initialSliderValue;
     }
 
     private getSelectedVersion() {
@@ -118,9 +118,14 @@ export class VersionSliderComponent implements OnInit {
     }
 
     private toId(version: WineryVersion): string {
-        return VersionSliderComponent.getName(this.backendService.configuration.id)
-            + WineryVersion.WINERY_NAME_FROM_VERSION_SEPARATOR
-            + version.toString();
+        const id = this.backendService.configuration.id;
+        if (version.toReadableString() === WineryVersion.EMPTY_STRING) {
+            return Utils.getNameWithoutVersion(id);
+        } else {
+            return Utils.getNameWithoutVersion(id)
+                + WineryVersion.WINERY_NAME_FROM_VERSION_SEPARATOR
+                + version.toString();
+        }
     }
 
     private updateTopologyTemplate(id: string) {
@@ -135,10 +140,6 @@ export class VersionSliderComponent implements OnInit {
                     );
                 }
             );
-    }
-
-    private static getName(id: string) {
-        return id.split(WineryVersion.WINERY_NAME_FROM_VERSION_SEPARATOR)[0];
     }
 
     private static hideValues(): string {
