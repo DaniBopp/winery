@@ -135,7 +135,6 @@ export class VersionSliderComponent implements OnInit {
                         this.ngRedux,
                         this.wineryActions,
                         topologyTemplate,
-                        this.entityTypes,
                         this.configurationService.isYaml()
                     );
                 }
