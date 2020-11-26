@@ -77,24 +77,26 @@ public class TRelationshipTemplate extends TEntityTemplate implements HasPolicie
         this.sourceElement = builder.sourceElement;
         this.targetElement = builder.targetElement;
         this.relationshipConstraints = builder.relationshipConstraints;
+        this.policies = builder.policies;
         this.name = builder.name;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof TRelationshipTemplate)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         TRelationshipTemplate that = (TRelationshipTemplate) o;
         return Objects.equals(sourceElement, that.sourceElement) &&
             Objects.equals(targetElement, that.targetElement) &&
             Objects.equals(relationshipConstraints, that.relationshipConstraints) &&
+            Objects.equals(policies, that.policies) &&
             Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), sourceElement, targetElement, relationshipConstraints, name);
+        return Objects.hash(super.hashCode(), sourceElement, targetElement, relationshipConstraints, policies, name);
     }
 
     public TRelationshipTemplate.@NonNull SourceOrTargetElement getSourceElement() {
@@ -291,6 +293,7 @@ public class TRelationshipTemplate extends TEntityTemplate implements HasPolicie
         private final SourceOrTargetElement targetElement;
         private RelationshipConstraints relationshipConstraints;
         private String name;
+        private TPolicies policies;
 
         public Builder(String id, QName type, TRelationshipTemplate.SourceOrTargetElement sourceElement, TRelationshipTemplate.SourceOrTargetElement targetElement) {
             super(id, type);
@@ -348,6 +351,10 @@ public class TRelationshipTemplate extends TEntityTemplate implements HasPolicie
 
         public TRelationshipTemplate build() {
             return new TRelationshipTemplate(this);
+        }
+
+        public void setPolicies(TPolicies policies) {
+            this.policies = policies;
         }
     }
 }

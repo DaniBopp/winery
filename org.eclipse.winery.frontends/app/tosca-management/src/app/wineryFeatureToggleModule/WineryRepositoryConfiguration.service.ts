@@ -23,11 +23,12 @@ export interface WineryConfiguration {
         compliance: boolean;
         freezeAndDefrost: boolean;
         managementFeatureEnrichment: boolean;
-        nfv: boolean;
+        nfv: boolean; // deprecated
         patternRefinement: boolean;
         problemDetection: boolean;
         radon: boolean;
         splitting: boolean;
+        multiParticipant: boolean;
         testRefinement: boolean;
         topologyFragmentRefinementModel: boolean;
         placement: boolean;

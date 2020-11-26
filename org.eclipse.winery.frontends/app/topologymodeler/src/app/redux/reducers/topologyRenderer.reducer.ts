@@ -38,13 +38,19 @@ export interface TopologyRendererState {
         refinePatternsButton?: boolean;
         refineTopologyButton?: boolean;
         refineTopologyWithTestsButton?: boolean;
+        generateGDM?: boolean;
+        extractLDM?: boolean;
+        generatePlaceholderSubs?: boolean;
         determineStatefulComponents?: boolean;
         determineFreezableComponentsButton?: boolean;
         cleanFreezableComponentsButton?: boolean;
         placeComponentsButton?: boolean;
         manageYamlPoliciesButton?: boolean;
+        versionSliderButton?: boolean;
         manageYamlGroupsButton?: boolean;
         yamlGroupsButton?: boolean;
+        manageParticipantsButton?: boolean;
+        assignParticipantsButton?: boolean;
     };
     nodesToSelect?: string[];
 }
@@ -73,12 +79,17 @@ export const INITIAL_TOPOLOGY_RENDERER_STATE: TopologyRendererState = {
         refineTopologyButton: false,
         refineTopologyWithTestsButton: false,
         determineStatefulComponents: false,
+        generateGDM: false,
+        extractLDM: false,
+        generatePlaceholderSubs: false,
         determineFreezableComponentsButton: false,
         cleanFreezableComponentsButton: false,
         placeComponentsButton: false,
         manageYamlPoliciesButton: false,
+        versionSliderButton: false,
         manageYamlGroupsButton: false,
         yamlGroupsButton: false,
+        manageParticipantsButton: false,
     },
 };
 /**
@@ -111,6 +122,22 @@ export const TopologyRendererReducer =
                         manageYamlGroupsButton: !lastState.buttonsState.manageYamlGroupsButton
                     }
                 };
+            case TopologyRendererActions.TOGGLE_MANAGE_PARTICIPANTS:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        manageParticipantsButton: !lastState.buttonsState.manageParticipantsButton
+                    }
+                };
+            case TopologyRendererActions.TOGGLE_ASSIGN_PARTICIPANTS:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        assignParticipantsButton: !lastState.buttonsState.assignParticipantsButton
+                    }
+                };
             case TopologyRendererActions.TOGGLE_POLICIES:
                 return {
                     ...lastState,
@@ -133,6 +160,14 @@ export const TopologyRendererReducer =
                     buttonsState: {
                         ...lastState.buttonsState,
                         propertiesButton: !lastState.buttonsState.propertiesButton
+                    }
+                };
+            case TopologyRendererActions.EXTRACT_LDM:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        extractLDM: !lastState.buttonsState.extractLDM
                     }
                 };
             case TopologyRendererActions.TOGGLE_REQUIREMENTS_CAPABILITIES:
@@ -279,6 +314,22 @@ export const TopologyRendererReducer =
                         refineTopologyWithTestsButton: !lastState.buttonsState.refineTopologyWithTestsButton
                     }
                 };
+            case TopologyRendererActions.GENERATE_GDM:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        generateGDM: !lastState.buttonsState.generateGDM
+                    }
+                };
+            case TopologyRendererActions.GENERATE_PLACEHOLDER_SUBS:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        generatePlaceholderSubs: !lastState.buttonsState.generatePlaceholderSubs
+                    }
+                };
             case TopologyRendererActions.HIGHLIGHT_NODES:
                 const data = <HighlightNodesAction>action;
                 if (data.nodesToHighlight) {
@@ -328,6 +379,14 @@ export const TopologyRendererReducer =
                     buttonsState: {
                         ...lastState.buttonsState,
                         manageYamlPoliciesButton: !lastState.buttonsState.manageYamlPoliciesButton
+                    }
+                };
+            case TopologyRendererActions.TOGGLE_VERSION_SLIDER:
+                return {
+                    ...lastState,
+                    buttonsState: {
+                        ...lastState.buttonsState,
+                        versionSliderButton: !lastState.buttonsState.versionSliderButton
                     }
                 };
         }

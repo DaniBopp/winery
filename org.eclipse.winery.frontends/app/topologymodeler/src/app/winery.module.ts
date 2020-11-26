@@ -48,6 +48,7 @@ import { WineryModalModule } from '../../../tosca-management/src/app/wineryModal
 import { EnricherComponent } from './enricher/enricher.component';
 import { WineryFeatureToggleModule } from '../../../tosca-management/src/app/wineryFeatureToggleModule/winery-feature-toggle.module';
 import { PlaceComponentsService } from './services/placement.service';
+import { MultiParticipantsComponent } from './multi-participants/multi-participants.component';
 import { ReqCapRelationshipService } from './services/req-cap-relationship.service';
 import { WineryTableModule } from '../../../tosca-management/src/app/wineryTableModule/wineryTable.module';
 import { EdmmTransformationCheckComponent } from './edmmTransformationCheck/edmmTransformationCheck.component';
@@ -61,6 +62,11 @@ import { WineryDynamicTableModule } from '../../../tosca-management/src/app/wine
 import { WineryDuplicateValidatorModule } from '../../../tosca-management/src/app/wineryValidators/wineryDuplicateValidator.module';
 import { CollapseModule } from 'ngx-bootstrap';
 import { GroupViewPoliciesComponent } from './group-view/policies/policies.component';
+import { VersionSliderComponent } from './version-slider/version-slider.component';
+import { NgxSliderModule } from '@angular-slider/ngx-slider';
+import { VersionSliderService } from './version-slider/version-slider.service';
+import { MultiParticipantsService } from './services/multi-participants.service';
+import { ManageParticipantsComponent } from './participants/manage-participants.component';
 
 @NgModule({
     declarations: [
@@ -71,9 +77,12 @@ import { GroupViewPoliciesComponent } from './group-view/policies/policies.compo
         RefinementSidebarComponent,
         ProblemDetectionComponent,
         EnricherComponent,
+        MultiParticipantsComponent,
         EdmmTransformationCheckComponent,
+        VersionSliderComponent,
         GroupViewComponent,
         GroupViewPoliciesComponent,
+        ManageParticipantsComponent,
     ],
     exports: [WineryComponent],
     imports: [
@@ -106,6 +115,8 @@ import { GroupViewPoliciesComponent } from './group-view/policies/policies.compo
         WineryDynamicTableModule,
         WineryDuplicateValidatorModule,
         CollapseModule,
+        WineryTableModule,
+        NgxSliderModule
     ],
     providers: [
         // { provide: ToastOptions, useClass: WineryCustomOption },
@@ -124,7 +135,9 @@ import { GroupViewPoliciesComponent } from './group-view/policies/policies.compo
         StatefulAnnotationsService,
         PlaceComponentsService,
         ReqCapRelationshipService,
-        PolicyService
+        PolicyService,
+        VersionSliderService,
+        MultiParticipantsService
     ],
     bootstrap: [WineryComponent]
 })

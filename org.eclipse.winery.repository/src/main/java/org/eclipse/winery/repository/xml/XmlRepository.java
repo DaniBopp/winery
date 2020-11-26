@@ -70,11 +70,13 @@ public class XmlRepository extends AbstractFileBasedRepository {
     }
 
     @Override
-    public org.eclipse.winery.model.tosca.TDefinitions definitionsFromRef(RepositoryFileReference ref) throws IOException {
+    public org.eclipse.winery.model.tosca.TDefinitions definitionsFromRef(RepositoryFileReference ref) {
         final Object definition;
         try {
             InputStream is = newInputStream(ref);
             Unmarshaller unmarshaller = XmlModelJAXBSupport.createUnmarshaller();
+            // Enable for debugging
+            // unmarshaller.setEventHandler(new javax.xml.bind.helpers.DefaultValidationEventHandler());
             definition = unmarshaller.unmarshal(is);
         } catch (Exception e) {
             LOGGER.info("Failed to read definitions from reference {}", ref, e);

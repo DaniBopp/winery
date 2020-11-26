@@ -225,6 +225,10 @@ a.styledTabMenuButton {
     float: left;
 }
 
+a.tab-menu-fix {
+    margin-bottom: 5px !important;
+}
+
 a.styledTabMenuButton > div {
     height: 28px;
     float: left;

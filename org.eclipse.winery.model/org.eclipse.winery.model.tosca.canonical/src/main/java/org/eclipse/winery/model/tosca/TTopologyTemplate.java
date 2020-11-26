@@ -24,9 +24,11 @@ import java.util.stream.Stream;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlType;
 
+import org.eclipse.winery.model.tosca.extensions.OTParticipant;
 import org.eclipse.winery.model.tosca.extensions.kvproperties.ParameterDefinition;
 import org.eclipse.winery.model.tosca.visitor.Visitor;
 
@@ -42,7 +44,8 @@ import org.eclipse.jdt.annotation.Nullable;
     "groups",
     "policies",
     "inputs",
-    "outputs"
+    "outputs",
+    "participants"
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TTopologyTemplate extends TExtensibleElements {
@@ -61,6 +64,10 @@ public class TTopologyTemplate extends TExtensibleElements {
     @JsonProperty("outputs")
     protected List<ParameterDefinition> outputs;
 
+    @XmlElementWrapper(name = "Participants")
+    @XmlElement(name = "Participant")
+    protected List<OTParticipant> participants;
+
     @Deprecated // used for XML deserialization of API request content
     public TTopologyTemplate() {
     }
@@ -72,6 +79,7 @@ public class TTopologyTemplate extends TExtensibleElements {
         this.inputs = builder.inputs;
         this.outputs = builder.outputs;
         this.groups = builder.groups;
+        this.participants = builder.participants;
     }
 
     @Override
@@ -83,12 +91,13 @@ public class TTopologyTemplate extends TExtensibleElements {
         return Objects.equals(nodeTemplateOrRelationshipTemplate, that.nodeTemplateOrRelationshipTemplate) &&
             Objects.equals(policies, that.policies) &&
             Objects.equals(inputs, that.inputs) &&
-            Objects.equals(outputs, that.outputs);
+            Objects.equals(outputs, that.outputs) &&
+            Objects.equals(participants, that.participants);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), nodeTemplateOrRelationshipTemplate, policies, inputs, outputs);
+        return Objects.hash(super.hashCode(), nodeTemplateOrRelationshipTemplate, policies, inputs, outputs, participants);
     }
 
     @JsonIgnore
@@ -213,6 +222,15 @@ public class TTopologyTemplate extends TExtensibleElements {
         groups.add(group);
     }
 
+    @Nullable
+    public List<OTParticipant> getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(@Nullable List<OTParticipant> participants) {
+        this.participants = participants;
+    }
+
     public void accept(Visitor visitor) {
         visitor.visit(this);
     }
@@ -224,6 +242,7 @@ public class TTopologyTemplate extends TExtensibleElements {
         private List<ParameterDefinition> inputs;
         private List<ParameterDefinition> outputs;
         private List<TGroupDefinition> groups;
+        private List<OTParticipant> participants;
 
         public Builder() {
         }
@@ -306,6 +325,11 @@ public class TTopologyTemplate extends TExtensibleElements {
 
         public Builder setGroups(List<TGroupDefinition> groups) {
             this.groups = groups;
+            return this;
+        }
+
+        public Builder setParticipants(List<OTParticipant> participants) {
+            this.participants = participants;
             return this;
         }
 

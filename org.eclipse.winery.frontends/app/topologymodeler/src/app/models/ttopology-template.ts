@@ -38,6 +38,11 @@ export class TGroupDefinition extends AbstractTEntity {
     }
 }
 
+export interface OTParticipant {
+    name: string;
+    url: string;
+}
+
 /**
  * This is the datamodel for node Templates and relationship templates
  */
@@ -46,6 +51,7 @@ export class TTopologyTemplate extends AbstractTEntity {
     relationshipTemplates: Array<TRelationshipTemplate> = [];
     policies: { policy: Array<TPolicy> };
     groups: Array<TGroupDefinition> = [];
+    participants: Array<OTParticipant> = [];
 }
 
 /**
@@ -113,17 +119,29 @@ export class TNodeTemplate extends AbstractTEntity {
                 };
                 nodeTemplate.otherAttributes = otherAttributes;
             }
-            console.log(nodeTemplate);
         } else if (updatedAttribute === ('minInstances') || updatedAttribute === ('maxInstances')) {
             if (Number.isNaN(+updatedValue)) {
                 nodeTemplate[updatedAttribute] = updatedValue;
             } else {
                 nodeTemplate[updatedAttribute] = +updatedValue;
             }
+        } else if (updatedAttribute === 'participant') {
+            let nameSpace: string;
+            for (const key in nodeTemplate.otherAttributes) {
+                if (nodeTemplate.otherAttributes.hasOwnProperty(key)) {
+                    nameSpace = key.substring(key.indexOf('{'), key.indexOf('}') + 1);
+                    if (updatedValue.length === 0) {
+                        delete nodeTemplate.otherAttributes[nameSpace + 'participant'];
+                        break;
+                    }
+                    if (nameSpace) {
+                        nodeTemplate.otherAttributes[nameSpace + 'participant'] = updatedValue;
+                        break;
+                    }
+                }
+            }
         } else {
-            console.log(updatedValue);
             nodeTemplate[updatedAttribute] = updatedValue;
-            console.log(nodeTemplate);
         }
         return nodeTemplate;
     }

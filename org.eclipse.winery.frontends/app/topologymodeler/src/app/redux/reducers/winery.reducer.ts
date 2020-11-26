@@ -14,11 +14,14 @@
 
 import { Action } from 'redux';
 import {
-    AddEntityTypesAction, ChangeYamlPoliciesAction, DecMaxInstances, DecMinInstances, DeleteDeploymentArtifactAction, DeleteNodeAction, DeletePolicyAction,
-    DeleteRelationshipAction, DeleteYamlArtifactAction, HideNavBarAndPaletteAction, IncMaxInstances, IncMinInstances, SaveNodeTemplateAction,
-    SaveRelationshipAction, SendCurrentNodeIdAction, SendPaletteOpenedAction, SetCapabilityAction, SetDeploymentArtifactAction, SetNodeVisuals, SetPolicyAction,
-    SetPropertyAction, SetRequirementAction, SetTargetLocation, SetYamlArtifactAction, SidebarChangeNodeName, SidebarMaxInstanceChanges,
-    SidebarMinInstanceChanges, SidebarStateAction, UpdateGroupDefinitionAction, UpdateNodeCoordinatesAction, UpdateRelationshipNameAction, WineryActions
+    AddEntityTypesAction, AssignParticipantAction, ChangeYamlPoliciesAction, DecMaxInstances, DecMinInstances,
+    DeleteDeploymentArtifactAction, DeleteNodeAction, DeletePolicyAction, DeleteRelationshipAction,
+    DeleteYamlArtifactAction, HideNavBarAndPaletteAction, IncMaxInstances, IncMinInstances, SaveNodeTemplateAction,
+    SaveRelationshipAction, SendCurrentNodeIdAction, SendPaletteOpenedAction, SetCapabilityAction,
+    SetDeploymentArtifactAction, SetNodeVisuals, SetPolicyAction, SetPropertyAction, SetRequirementAction,
+    SetTargetLocation, SetYamlArtifactAction, SidebarChangeNodeName, SidebarMaxInstanceChanges,
+    SidebarMinInstanceChanges, SidebarStateAction, UpdateGroupDefinitionAction, UpdateNodeCoordinatesAction,
+    UpdateParticipantsAction, UpdateRelationshipNameAction, WineryActions
 } from '../actions/winery.actions';
 import { TArtifact, TNodeTemplate, TRelationshipTemplate, TTopologyTemplate } from '../../models/ttopology-template';
 import { TDeploymentArtifact } from '../../models/artifactsModalData';
@@ -172,6 +175,20 @@ export const WineryReducer =
                             )
                     }
                 };
+            case WineryActions.ASSIGN_PARTICIPANT:
+                const node = (<AssignParticipantAction>action).node;
+                const participant = (<AssignParticipantAction>action).participant;
+                return <WineryState>{
+                    ...lastState,
+                    currentJsonTopology: {
+                        ...lastState.currentJsonTopology,
+                        nodeTemplates: lastState.currentJsonTopology.nodeTemplates
+                            .map(nodeTemplate => nodeTemplate.id === node.id ?
+                                nodeTemplate.generateNewNodeTemplateWithUpdatedAttribute('participant', participant)
+                                : nodeTemplate
+                            )
+                    }
+                };
             case WineryActions.DEC_MAX_INSTANCES:
                 const id_decMaxInstances: any = (<DecMaxInstances>action).maxInstances.id;
                 const indexDecMaxInstances = lastState.currentJsonTopology.nodeTemplates
@@ -255,7 +272,7 @@ export const WineryReducer =
                 const newDepArt: any = (<SetDeploymentArtifactAction>action).nodeDeploymentArtifact;
                 const newDeploymentArtifact: TDeploymentArtifact = newDepArt.newDeploymentArtifact;
                 const indexOfNodeDepArt = lastState.currentJsonTopology.nodeTemplates
-                    .map(node => node.id).indexOf(newDepArt.nodeId);
+                    .map(n => n.id).indexOf(newDepArt.nodeId);
                 const nodeDepArtTemplate = lastState.currentJsonTopology.nodeTemplates
                     .find(nodeTemplate => nodeTemplate.id === newDepArt.nodeId);
                 const depArtExist = nodeDepArtTemplate.deploymentArtifacts && nodeDepArtTemplate.deploymentArtifacts.deploymentArtifact;
@@ -284,7 +301,7 @@ export const WineryReducer =
                 const newArtActionData: any = (<SetYamlArtifactAction>action).nodeYamlArtifact;
                 const newYamlArtifact: TArtifact = newArtActionData.newYamlArtifact;
                 const indexOfContainingNodeTemplate = lastState.currentJsonTopology.nodeTemplates
-                    .map(node => node.id).indexOf(newArtActionData.nodeId);
+                    .map(n => n.id).indexOf(newArtActionData.nodeId);
                 const containingNodeTemplate = lastState.currentJsonTopology.nodeTemplates
                     .find(nodeTemplate => nodeTemplate.id === newArtActionData.nodeId);
                 const artifactsExistInNodeTemplate = containingNodeTemplate.artifacts && containingNodeTemplate.artifacts.artifact;
@@ -314,9 +331,7 @@ export const WineryReducer =
             case WineryActions.DELETE_DEPLOYMENT_ARTIFACT:
                 const deletedDeploymentArtifact: any = (<DeleteDeploymentArtifactAction>action).nodeDeploymentArtifact.deletedDeploymentArtifact;
                 const indexOfNodeWithDeletedDeploymentArtifact = lastState.currentJsonTopology.nodeTemplates
-                    .map((node) => {
-                        return node.id;
-                    })
+                    .map((n) => n.id)
                     .indexOf((<DeleteDeploymentArtifactAction>action).nodeDeploymentArtifact.nodeId);
 
                 return <WineryState>{
@@ -339,7 +354,7 @@ export const WineryReducer =
             case WineryActions.DELETE_YAML_ARTIFACT:
                 const deletedYamlArtifactId: any = (<DeleteYamlArtifactAction>action).nodeYamlArtifact.deletedYamlArtifactId;
                 const indexOfNodeWithDeletedYamlArtifact = lastState.currentJsonTopology.nodeTemplates
-                    .map(node => node.id)
+                    .map(n => n.id)
                     .indexOf((<DeleteYamlArtifactAction>action).nodeYamlArtifact.nodeId);
 
                 return <WineryState>{
@@ -364,7 +379,7 @@ export const WineryReducer =
                 const newPolicy: any = (<SetPolicyAction>action).nodePolicy;
                 const policy = newPolicy.newPolicy;
                 const indexOfNodePolicy = lastState.currentJsonTopology.nodeTemplates
-                    .map(node => node.id).indexOf(newPolicy.nodeId);
+                    .map(n => n.id).indexOf(newPolicy.nodeId);
                 const nodePolicyTemplate = lastState.currentJsonTopology.nodeTemplates
                     .find(nodeTemplate => nodeTemplate.id === newPolicy.nodeId);
                 const policyExist = nodePolicyTemplate.policies && nodePolicyTemplate.policies.policy;
@@ -397,7 +412,6 @@ export const WineryReducer =
                         policies: (<ChangeYamlPoliciesAction>action).yamlPolicies.policies
                     }
                 };
-
             case WineryActions.UPDATE_GROUP_DEFINITIONS:
                 return <WineryState>{
                     ...lastState,
@@ -406,12 +420,19 @@ export const WineryReducer =
                         groups: (<UpdateGroupDefinitionAction>action).groups
                     }
                 };
-
+            case WineryActions.UPDATE_PARTICIPANTS:
+                return <WineryState>{
+                    ...lastState,
+                    currentJsonTopology: {
+                        ...lastState.currentJsonTopology,
+                        participants: (<UpdateParticipantsAction>action).participants
+                    }
+                };
             case WineryActions.SET_POLICY_FOR_RELATIONSHIP:
                 const newRelPolicy: any = (<SetPolicyAction>action).nodePolicy;
                 const relPolicy = newRelPolicy.newPolicy;
                 const indexOfRelationshipPolicy = lastState.currentJsonTopology.relationshipTemplates
-                    .map(node => node.id).indexOf(newRelPolicy.nodeId);
+                    .map(n => n.id).indexOf(newRelPolicy.nodeId);
                 const relationshipPolicyTemplate = lastState.currentJsonTopology.relationshipTemplates
                     .find(relationshipTemplate => relationshipTemplate.id === newRelPolicy.nodeId);
                 const policyExistCheck = relationshipPolicyTemplate.policies && relationshipPolicyTemplate.policies.policy;
@@ -453,9 +474,7 @@ export const WineryReducer =
             case WineryActions.DELETE_POLICY:
                 const deletedPolicy: any = (<DeletePolicyAction>action).nodePolicy.deletedPolicy;
                 const indexOfNodeWithDeletedPolicy = lastState.currentJsonTopology.nodeTemplates
-                    .map((node) => {
-                        return node.id;
-                    })
+                    .map((n) => n.id)
                     .indexOf((<DeletePolicyAction>action).nodePolicy.nodeId);
 
                 return <WineryState>{
@@ -541,7 +560,7 @@ export const WineryReducer =
                                 relationshipTemplate.targetElement.ref !== deletedNodeId),
                         // we check if the targets of YAML policies include the deleted node template<
                         policies: {
-                            policy: lastState.currentJsonTopology.policies.policy.map(pol => {
+                            policy: lastState.currentJsonTopology.policies.policy && lastState.currentJsonTopology.policies.policy.map(pol => {
                                 if (pol.targets) {
                                     pol.targets = pol.targets.filter(target => target !== deletedNodeId);
                                     // to keep a consistent behavior, if no targets remain, remove the field.
@@ -549,12 +568,11 @@ export const WineryReducer =
                                         pol.targets = undefined;
                                     }
                                 }
-
                                 return pol;
                             })
                         },
                         // update groups
-                        groups: lastState.currentJsonTopology.groups.map((group) => {
+                        groups: lastState.currentJsonTopology.groups && lastState.currentJsonTopology.groups.map((group) => {
                             group.members = group.members.filter((member) => member !== deletedNodeId);
                             return group;
                         }),
