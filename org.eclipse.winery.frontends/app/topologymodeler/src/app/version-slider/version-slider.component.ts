@@ -23,7 +23,6 @@ import { IWineryState } from '../redux/store/winery.store';
 import { TopologyRendererActions } from '../redux/actions/topologyRenderer.actions';
 import { WineryActions } from '../redux/actions/winery.actions';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
-import { EntityTypesModel } from '../models/entityTypesModel';
 import { Utils } from '../../../../tosca-management/src/app/wineryUtils/utils';
 
 @Component({
@@ -37,7 +36,6 @@ export class VersionSliderComponent implements OnInit {
 
     private versions: WineryVersion[];
     private initialSliderValue: number;
-    private entityTypes: EntityTypesModel;
 
     sliderValue: number;
     options: Options = {
@@ -54,12 +52,6 @@ export class VersionSliderComponent implements OnInit {
                 private configurationService: WineryRepositoryConfigurationService) {
         this.versionSliderService.getVersions()
             .subscribe(versions => this.init(versions));
-        this.ngRedux.select(state => state.wineryState.entityTypes)
-            .subscribe(data => {
-                if (data) {
-                    this.entityTypes = data;
-                }
-            });
     }
 
     ngOnInit() {

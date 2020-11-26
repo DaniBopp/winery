@@ -216,6 +216,14 @@
             </button>
         </div>
 
+        <div class="btn-group button-group" data-toggle="buttons">
+            <button class="btn btn-sm align-middle dark-button-style" id="detectPatterns"
+                    (click)="toggleButton($event)"
+                    [style.background-color]="getStyle(navbarButtonsState.buttonsState.detectPatternsButton)">
+                Detect Patterns
+            </button>
+        </div>
+
         <div *wineryRepositoryFeatureToggle="configEnum.EdmmModeling" class="btn-group button-group"
              data-toggle="buttons">
             <button class="btn btn-sm align-middle dark-button-style" id="edmmTransformationCheck"

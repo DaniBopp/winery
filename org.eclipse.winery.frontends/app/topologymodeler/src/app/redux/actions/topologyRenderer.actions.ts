@@ -53,6 +53,7 @@ export class TopologyRendererActions {
     static PLACE_COMPONENTS = 'PLACE_COMPONENTS';
     static MANAGE_YAML_POLICIES = 'MANAGE_YAML_POLICIES';
     static TOGGLE_VERSION_SLIDER = 'TOGGLE_VERSION_SLIDER';
+    static DETECT_PATTERNS = 'DETECT_PATTERNS';
 
     togglePolicies(): Action {
         return { type: TopologyRendererActions.TOGGLE_POLICIES };
@@ -169,5 +170,9 @@ export class TopologyRendererActions {
 
     toggleVersionSlider(): Action {
         return { type: TopologyRendererActions.TOGGLE_VERSION_SLIDER };
+    }
+
+    detectPatterns(): Action {
+        return { type: TopologyRendererActions.DETECT_PATTERNS };
     }
 }

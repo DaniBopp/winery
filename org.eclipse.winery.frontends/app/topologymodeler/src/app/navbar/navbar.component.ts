@@ -255,6 +255,11 @@ export class NavbarComponent implements OnDestroy {
                 this.ngRedux.dispatch(this.wineryActions.sendPaletteOpened(false));
                 this.ngRedux.dispatch(this.actions.toggleVersionSlider());
                 break;
+            case 'detectPatterns':
+                this.readonly = true;
+                this.ngRedux.dispatch(this.wineryActions.sendPaletteOpened(false));
+                this.ngRedux.dispatch(this.actions.detectPatterns());
+                break;
         }
     }
 
