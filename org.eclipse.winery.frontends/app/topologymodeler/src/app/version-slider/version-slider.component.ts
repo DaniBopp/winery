@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { VersionSliderService } from './version-slider.service';
 import { Options } from '@angular-slider/ngx-slider/options';
 import { WineryVersion } from '../../../../tosca-management/src/app/model/wineryVersion';
@@ -31,7 +31,7 @@ import { EntityTypesModel } from '../models/entityTypesModel';
     templateUrl: './version-slider.component.html',
     styleUrls: ['./version-slider.component.css']
 })
-export class VersionSliderComponent {
+export class VersionSliderComponent implements OnInit {
 
     private static readonly LEGEND_CHAR_LIMIT = 15;
 
@@ -60,6 +60,9 @@ export class VersionSliderComponent {
                     this.entityTypes = data;
                 }
             });
+    }
+
+    ngOnInit() {
     }
 
     private init(versions: WineryVersion[]) {
