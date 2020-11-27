@@ -33,7 +33,7 @@ import { VersionElement } from '../models/versionElement';
 import { WineryRepositoryConfigurationService } from '../../../../tosca-management/src/app/wineryFeatureToggleModule/WineryRepositoryConfiguration.service';
 import { takeLast } from 'rxjs/operators';
 import { TPolicy } from '../models/policiesModalData';
-import { backendBaseURL } from '../../../../tosca-management/src/app/configuration';
+import { SubMenuItems } from '../../../../tosca-management/src/app/model/subMenuItem';
 
 /**
  * Responsible for interchanging data between the app and the server.
@@ -95,20 +95,39 @@ export class BackendService {
      */
     private requestAllEntitiesAtOnce(): Observable<any> {
         if (this.configuration) {
-            return forkJoin(
-                this.requestGroupedNodeTypes(),
-                this.requestArtifactTemplates(),
-                this.requestTopologyTemplateAndVisuals(),
-                this.requestArtifactTypes(),
-                this.requestPolicyTypes(),
-                this.requestCapabilityTypes(),
-                this.requestRequirementTypes(),
-                this.requestPolicyTemplates(),
-                this.requestRelationshipTypes(),
-                this.requestNodeTypes(),
-                this.requestVersionElements(),
-                this.configurationService.getConfigurationFromBackend(this.configuration.repositoryURL)
-            );
+            // request data for graphicPrmModeling
+            if (this.configuration.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+                return forkJoin(
+                    this.requestGroupedNodeTypes(),
+                    this.requestArtifactTemplates(),
+                    this.requestTopologyTemplateAndVisuals(),
+                    this.requestArtifactTypes(),
+                    this.requestPolicyTypes(),
+                    this.requestCapabilityTypes(),
+                    this.requestRequirementTypes(),
+                    this.requestPolicyTemplates(),
+                    this.requestPrmMappingTypes(),
+                    this.requestNodeTypes(),
+                    this.requestVersionElements(),
+                    this.configurationService.getConfigurationFromBackend(this.configuration.repositoryURL)
+                );
+            } else {
+                // request data for standard topology modeling
+                return forkJoin(
+                    this.requestGroupedNodeTypes(),
+                    this.requestArtifactTemplates(),
+                    this.requestTopologyTemplateAndVisuals(),
+                    this.requestArtifactTypes(),
+                    this.requestPolicyTypes(),
+                    this.requestCapabilityTypes(),
+                    this.requestRequirementTypes(),
+                    this.requestPolicyTemplates(),
+                    this.requestRelationshipTypes(),
+                    this.requestNodeTypes(),
+                    this.requestVersionElements(),
+                    this.configurationService.getConfigurationFromBackend(this.configuration.repositoryURL)
+                );
+            }
         }
     }
 

@@ -37,6 +37,7 @@ import { WineryRepositoryConfigurationService } from '../../../tosca-management/
 import { TPolicy } from './models/policiesModalData';
 import { GroupedNodeTypeModel } from './models/groupedNodeTypeModel';
 import { SubMenuItems } from '../../../tosca-management/src/app/model/subMenuItem';
+import { Visuals } from './models/visuals';
 
 /**
  * This is the root component of the topology modeler.
@@ -260,8 +261,13 @@ export class WineryComponent implements OnInit, AfterViewInit {
                 this.entityTypes.relationshipTypes = [];
                 entityTypeJSON.forEach((relationshipType: EntityType) => {
                     console.log(relationshipType);
-                    const visuals = this.entityTypes.relationshipVisuals
+                    // TODO
+                    let visuals = this.entityTypes.relationshipVisuals
                         .find(value => value.typeId === relationshipType.qName);
+
+                    if (this.templateParameter.elementPath === this.prmModellingUrlFragment) {
+                        visuals = new Visuals('black', null, null, null, null);
+                    }
                     this.entityTypes.relationshipTypes
                         .push(new VisualEntityType(
                             relationshipType.id,
@@ -315,6 +321,7 @@ export class WineryComponent implements OnInit, AfterViewInit {
              * by using Observable.forkJoin(1$, 2$);
              * */
             const topologyData = JSON[2];
+            console.log(topologyData);
             const topologyTemplate = topologyData[0];
             this.entityTypes.nodeVisuals = topologyData[1];
             this.entityTypes.relationshipVisuals = topologyData[2];
@@ -346,11 +353,11 @@ export class WineryComponent implements OnInit, AfterViewInit {
             // PolicyTemplates
             this.initEntityType(JSON[7], 'policyTemplates');
 
-            if (this.templateParameter.elementPath !== this.prmModellingUrlFragment) {
-                // Relationship Types
-                this.initEntityType(JSON[8], 'relationshipTypes');
-                console.log(JSON[8]);
-            }
+
+            // Relationship Types
+            this.initEntityType(JSON[8], 'relationshipTypes');
+            console.log(JSON[8]);
+
 
             // NodeTypes
             this.initEntityType(JSON[9], 'unGroupedNodeTypes');
@@ -362,13 +369,6 @@ export class WineryComponent implements OnInit, AfterViewInit {
             this.initTopologyTemplateForRendering(topologyTemplate.nodeTemplates, topologyTemplate.relationshipTemplates);
 
             this.triggerLoaded('everything');
-
-            if (this.templateParameter.elementPath === this.prmModellingUrlFragment) {
-                this.backendService.requestPrmMappingTypes().subscribe(JSON2 => {
-                    console.log(JSON2);
-                    this.initEntityType(JSON2, 'relationshipTypes');
-                });
-            }
         });
     }
 

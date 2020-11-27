@@ -13,7 +13,8 @@
  ********************************************************************************/
 
 import {
-    AfterViewInit, Component, ComponentRef, DoCheck, ElementRef, EventEmitter, Input, KeyValueDiffers, NgZone, OnDestroy, OnInit, Output, Renderer2, ViewChild
+    AfterViewInit, Component, ComponentRef, DoCheck, ElementRef, EventEmitter, Input, KeyValueDiffers, NgZone,
+    OnDestroy, OnInit, Output, Renderer2, ViewChild
 } from '@angular/core';
 import { animate, keyframes, state, style, transition, trigger } from '@angular/animations';
 import { NgRedux } from '@angular-redux/store';
@@ -341,6 +342,7 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
      * Sets the current type of a node.
      */
     passCurrentType($event): void {
+        console.log($event);
         $event.stopPropagation();
         $event.preventDefault();
         let currentType: string;
@@ -349,7 +351,10 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
         } catch (e) {
             currentType = $event.target.innerText.replace(/\n/g, '').replace(/\s+/g, '');
         }
+
+        // TODO
         this.entityTypes.relationshipTypes.some(relType => {
+            console.log(relType);
             if (relType.qName.includes(currentType)) {
                 this.sendSelectedRelationshipType.emit(relType);
                 return true;

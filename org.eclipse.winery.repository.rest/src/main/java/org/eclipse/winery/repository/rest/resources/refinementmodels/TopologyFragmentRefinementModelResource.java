@@ -74,6 +74,9 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     public List<TRelationshipType> getPrmMappingTypes() {
         List<TRelationshipType> prmMappingTypes = new ArrayList<>();
         prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping")));
+        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Relationship Mapping")));
+        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Stay Mapping")));
+        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Attribute Mapping")));
         prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping")));
         return prmMappingTypes;
     }
