@@ -11,7 +11,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-import { Component, Input, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { PatternRefinementModel, RefinementElement, RefinementWebSocketService } from './refinementWebSocket.service';
 import { BackendService } from '../../services/backend.service';
 import { NgRedux } from '@angular-redux/store';
@@ -32,7 +32,7 @@ import { EntityTypesModel } from '../../models/entityTypesModel';
         'refinementSidebar.component.css'
     ]
 })
-export class RefinementSidebarComponent implements OnDestroy {
+export class RefinementSidebarComponent implements OnDestroy, OnInit {
 
     @Input() refinementType: string;
 
@@ -40,6 +40,7 @@ export class RefinementSidebarComponent implements OnDestroy {
     refinementIsLoading: boolean;
     refinementIsDone: boolean;
     prmCandidates: PatternRefinementModel[];
+    typeText: string;
 
     private entityTypes: EntityTypesModel;
 
@@ -51,6 +52,10 @@ export class RefinementSidebarComponent implements OnDestroy {
                 private backendService: BackendService) {
         this.ngRedux.select(state => state.wineryState.entityTypes)
             .subscribe(types => this.entityTypes = types);
+    }
+
+    ngOnInit(): void {
+        this.typeText = this.refinementType === 'patternDetection' ? 'Detection' : 'Refinement';
     }
 
     startRefinement(event: MouseEvent) {
@@ -91,6 +96,11 @@ export class RefinementSidebarComponent implements OnDestroy {
 
     stopRefinement(): void {
         this.webSocketService.cancel();
+    }
+
+    showStopButton(): boolean {
+        return this.refinementType === 'tests'
+            || this.refinementType === 'patternDetection';
     }
 
     private handleWebSocketData(value: RefinementElement) {

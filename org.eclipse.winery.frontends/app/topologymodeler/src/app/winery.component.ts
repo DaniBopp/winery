@@ -223,6 +223,8 @@ export class WineryComponent implements OnInit, AfterViewInit {
             this.refiningType = 'patterns';
         } else if (currentButtonsState.buttonsState.refineTopologyWithTestsButton) {
             this.refiningType = 'tests';
+        } else if (currentButtonsState.buttonsState.detectPatternsButton) {
+            this.refiningType = 'patternDetection';
         } else {
             delete this.refiningType;
         }

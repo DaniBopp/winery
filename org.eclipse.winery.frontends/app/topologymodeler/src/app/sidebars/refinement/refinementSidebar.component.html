@@ -16,17 +16,18 @@
     <div class="refinementContainer">
         <div class="informationContainer" *ngIf="!refinementIsRunning; else showIsRunning">
             <div *ngIf="refinementIsDone; else showStart">
-                <h5>Refinement successful!</h5>
+                <h5>{{typeText}} successful!</h5>
             </div>
             <ng-template #showStart>
-                <button class="btn btn-primary" (click)="startRefinement($event)">Start Refinement</button>
+                <button class="btn btn-primary" (click)="startRefinement($event)">Start {{typeText}}</button>
             </ng-template>
         </div>
         <ng-template #showIsRunning>
             <div class="loader" *ngIf="refinementIsLoading; else showContent"></div>
             <ng-template #showContent>
                 <ul>
-                    <li *ngFor="let candidate of prmCandidates" (mouseover)="onHoverOver(candidate)" (mouseleave)="hoverOut()">
+                    <li *ngFor="let candidate of prmCandidates" (mouseover)="onHoverOver(candidate)"
+                        (mouseleave)="hoverOut()">
                         {{ candidate.refinementModel.name }}
                         <br>
                         <div class="btn-group">
@@ -35,7 +36,9 @@
                                 Show Refinement Structure
                             </button>
                             <br>
-                            <button class="btn btn-sm btn-primary" (click)="prmChosen($event, candidate)">Choose</button>
+                            <button class="btn btn-sm btn-primary" (click)="prmChosen($event, candidate)">
+                                Choose
+                            </button>
                         </div>
                     </li>
                 </ul>

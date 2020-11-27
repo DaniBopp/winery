@@ -30,13 +30,15 @@ import javax.websocket.server.ServerEndpoint;
 import javax.ws.rs.NotFoundException;
 
 import org.eclipse.winery.common.json.JacksonProvider;
-import org.eclipse.winery.model.ids.definitions.ServiceTemplateId;
+import org.eclipse.winery.model.adaptation.substitution.patterndetection.DetectorChooser;
+import org.eclipse.winery.model.adaptation.substitution.patterndetection.PatternDetection;
 import org.eclipse.winery.model.adaptation.substitution.refinement.AbstractRefinement;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementChooser;
 import org.eclipse.winery.model.adaptation.substitution.refinement.patterns.PatternRefinement;
 import org.eclipse.winery.model.adaptation.substitution.refinement.tests.TestRefinement;
 import org.eclipse.winery.model.adaptation.substitution.refinement.topologyrefinement.TopologyFragmentRefinement;
+import org.eclipse.winery.model.ids.definitions.ServiceTemplateId;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources.apiData.RefinementElementApiData;
 import org.eclipse.winery.repository.rest.resources.apiData.RefinementWebSocketApiData;
@@ -70,6 +72,8 @@ public class RefinementWebSocket implements RefinementChooser {
                 this.refinement = new TopologyFragmentRefinement(this);
             } else if ("tests".equals(type)) {
                 this.refinement = new TestRefinement(this);
+            } else if ("patternDetection".equals(type)) {
+                this.refinement = new PatternDetection(new DetectorChooser());
             }
             if (Objects.nonNull(this.refinement)) {
                 LOGGER.info("Opened consistency check web-socket with id: " + session.getId());
