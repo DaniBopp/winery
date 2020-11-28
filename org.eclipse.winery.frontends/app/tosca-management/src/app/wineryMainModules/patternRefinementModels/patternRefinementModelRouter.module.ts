@@ -28,6 +28,7 @@ import { AttributeMappingsComponent } from '../../instance/refinementModels/attr
 import { DeploymentArtifactsMappingsComponent } from '../../instance/refinementModels/deploymentArtifactsMappings/deploymentArtifactsMappings.component';
 import { PermutationMappingsComponent } from '../../instance/refinementModels/permutationMappings/permutationMappings.component';
 import { PermutationsComponent } from '../../instance/refinementModels/permutations/permutations.component';
+import { BehaviorPatternMappingsComponent } from '../../instance/refinementModels/behavior-pattern-mappings/behavior-pattern-mappings.component';
 
 const toscaType = ToscaTypes.PatternRefinementModel;
 
@@ -49,6 +50,7 @@ const patternRefinementRoutes: Routes = [
             { path: 'deploymentartifactmappings', component: DeploymentArtifactsMappingsComponent },
             { path: 'permutationmappings', component: PermutationMappingsComponent },
             { path: 'permutations', component: PermutationsComponent },
+            { path: 'behaviorpatternmappings', component: BehaviorPatternMappingsComponent },
             { path: 'xml', component: EditXMLComponent },
             { path: '', redirectTo: 'readme', pathMatch: 'full' }
         ]
