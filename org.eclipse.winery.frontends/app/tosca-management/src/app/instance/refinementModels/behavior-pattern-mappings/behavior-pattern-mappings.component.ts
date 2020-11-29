@@ -51,6 +51,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
 
     ngOnInit() {
         forkJoin(
+            this.service.getBehaviorPatternMappings(),
             this.service.getDetectorNodeTemplates(),
             this.service.getDetectorRelationshipTemplates(),
             this.service.getRefinementTopologyNodeTemplates(),
@@ -67,10 +68,11 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     onRemoveButtonClicked(mapping: BehaviorPatternMapping) {
     }
 
-    private handleData(data: any) {
+    private handleData(data: [BehaviorPatternMapping[], WineryTemplate[], WineryTemplate[], WineryTemplate[], WineryTemplate[]]) {
         this.loading = false;
-        this.detectorTemplates = data[0].concat(data[1]);
-        this.refinementTemplates = data[2].concat(data[3]);
+        this.behaviorPatternMappings = data[0];
+        this.detectorTemplates = data[1].concat(data[2]);
+        this.refinementTemplates = data[3].concat(data[4]);
     }
 
     private handleError(error: HttpErrorResponse) {

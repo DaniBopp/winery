@@ -23,13 +23,14 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
 import org.eclipse.winery.model.adaptation.substitution.refinement.PermutationGenerator;
-import org.eclipse.winery.model.tosca.extensions.OTPermutationMapping;
-import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
-import org.eclipse.winery.model.tosca.extensions.OTDeploymentArtifactMapping;
-import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
-import org.eclipse.winery.model.tosca.extensions.OTPatternRefinementModel;
-import org.eclipse.winery.model.tosca.extensions.OTStayMapping;
 import org.eclipse.winery.model.ids.definitions.DefinitionsChildId;
+import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
+import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
+import org.eclipse.winery.model.tosca.extensions.OTDeploymentArtifactMapping;
+import org.eclipse.winery.model.tosca.extensions.OTPatternRefinementModel;
+import org.eclipse.winery.model.tosca.extensions.OTPermutationMapping;
+import org.eclipse.winery.model.tosca.extensions.OTStayMapping;
+import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
@@ -127,5 +128,16 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
         permutationsResponse.setError(permutationGenerator.getMutabilityErrorReason());
 
         return permutationsResponse;
+    }
+
+    @Path("behaviorpatternmappings")
+    public BehaviorPatternMappingsResource getBehaviorPatternMappings() {
+        List<OTBehaviorPatternMapping> behaviorPatternMappings = this.getTRefinementModel().getBehaviorPatternMappings();
+
+        if (Objects.isNull(behaviorPatternMappings)) {
+            behaviorPatternMappings = new ArrayList<>();
+            this.getTRefinementModel().setBehaviorPatternMappings(behaviorPatternMappings);
+        }
+        return new BehaviorPatternMappingsResource(this, behaviorPatternMappings);
     }
 }

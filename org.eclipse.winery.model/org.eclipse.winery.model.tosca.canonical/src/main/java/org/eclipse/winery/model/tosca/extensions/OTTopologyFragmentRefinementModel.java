@@ -57,6 +57,10 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
     @XmlElement(name = "ComponentSet")
     protected List<OTStringList> componentSets;
 
+    @XmlElementWrapper(name = "BehaviorPatternMappings")
+    @XmlElement(name = "BehaviorPatternMapping")
+    protected List<OTBehaviorPatternMapping> behaviorPatternMappings;
+
     @Deprecated // used for XML deserialization of API request content
     public OTTopologyFragmentRefinementModel() {
     }
@@ -70,6 +74,7 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
         this.permutationOptions = builder.permutationOptions;
         this.permutationMappings = builder.permutationMappings;
         this.componentSets = builder.componentSets;
+        this.behaviorPatternMappings = builder.behaviorPatternMappings;
     }
 
     @NonNull
@@ -133,6 +138,14 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
         this.componentSets = componentSets;
     }
 
+    public List<OTBehaviorPatternMapping> getBehaviorPatternMappings() {
+        return behaviorPatternMappings;
+    }
+
+    public void setBehaviorPatternMappings(List<OTBehaviorPatternMapping> behaviorPatternMappings) {
+        this.behaviorPatternMappings = behaviorPatternMappings;
+    }
+
     public abstract static class RefinementBuilder<T extends OTRefinementModel.Builder<T>> extends OTRefinementModel.Builder<T> {
 
         private List<OTPermutationMapping> permutationMappings;
@@ -142,6 +155,7 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
         private List<OTStayMapping> stayMappings;
         private List<OTDeploymentArtifactMapping> deploymentArtifactMappings;
         private List<OTStringList> componentSets;
+        private List<OTBehaviorPatternMapping> behaviorPatternMappings;
 
         public RefinementBuilder() {
         }
@@ -178,6 +192,11 @@ public class OTTopologyFragmentRefinementModel extends OTRefinementModel {
 
         public T setComponentSets(List<OTStringList> componentSets) {
             this.componentSets = componentSets;
+            return self();
+        }
+
+        public T setBehaviorPatternMappings(List<OTBehaviorPatternMapping> behaviorPatternMappings) {
+            this.behaviorPatternMappings = behaviorPatternMappings;
             return self();
         }
     }
