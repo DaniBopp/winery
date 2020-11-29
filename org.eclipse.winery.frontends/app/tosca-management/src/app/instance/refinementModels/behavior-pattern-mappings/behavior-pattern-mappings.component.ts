@@ -13,33 +13,68 @@
  *******************************************************************************/
 
 import { Component, OnInit } from '@angular/core';
-import { WineryDynamicTableMetadata } from '../../../wineryDynamicTable/wineryDynamicTableMetadata';
+import { BehaviorPatternMapping } from './behaviorPatternMapping';
+import { RefinementMappingsService } from '../refinementMappings.service';
+import { forkJoin } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { WineryNotificationService } from '../../../wineryNotificationModule/wineryNotification.service';
+import { WineryTemplate } from '../../../model/wineryComponent';
+import { WineryTableColumn } from '../../../wineryTableModule/wineryTable.component';
+import { InstanceService } from '../../instance.service';
 
 @Component({
-    selector: 'winery-behavior-pattern-mappings',
     templateUrl: './behavior-pattern-mappings.component.html',
-    styleUrls: []
+    providers: [
+        RefinementMappingsService
+    ]
 })
 export class BehaviorPatternMappingsComponent implements OnInit {
 
-    loading = false;
-    dynamicTableData: Array<WineryDynamicTableMetadata> = [];
-    // TODO
-    behaviorPatternMappings: any[] = [];
+    loading = true;
+    columns: Array<WineryTableColumn> = [
+        { title: 'Detector Element', name: 'detectorElement', sort: true },
+        { title: 'Behavior Pattern', name: 'behaviorPattern', sort: true },
+        { title: 'Refinement Element', name: 'refinementElement', sort: true },
+        { title: 'Refinement Element Property', name: 'refinementProperty', sort: true },
+    ];
+    behaviorPatternMappings: BehaviorPatternMapping[];
 
-    constructor() {
+    detectorTemplates: WineryTemplate[];
+    behaviorPatterns: any[];
+    refinementTemplates: WineryTemplate[];
+    refinementProperties: any[];
+
+    constructor(private service: RefinementMappingsService,
+                private notify: WineryNotificationService,
+                public sharedData: InstanceService) {
     }
 
     ngOnInit() {
+        forkJoin(
+            this.service.getDetectorNodeTemplates(),
+            this.service.getDetectorRelationshipTemplates(),
+            this.service.getRefinementTopologyNodeTemplates(),
+            this.service.getRefinementTopologyRelationshipTemplates()
+        ).subscribe(
+            data => this.handleData(data),
+            error => this.handleError(error)
+        );
     }
 
-    // TODO
-    save(mapping: any) {
-
+    onAddButtonClicked() {
     }
 
-    // TODO
-    remove(mapping: any) {
+    onRemoveButtonClicked(mapping: BehaviorPatternMapping) {
+    }
 
+    private handleData(data: any) {
+        this.loading = false;
+        this.detectorTemplates = data[0].concat(data[1]);
+        this.refinementTemplates = data[2].concat(data[3]);
+    }
+
+    private handleError(error: HttpErrorResponse) {
+        this.loading = false;
+        this.notify.error(error.message);
     }
 }

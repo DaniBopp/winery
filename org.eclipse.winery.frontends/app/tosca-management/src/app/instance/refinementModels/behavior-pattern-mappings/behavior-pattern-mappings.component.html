@@ -12,13 +12,10 @@
   ~ SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
 
-<winery-loader *ngIf="loading; else content"></winery-loader>
+<winery-loader *ngIf="loading || !behaviorPatternMappings; else content"></winery-loader>
 <ng-template #content>
-    <winery-dynamic-table [dynamicMetadata]="dynamicTableData"
-                          [tableTitle]="'Behavior Pattern Mappings'"
-                          [modalTitle]="'Add Behavior Pattern Mapping'"
-                          [data]="behaviorPatternMappings"
-                          (entryAdded)="save($event)"
-                          (entryRemoved)="remove($event)">
-    </winery-dynamic-table>
+    <winery-table [columns]="columns" [data]="behaviorPatternMappings"
+                  [disableButtons]="!sharedData.currentVersion.editable"
+                  (addBtnClicked)="onAddButtonClicked()" (removeBtnClicked)="onRemoveButtonClicked($event)">
+    </winery-table>
 </ng-template>
