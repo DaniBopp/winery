@@ -71,6 +71,7 @@ import org.eclipse.winery.model.tosca.TServiceTemplate;
 import org.eclipse.winery.model.tosca.TTag;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
+import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.extensions.OTComplianceRule;
 import org.eclipse.winery.model.tosca.extensions.OTDeploymentArtifactMapping;
 import org.eclipse.winery.model.tosca.extensions.OTParticipant;
@@ -143,6 +144,7 @@ import org.eclipse.winery.model.tosca.xml.XTTopologyElementInstanceStates;
 import org.eclipse.winery.model.tosca.xml.XTTopologyTemplate;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTAttributeMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTAttributeMappingType;
+import org.eclipse.winery.model.tosca.xml.extensions.XOTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTComplianceRule;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTDeploymentArtifactMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTPatternRefinementModel;
@@ -1054,6 +1056,7 @@ public class FromCanonical {
         builder.setPermutationMappings(convertList(value.getPermutationMappings(), this::convert));
         builder.setPermutationOptions(convertList(value.getPermutationOptions(), this::convert));
         builder.setAttributeMappings(convertList(value.getAttributeMappings(), this::convert));
+        builder.setBehaviorPatternMappings(convertList(value.getBehaviorPatternMappings(), this::convert));
         fillOTRefinementModelProperties(builder, value);
     }
 
@@ -1108,6 +1111,14 @@ public class FromCanonical {
     private XOTTopologyFragmentRefinementModel convert(OTTopologyFragmentRefinementModel canonical) {
         XOTTopologyFragmentRefinementModel.Builder builder = new XOTTopologyFragmentRefinementModel.Builder();
         fillOTTopologyFragmentRefinementModelProperties(builder, canonical);
+        return builder.build();
+    }
+
+    private XOTBehaviorPatternMapping convert(OTBehaviorPatternMapping canonical) {
+        XOTBehaviorPatternMapping.Builder builder = new XOTBehaviorPatternMapping.Builder(canonical.getId());
+        builder.setBehaviorPattern(canonical.getBehaviorPattern());
+        builder.setRefinementProperty(canonical.getRefinementProperty());
+        fillOTPrmMappingProperties(builder, canonical);
         return builder.build();
     }
 }

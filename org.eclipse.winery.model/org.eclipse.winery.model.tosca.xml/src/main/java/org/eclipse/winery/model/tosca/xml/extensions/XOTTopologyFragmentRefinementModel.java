@@ -59,8 +59,13 @@ public class XOTTopologyFragmentRefinementModel extends XOTRefinementModel {
     @XmlElement(name = "ComponentSet")
     protected List<XOTStringList> componentSets;
 
+    @XmlElementWrapper(name = "BehaviorPatternMappings")
+    @XmlElement(name = "BehaviorPatternMapping")
+    protected List<XOTBehaviorPatternMapping> behaviorPatternMappings;
+
     @Deprecated // required for XML deserialization
-    public XOTTopologyFragmentRefinementModel() { }
+    public XOTTopologyFragmentRefinementModel() {
+    }
 
     public XOTTopologyFragmentRefinementModel(Builder builder) {
         super(builder);
@@ -69,6 +74,7 @@ public class XOTTopologyFragmentRefinementModel extends XOTRefinementModel {
         this.stayMappings = builder.stayMappings;
         this.deploymentArtifactMappings = builder.deploymentArtifactMappings;
         this.permutationOptions = builder.permutationOptions;
+        this.behaviorPatternMappings = builder.behaviorPatternMappings;
     }
 
     @NonNull
@@ -131,6 +137,14 @@ public class XOTTopologyFragmentRefinementModel extends XOTRefinementModel {
         this.componentSets = componentSets;
     }
 
+    public List<XOTBehaviorPatternMapping> getBehaviorPatternMappings() {
+        return behaviorPatternMappings;
+    }
+
+    public void setBehaviorPatternMappings(List<XOTBehaviorPatternMapping> behaviorPatternMappings) {
+        this.behaviorPatternMappings = behaviorPatternMappings;
+    }
+
     public static class Builder extends XOTRefinementModel.Builder<Builder> {
 
         private XTTopologyTemplate refinementStructure;
@@ -138,6 +152,7 @@ public class XOTTopologyFragmentRefinementModel extends XOTRefinementModel {
         private List<XOTStayMapping> stayMappings;
         private List<XOTDeploymentArtifactMapping> deploymentArtifactMappings;
         private List<XOTStringList> permutationOptions;
+        private List<XOTBehaviorPatternMapping> behaviorPatternMappings;
 
         public Builder() {
             super();
@@ -165,6 +180,11 @@ public class XOTTopologyFragmentRefinementModel extends XOTRefinementModel {
 
         public Builder setPermutationOptions(List<XOTStringList> permutationOptions) {
             this.permutationOptions = permutationOptions;
+            return self();
+        }
+
+        public Builder setBehaviorPatternMappings(List<XOTBehaviorPatternMapping> behaviorPatternMappings) {
+            this.behaviorPatternMappings = behaviorPatternMappings;
             return self();
         }
 

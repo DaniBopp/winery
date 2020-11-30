@@ -80,6 +80,7 @@ import org.eclipse.winery.model.tosca.TTopologyElementInstanceStates;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMappingType;
+import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.extensions.OTComplianceRule;
 import org.eclipse.winery.model.tosca.extensions.OTDeploymentArtifactMapping;
 import org.eclipse.winery.model.tosca.extensions.OTParticipant;
@@ -145,6 +146,7 @@ import org.eclipse.winery.model.tosca.xml.XTServiceTemplate;
 import org.eclipse.winery.model.tosca.xml.XTTag;
 import org.eclipse.winery.model.tosca.xml.XTTopologyTemplate;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTAttributeMapping;
+import org.eclipse.winery.model.tosca.xml.extensions.XOTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTComplianceRule;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTDeploymentArtifactMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTPatternRefinementModel;
@@ -1098,6 +1100,9 @@ public class ToCanonical {
         if (xml instanceof XOTTopologyFragmentRefinementModel) {
             return convert((XOTTopologyFragmentRefinementModel) xml);
         }
+        if (xml instanceof XOTBehaviorPatternMapping) {
+            return convert((XOTBehaviorPatternMapping) xml);
+        }
         throw new IllegalStateException("Attempted to convert unknown Extension to the TOSCA-Standard of the type " + xml.getClass().getName() + " to canonical");
     }
 
@@ -1131,6 +1136,7 @@ public class ToCanonical {
         builder.setPermutationOptions(convertList(value.getPermutationOptions(), this::convert));
         builder.setAttributeMappings(convertList(value.getAttributeMappings(), this::convert));
         builder.setComponentSets(convertList(value.getComponentSets(), this::convert));
+        builder.setBehaviorPatternMappings(convertList(value.getBehaviorPatternMappings(), this::convert));
         fillOTRefinementModelProperties(builder, value);
     }
 
@@ -1195,6 +1201,14 @@ public class ToCanonical {
     private OTTopologyFragmentRefinementModel convert(XOTTopologyFragmentRefinementModel xml) {
         OTTopologyFragmentRefinementModel.Builder builder = new OTTopologyFragmentRefinementModel.Builder();
         fillOTTopologyFragmentRefinementModelProperties(builder, xml);
+        return builder.build();
+    }
+
+    private OTBehaviorPatternMapping convert(XOTBehaviorPatternMapping xml) {
+        OTBehaviorPatternMapping.Builder builder = new OTBehaviorPatternMapping.Builder(xml.getId());
+        builder.setBehaviorPattern(xml.getBehaviorPattern());
+        builder.setRefinementProperty(xml.getRefinementProperty());
+        fillOTPrmMappingProperties(builder, xml);
         return builder.build();
     }
 }
