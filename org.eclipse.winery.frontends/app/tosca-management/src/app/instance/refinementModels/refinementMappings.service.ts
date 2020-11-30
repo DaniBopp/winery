@@ -133,11 +133,11 @@ export class RefinementMappingsService {
         return this.http.get<PermutationMapping[]>(this.path + '/permutationmappings');
     }
 
-    public addBehaviorPatternMappings(mapping: BehaviorPatternMapping): Observable<BehaviorPatternMapping[]> {
+    public addBehaviorPatternMapping(mapping: BehaviorPatternMapping): Observable<BehaviorPatternMapping[]> {
         return this.http.put<BehaviorPatternMapping[]>(this.path + '/behaviorpatternmappings', mapping);
     }
 
-    public deleteBehaviorPatternMappings(mapping: BehaviorPatternMapping): Observable<BehaviorPatternMapping[]> {
+    public deleteBehaviorPatternMapping(mapping: BehaviorPatternMapping): Observable<BehaviorPatternMapping[]> {
         return this.http.delete<BehaviorPatternMapping[]>(this.path + '/behaviorpatternmappings/' + mapping.id);
     }
 

@@ -117,7 +117,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
 
     onAddBehaviorPatternMapping() {
         this.loading = true;
-        this.service.addBehaviorPatternMappings(this.mapping)
+        this.service.addBehaviorPatternMapping(this.mapping)
             .subscribe(
                 data => this.handleSave('Added', data),
                 error => this.handleError(error)
@@ -127,6 +127,14 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     onRemoveButtonClicked(mapping: BehaviorPatternMapping) {
         this.mapping = mapping;
         this.removeModalRef = this.modalService.show(this.removeModal);
+    }
+
+    onRemoveBehaviorPatternMapping() {
+        this.service.deleteBehaviorPatternMapping(this.mapping)
+            .subscribe(
+                data => this.handleSave('Removed', data),
+                error => this.handleError(error)
+            );
     }
 
     private handleData(data: [BehaviorPatternMapping[], WineryTemplateWithPolicies[], WineryTemplateWithPolicies[],
@@ -143,7 +151,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     }
 
     private handleSave(type: string, data: BehaviorPatternMapping[]) {
-        this.notify.success(type + ' Property Mapping ' + this.mapping.id);
+        this.notify.success(type + ' Behavior Pattern Mapping ' + this.mapping.id);
         this.behaviorPatternMappings = data;
         this.loading = false;
     }

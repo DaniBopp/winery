@@ -61,3 +61,15 @@
                          (onOk)="onAddBehaviorPatternMapping()">
     </winery-modal-footer>
 </ng-template>
+
+<ng-template #removeModal>
+    <winery-modal-header [modalRef]="removeModalRef" [title]="'Remove Behavior Pattern Mapping'">
+    </winery-modal-header>
+    <winery-modal-body>
+        <p>Are you sure you want to delete <b>{{ mapping.id }}</b>?</p>
+    </winery-modal-body>
+    <winery-modal-footer [modalRef]="removeModalRef"
+                         [okButtonLabel]="'Delete'"
+                         (onOk)="onRemoveBehaviorPatternMapping()">
+    </winery-modal-footer>
+</ng-template>
