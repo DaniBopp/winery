@@ -17,14 +17,10 @@ package org.eclipse.winery.model.tosca.extensions;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlIDREF;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
 
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.visitor.Visitor;
 
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
 import io.github.adr.embedded.ADR;
 import org.eclipse.jdt.annotation.NonNull;
 
@@ -32,12 +28,9 @@ import org.eclipse.jdt.annotation.NonNull;
 @XmlType(name = "otBehaviorPatternMapping")
 public class OTBehaviorPatternMapping extends OTPrmMapping {
 
-    @JsonIdentityReference(alwaysAsId = true)
     @XmlAttribute(name = "behaviorPattern", required = true)
-    @XmlIDREF
-    @XmlSchemaType(name = "IDREF")
     @NonNull
-    private TPolicy behaviorPattern;
+    private String behaviorPattern;
 
     @XmlAttribute(name = "refinementProperty", required = true)
     @NonNull
@@ -53,11 +46,11 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
         this.refinementProperty = builder.refinementProperty;
     }
 
-    public TPolicy getBehaviorPattern() {
+    public String getBehaviorPattern() {
         return behaviorPattern;
     }
 
-    public void setBehaviorPattern(TPolicy behaviorPattern) {
+    public void setBehaviorPattern(String behaviorPattern) {
         this.behaviorPattern = behaviorPattern;
     }
 
@@ -82,7 +75,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
 
     public static class Builder extends OTPrmMapping.Builder<Builder> {
 
-        private TPolicy behaviorPattern;
+        private String behaviorPattern;
         private String refinementProperty;
 
         public Builder() {
@@ -93,7 +86,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
             super(id);
         }
 
-        public OTBehaviorPatternMapping.Builder setBehaviorPattern(TPolicy behaviorPattern) {
+        public OTBehaviorPatternMapping.Builder setBehaviorPattern(String behaviorPattern) {
             this.behaviorPattern = behaviorPattern;
             return self();
         }

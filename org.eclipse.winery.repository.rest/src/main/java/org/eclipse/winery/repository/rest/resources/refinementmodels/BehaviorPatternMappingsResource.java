@@ -21,9 +21,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelMappingsResource;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
@@ -44,14 +42,14 @@ public class BehaviorPatternMappingsResource extends AbstractRefinementModelMapp
             .filter(entityTemplate -> entityTemplate.getId().equals(mapping.detectorElement))
             .findFirst()
             .orElse(null);
-        TPolicy behaviorPattern = ((HasPolicies) detectorElement).getPolicies().getPolicy().stream()
-            .filter(policy -> policy.getPolicyRef().equals(mapping.behaviorPattern))
-            .findFirst()
-            .orElse(null);
         TEntityTemplate refinementElement = this.res.getRefinementTopologyResource().getTopologyTempalte().getNodeTemplateOrRelationshipTemplate().stream()
             .filter(entityTemplate -> entityTemplate.getId().equals(mapping.refinementElement))
             .findFirst()
             .orElse(null);
-        return this.addMapping(mapping.createBehaviorPatternMapping(detectorElement, behaviorPattern, refinementElement));
+        return this.addMapping(mapping.createBehaviorPatternMapping(
+            detectorElement,
+            mapping.behaviorPattern,
+            refinementElement
+        ));
     }
 }

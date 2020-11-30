@@ -14,17 +14,14 @@
 
 package org.eclipse.winery.repository.rest.resources.apiData;
 
-import javax.xml.namespace.QName;
-
 import org.eclipse.winery.model.tosca.TEntityTemplate;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement {
 
-    public QName behaviorPattern;
+    public String behaviorPattern;
     public String refinementProperty;
 
     public PrmBehaviorPatternMappingApiData() {
@@ -33,7 +30,7 @@ public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement 
     @JsonIgnore
     public OTBehaviorPatternMapping createBehaviorPatternMapping(
         TEntityTemplate detectorEntityTemplate,
-        TPolicy behaviorPattern,
+        String behaviorPattern,
         TEntityTemplate refinementEntityTemplate
     ) {
         return new OTBehaviorPatternMapping(new OTBehaviorPatternMapping.Builder(this.id)

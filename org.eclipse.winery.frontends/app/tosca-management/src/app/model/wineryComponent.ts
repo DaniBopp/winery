@@ -96,12 +96,3 @@ export class Policy {
     policyType: string;
     policyRef?: string;
 }
-
-export class KvProperty {
-    key: string;
-    value: string;
-
-    toString(): string {
-        return this.key + ': ' + this.value;
-    }
-}
