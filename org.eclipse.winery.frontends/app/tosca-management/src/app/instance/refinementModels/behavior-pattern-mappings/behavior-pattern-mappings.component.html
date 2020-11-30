@@ -19,3 +19,45 @@
                   (addBtnClicked)="onAddButtonClicked()" (removeBtnClicked)="onRemoveButtonClicked($event)">
     </winery-table>
 </ng-template>
+
+<ng-template #addModal>
+    <winery-modal-header [modalRef]="addModalRef" [title]="'Add Behavior Pattern Mapping'">
+    </winery-modal-header>
+    <winery-modal-body>
+        <form>
+            <div class="form-group">
+                <label for="detectorNode" class="control-label">Detector Element</label>
+                <ng-select id="detectorNode" [items]="detectorTemplates" [textField]="'name'"
+                           (selected)="detectorElementSelected($event)">
+                </ng-select>
+            </div>
+            <div class="form-group" *ngIf="behaviorPatterns">
+                <label for="behaviorPattern" class="control-label">Behavior Pattern</label>
+                <ng-select id="behaviorPattern" [items]="behaviorPatterns" [textField]="'name'" [idField]="'name'"
+                           (selected)="mapping.behaviorPattern = $event.id">
+                </ng-select>
+            </div>
+            <hr>
+
+            <div class="form-group">
+                <label for="refinementNode" class="control-label">Refinement Structure Element</label>
+                <ng-select id="refinementNode" [items]="refinementTemplates" [textField]="'name'"
+                           (selected)="refinementElementSelected($event)">
+                </ng-select>
+            </div>
+            <div class="from-group" *ngIf="refinementProperties">
+                <label for="refinementNodePropertiesDropdown" class="control-label">Refinement Element Property</label>
+                <ng-select id="refinementNodePropertiesDropdown" [items]="refinementProperties" [textField]="'str'"
+                           [idField]="'str'"
+                           (selected)="mapping.refinementProperty = $event.id">
+                </ng-select>
+            </div>
+        </form>
+    </winery-modal-body>
+    <winery-modal-footer [modalRef]="addModalRef"
+                         [okButtonLabel]="'Add'"
+                         [disableOkButton]="(!mapping.detectorElement || !mapping.behaviorPattern
+                                            || !mapping.refinementElement || !mapping.refinementProperty)"
+                         (onOk)="onAddBehaviorPatternMapping()">
+    </winery-modal-footer>
+</ng-template>

@@ -21,6 +21,10 @@ export class BehaviorPatternMapping extends RefinementMappings {
     public behaviorPattern: string;
     public refinementProperty: string;
 
+    constructor(id: number) {
+        super(id);
+    }
+
     idPrefix(): string {
         return BehaviorPatternMapping.idPrefix;
     }
