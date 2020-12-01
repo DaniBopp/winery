@@ -76,15 +76,16 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     }
 
     onAddButtonClicked() {
+        this.clean();
         const id = this.service.getNewMappingsId(this.behaviorPatternMappings, BehaviorPatternMapping.idPrefix);
         this.mapping = new BehaviorPatternMapping(id);
         this.addModalRef = this.modalService.show(this.addModal);
     }
 
-    detectorElementSelected(node: SelectData) {
-        this.mapping.detectorElement = node.id;
+    detectorElementSelected(element: SelectData) {
+        this.mapping.detectorElement = element.id;
         this.selectedDetectorElement = this.detectorTemplates
-            .find(value => value.id === node.id);
+            .find(value => value.id === element.id);
         if (this.selectedDetectorElement.policies) {
             // TODO: filter for only behavior pattern policies
             this.behaviorPatterns = this.selectedDetectorElement.policies.policy;
@@ -93,12 +94,11 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         }
     }
 
-    refinementElementSelected(node: SelectData) {
-        this.mapping.refinementElement = node.id;
+    refinementElementSelected(element: SelectData) {
+        this.mapping.refinementElement = element.id;
         this.selectedRefinementElement = this.refinementTemplates
-            .find(value => value.id === node.id);
+            .find(value => value.id === element.id);
 
-        // TODO: remove any?
         const props: any = this.selectedRefinementElement.properties;
         if (props && props.propertyType && props.propertyType === 'KV') {
             this.refinementProperties = Object.keys(props.kvproperties)
@@ -154,5 +154,10 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         this.notify.success(type + ' Behavior Pattern Mapping ' + this.mapping.id);
         this.behaviorPatternMappings = data;
         this.loading = false;
+    }
+
+    private clean() {
+        delete this.behaviorPatterns;
+        delete this.refinementProperties;
     }
 }
