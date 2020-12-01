@@ -1117,7 +1117,8 @@ public class FromCanonical {
     private XOTBehaviorPatternMapping convert(OTBehaviorPatternMapping canonical) {
         XOTBehaviorPatternMapping.Builder builder = new XOTBehaviorPatternMapping.Builder(canonical.getId());
         builder.setBehaviorPattern(canonical.getBehaviorPattern());
-        builder.setRefinementProperty(canonical.getRefinementProperty());
+        // TODO
+        builder.setRefinementProperty(canonical.getRefinementProperty().getKey());
         fillOTPrmMappingProperties(builder, canonical);
         return builder.build();
     }

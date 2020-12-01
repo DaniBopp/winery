@@ -21,6 +21,9 @@ public class PropertyKV implements Serializable {
     private String key;
     private String value;
 
+    public PropertyKV() {
+    }
+
     public PropertyKV(String key, String value) {
         this.key = key;
         this.value = value;
@@ -65,5 +68,4 @@ public class PropertyKV implements Serializable {
     public int hashCode() {
         return Objects.hash(key, value);
     }
-
 }

@@ -94,6 +94,7 @@ import org.eclipse.winery.model.tosca.extensions.OTStayMapping;
 import org.eclipse.winery.model.tosca.extensions.OTStringList;
 import org.eclipse.winery.model.tosca.extensions.OTTestRefinementModel;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
+import org.eclipse.winery.model.tosca.extensions.kvproperties.PropertyKV;
 import org.eclipse.winery.model.tosca.extensions.kvproperties.WinerysPropertiesDefinition;
 import org.eclipse.winery.model.tosca.xml.XHasId;
 import org.eclipse.winery.model.tosca.xml.XRelationshipSourceOrTarget;
@@ -1207,7 +1208,11 @@ public class ToCanonical {
     private OTBehaviorPatternMapping convert(XOTBehaviorPatternMapping xml) {
         OTBehaviorPatternMapping.Builder builder = new OTBehaviorPatternMapping.Builder(xml.getId());
         builder.setBehaviorPattern(xml.getBehaviorPattern());
-        builder.setRefinementProperty(xml.getRefinementProperty());
+        builder.setRefinementProperty(new PropertyKV(
+            // TODO
+            xml.getRefinementProperty(),
+            xml.getRefinementProperty()
+        ));
         fillOTPrmMappingProperties(builder, xml);
         return builder.build();
     }

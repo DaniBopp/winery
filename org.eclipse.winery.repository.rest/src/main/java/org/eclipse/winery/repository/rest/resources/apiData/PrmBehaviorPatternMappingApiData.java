@@ -16,13 +16,14 @@ package org.eclipse.winery.repository.rest.resources.apiData;
 
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
+import org.eclipse.winery.model.tosca.extensions.kvproperties.PropertyKV;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement {
 
     public String behaviorPattern;
-    public String refinementProperty;
+    public PropertyKV refinementProperty;
 
     public PrmBehaviorPatternMappingApiData() {
     }

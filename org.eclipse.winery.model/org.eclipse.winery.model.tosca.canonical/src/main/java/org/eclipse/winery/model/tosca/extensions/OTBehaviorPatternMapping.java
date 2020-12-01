@@ -19,6 +19,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
+import org.eclipse.winery.model.tosca.extensions.kvproperties.PropertyKV;
 import org.eclipse.winery.model.tosca.visitor.Visitor;
 
 import io.github.adr.embedded.ADR;
@@ -34,7 +35,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
 
     @XmlAttribute(name = "refinementProperty", required = true)
     @NonNull
-    private String refinementProperty;
+    private PropertyKV refinementProperty;
 
     @Deprecated // used for XML deserialization of API request content
     public OTBehaviorPatternMapping() {
@@ -54,11 +55,11 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
         this.behaviorPattern = behaviorPattern;
     }
 
-    public String getRefinementProperty() {
+    public PropertyKV getRefinementProperty() {
         return refinementProperty;
     }
 
-    public void setRefinementProperty(String refinementProperty) {
+    public void setRefinementProperty(PropertyKV refinementProperty) {
         this.refinementProperty = refinementProperty;
     }
 
@@ -76,7 +77,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     public static class Builder extends OTPrmMapping.Builder<Builder> {
 
         private String behaviorPattern;
-        private String refinementProperty;
+        private PropertyKV refinementProperty;
 
         public Builder() {
             super();
@@ -91,7 +92,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
             return self();
         }
 
-        public OTBehaviorPatternMapping.Builder setRefinementProperty(String refinementProperty) {
+        public OTBehaviorPatternMapping.Builder setRefinementProperty(PropertyKV refinementProperty) {
             this.refinementProperty = refinementProperty;
             return self();
         }
