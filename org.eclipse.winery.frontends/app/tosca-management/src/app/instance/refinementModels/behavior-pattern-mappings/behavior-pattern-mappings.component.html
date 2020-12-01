@@ -47,9 +47,8 @@
             </div>
             <div class="from-group" *ngIf="refinementProperties">
                 <label for="refinementNodePropertiesDropdown" class="control-label">Refinement Element Property</label>
-                <ng-select id="refinementNodePropertiesDropdown" [items]="refinementProperties" [textField]="'str'"
-                           [idField]="'str'"
-                           (selected)="mapping.refinementProperty = $event.id">
+                <ng-select id="refinementNodePropertiesDropdown" [items]="refinementPropertiesAsString()"
+                           (selected)="refinementPropertySelected($event)">
                 </ng-select>
             </div>
         </form>

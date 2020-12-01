@@ -13,13 +13,14 @@
  *******************************************************************************/
 
 import { RefinementMappings } from '../RefinementMappings';
+import { KeyValueItem } from '../../../model/keyValueItem';
 
 export class BehaviorPatternMapping extends RefinementMappings {
 
     public static readonly idPrefix = 'behaviorPatternMap';
 
     public behaviorPattern: string;
-    public refinementProperty: string;
+    public refinementProperty: KvProperty;
 
     constructor(id: number) {
         super(id);
@@ -27,5 +28,20 @@ export class BehaviorPatternMapping extends RefinementMappings {
 
     idPrefix(): string {
         return BehaviorPatternMapping.idPrefix;
+    }
+}
+
+export class KvProperty implements KeyValueItem {
+
+    key: string;
+    value: any;
+
+    constructor(key: string, value: any) {
+        this.key = key;
+        this.value = value;
+    }
+
+    toString(): string {
+        return this.key + ': ' + this.value;
     }
 }

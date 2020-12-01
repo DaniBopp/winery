@@ -13,7 +13,7 @@
  *******************************************************************************/
 
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { BehaviorPatternMapping } from './behaviorPatternMapping';
+import { BehaviorPatternMapping, KvProperty } from './types';
 import { RefinementMappingsService } from '../refinementMappings.service';
 import { forkJoin } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -37,7 +37,10 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         { title: 'Detector Element', name: 'detectorElement', sort: true },
         { title: 'Behavior Pattern', name: 'behaviorPattern', sort: true },
         { title: 'Refinement Element', name: 'refinementElement', sort: true },
-        { title: 'Refinement Element Property', name: 'refinementProperty', sort: true },
+        {
+            title: 'Refinement Element Property', name: 'refinementProperty', sort: true,
+            display: value => value.toString()
+        },
     ];
 
     behaviorPatternMappings: BehaviorPatternMapping[];
@@ -53,8 +56,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     selectedDetectorElement: WineryTemplateWithPolicies;
     behaviorPatterns: Policy[];
     selectedRefinementElement: WineryTemplateWithPolicies;
-    // TODO: remove any
-    refinementProperties: any[];
+    refinementProperties: KvProperty[];
 
     constructor(private service: RefinementMappingsService,
                 private notify: WineryNotificationService,
@@ -89,8 +91,6 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         if (this.selectedDetectorElement.policies) {
             // TODO: filter for only behavior pattern policies
             this.behaviorPatterns = this.selectedDetectorElement.policies.policy;
-        } else {
-            delete this.behaviorPatterns;
         }
     }
 
@@ -102,17 +102,18 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         const props: any = this.selectedRefinementElement.properties;
         if (props && props.propertyType && props.propertyType === 'KV') {
             this.refinementProperties = Object.keys(props.kvproperties)
-                .map(key => {
-                    // TODO: proper type
-                    return {
-                        key,
-                        value: props.kvproperties[key],
-                        str: key + ': ' + props.kvproperties[key]
-                    };
-                });
-        } else {
-            delete this.refinementProperties;
+                .map(key => new KvProperty(key, props.kvproperties[key]));
         }
+    }
+
+    refinementPropertiesAsString(): string[] {
+        return this.refinementProperties
+            .map(prop => prop.toString());
+    }
+
+    refinementPropertySelected(element: SelectData) {
+        this.mapping.refinementProperty = this.refinementProperties
+            .find(prop => prop.toString() === element.id);
     }
 
     onAddBehaviorPatternMapping() {

@@ -27,7 +27,7 @@ import { AttributeMapping } from './attributeMappings/attributeMapping';
 import { DeploymentArtifactMapping } from './deploymentArtifactsMappings/deploymentArtifactMapping';
 import { RefinementMappings } from './RefinementMappings';
 import { PermutationMapping } from './permutationMappings/permutationMapping';
-import { BehaviorPatternMapping } from './behavior-pattern-mappings/behaviorPatternMapping';
+import { BehaviorPatternMapping } from './behavior-pattern-mappings/types';
 
 @Injectable()
 export class RefinementMappingsService {
