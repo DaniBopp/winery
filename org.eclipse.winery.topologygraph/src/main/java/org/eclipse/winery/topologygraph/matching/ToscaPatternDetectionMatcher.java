@@ -14,5 +14,20 @@
 
 package org.eclipse.winery.topologygraph.matching;
 
+import org.eclipse.winery.topologygraph.model.ToscaEdge;
+import org.eclipse.winery.topologygraph.model.ToscaNode;
+
 public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
+
+    @Override
+    public boolean isCompatible(ToscaNode left, ToscaNode right) {
+        // TODO
+        return super.isCompatible(left, right);
+    }
+
+    @Override
+    public boolean isCompatible(ToscaEdge left, ToscaEdge right) {
+        // TODO
+        return super.isCompatible(left, right);
+    }
 }

@@ -79,7 +79,7 @@ public abstract class AbstractRefinement extends AbstractSubstitution {
 
             List<RefinementCandidate> candidates = new ArrayList<>();
             this.refinementModels.forEach(prm -> {
-                ToscaGraph detectorGraph = ToscaTransformer.createTOSCAGraph(prm.getDetector());
+                ToscaGraph detectorGraph = ToscaTransformer.createTOSCAGraph(getDetector(prm));
                 IToscaMatcher matcher = this.getMatcher(prm);
                 Iterator<GraphMapping<ToscaNode, ToscaEdge>> matches = isomorphismMatcher.findMatches(detectorGraph, topologyGraph, matcher);
 
@@ -103,6 +103,10 @@ public abstract class AbstractRefinement extends AbstractSubstitution {
 
             applyRefinement(refinement, topology);
         }
+    }
+
+    public TTopologyTemplate getDetector(OTRefinementModel prm) {
+        return prm.getDetector();
     }
 
     public abstract boolean getLoopCondition(TTopologyTemplate topology);
