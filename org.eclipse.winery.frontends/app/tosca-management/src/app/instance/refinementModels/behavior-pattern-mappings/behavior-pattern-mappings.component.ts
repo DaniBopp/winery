@@ -23,11 +23,17 @@ import { WineryTableColumn } from '../../../wineryTableModule/wineryTable.compon
 import { InstanceService } from '../../instance.service';
 import { BsModalRef, BsModalService, ModalDirective } from 'ngx-bootstrap';
 import { SelectData } from '../../../model/selectData';
+import { NamespacesService } from '../../admin/namespaces/namespaces.service';
+import { NamespaceProperties } from '../../../model/namespaceProperties';
+import { WineryNamespaceSelectorService } from '../../../wineryNamespaceSelector/wineryNamespaceSelector.service';
+import { QName } from '../../../../../../shared/src/app/model/qName';
 
 @Component({
     templateUrl: './behavior-pattern-mappings.component.html',
     providers: [
-        RefinementMappingsService
+        RefinementMappingsService,
+        NamespacesService,
+        WineryNamespaceSelectorService
     ]
 })
 export class BehaviorPatternMappingsComponent implements OnInit {
@@ -46,6 +52,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     behaviorPatternMappings: BehaviorPatternMapping[];
     detectorTemplates: WineryTemplateWithPolicies[];
     refinementTemplates: WineryTemplateWithPolicies[];
+    patternNamespaces: Set<string>;
 
     @ViewChild('addModal') addModal: ModalDirective;
     @ViewChild('removeModal') removeModal: ModalDirective;
@@ -61,7 +68,8 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     constructor(private service: RefinementMappingsService,
                 private notify: WineryNotificationService,
                 public sharedData: InstanceService,
-                private modalService: BsModalService) {
+                private modalService: BsModalService,
+                private namespacesService: NamespacesService) {
     }
 
     ngOnInit() {
@@ -70,7 +78,8 @@ export class BehaviorPatternMappingsComponent implements OnInit {
             this.service.getDetectorNodeTemplates(),
             this.service.getDetectorRelationshipTemplates(),
             this.service.getRefinementTopologyNodeTemplates(),
-            this.service.getRefinementTopologyRelationshipTemplates()
+            this.service.getRefinementTopologyRelationshipTemplates(),
+            this.namespacesService.getAllNamespaces()
         ).subscribe(
             data => this.handleData(data),
             error => this.handleError(error)
@@ -89,8 +98,8 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         this.selectedDetectorElement = this.detectorTemplates
             .find(value => value.id === element.id);
         if (this.selectedDetectorElement.policies) {
-            // TODO: filter for only behavior pattern policies
-            this.behaviorPatterns = this.selectedDetectorElement.policies.policy;
+            this.behaviorPatterns = this.selectedDetectorElement.policies.policy
+                .filter(policy => this.hasPatternNamespace(policy));
         }
     }
 
@@ -139,11 +148,14 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     }
 
     private handleData(data: [BehaviorPatternMapping[], WineryTemplateWithPolicies[], WineryTemplateWithPolicies[],
-        WineryTemplateWithPolicies[], WineryTemplateWithPolicies[]]) {
+        WineryTemplateWithPolicies[], WineryTemplateWithPolicies[], NamespaceProperties[]]) {
         this.loading = false;
         this.behaviorPatternMappings = data[0];
         this.detectorTemplates = data[1].concat(data[2]);
         this.refinementTemplates = data[3].concat(data[4]);
+        this.patternNamespaces = new Set<string>(data[5]
+            .filter(ns => ns.patternCollection)
+            .map(ns => ns.namespace));
     }
 
     private handleError(error: HttpErrorResponse) {
@@ -160,5 +172,10 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     private clean() {
         delete this.behaviorPatterns;
         delete this.refinementProperties;
+    }
+
+    private hasPatternNamespace(policy: Policy) {
+        const namespace = new QName(policy.policyType).nameSpace;
+        return this.patternNamespaces.has(namespace);
     }
 }
