@@ -39,7 +39,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         { title: 'Refinement Element', name: 'refinementElement', sort: true },
         {
             title: 'Refinement Element Property', name: 'refinementProperty', sort: true,
-            display: value => value.toString()
+            display: item => new KvProperty(item.key, item.value).toString()
         },
     ];
 

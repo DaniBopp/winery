@@ -17,6 +17,7 @@ package org.eclipse.winery.model.tosca.xml.extensions;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.eclipse.winery.model.tosca.xml.visitor.Visitor;
@@ -32,9 +33,9 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
     @NonNull
     private String behaviorPattern;
 
-    @XmlAttribute(name = "refinementProperty", required = true)
+    @XmlElement(name = "RefinementProperty", required = true)
     @NonNull
-    private String refinementProperty;
+    private PropertyKV refinementProperty;
 
     @Deprecated // used for XML deserialization of API request content
     public XOTBehaviorPatternMapping() {
@@ -54,11 +55,11 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
         this.behaviorPattern = behaviorPattern;
     }
 
-    public String getRefinementProperty() {
+    public PropertyKV getRefinementProperty() {
         return refinementProperty;
     }
 
-    public void setRefinementProperty(String refinementProperty) {
+    public void setRefinementProperty(PropertyKV refinementProperty) {
         this.refinementProperty = refinementProperty;
     }
 
@@ -76,7 +77,7 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
     public static class Builder extends XOTPrmMapping.Builder<Builder> {
 
         private String behaviorPattern;
-        private String refinementProperty;
+        private PropertyKV refinementProperty;
 
         public Builder() {
             super();
@@ -91,7 +92,7 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
             return self();
         }
 
-        public Builder setRefinementProperty(String refinementProperty) {
+        public Builder setRefinementProperty(PropertyKV refinementProperty) {
             this.refinementProperty = refinementProperty;
             return self();
         }

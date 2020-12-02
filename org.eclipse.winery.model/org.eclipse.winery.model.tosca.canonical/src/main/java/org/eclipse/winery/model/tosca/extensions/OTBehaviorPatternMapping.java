@@ -33,7 +33,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     @NonNull
     private String behaviorPattern;
 
-    @XmlAttribute(name = "refinementProperty", required = true)
+    @XmlAttribute(name = "RefinementProperty", required = true)
     @NonNull
     private PropertyKV refinementProperty;
 

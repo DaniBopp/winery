@@ -29,11 +29,9 @@ public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement 
     }
 
     @JsonIgnore
-    public OTBehaviorPatternMapping createBehaviorPatternMapping(
-        TEntityTemplate detectorEntityTemplate,
-        String behaviorPattern,
-        TEntityTemplate refinementEntityTemplate
-    ) {
+    public OTBehaviorPatternMapping createBehaviorPatternMapping(TEntityTemplate detectorEntityTemplate,
+                                                                 String behaviorPattern,
+                                                                 TEntityTemplate refinementEntityTemplate) {
         return new OTBehaviorPatternMapping(new OTBehaviorPatternMapping.Builder(this.id)
             .setDetectorElement(detectorEntityTemplate)
             .setBehaviorPattern(behaviorPattern)

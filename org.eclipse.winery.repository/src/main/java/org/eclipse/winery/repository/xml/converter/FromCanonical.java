@@ -142,6 +142,7 @@ import org.eclipse.winery.model.tosca.xml.XTServiceTemplate;
 import org.eclipse.winery.model.tosca.xml.XTTag;
 import org.eclipse.winery.model.tosca.xml.XTTopologyElementInstanceStates;
 import org.eclipse.winery.model.tosca.xml.XTTopologyTemplate;
+import org.eclipse.winery.model.tosca.xml.extensions.PropertyKV;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTAttributeMapping;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTAttributeMappingType;
 import org.eclipse.winery.model.tosca.xml.extensions.XOTBehaviorPatternMapping;
@@ -1117,8 +1118,10 @@ public class FromCanonical {
     private XOTBehaviorPatternMapping convert(OTBehaviorPatternMapping canonical) {
         XOTBehaviorPatternMapping.Builder builder = new XOTBehaviorPatternMapping.Builder(canonical.getId());
         builder.setBehaviorPattern(canonical.getBehaviorPattern());
-        // TODO
-        builder.setRefinementProperty(canonical.getRefinementProperty().getKey());
+        builder.setRefinementProperty(new PropertyKV(
+            canonical.getRefinementProperty().getKey(),
+            canonical.getRefinementProperty().getValue()
+        ));
         fillOTPrmMappingProperties(builder, canonical);
         return builder.build();
     }
