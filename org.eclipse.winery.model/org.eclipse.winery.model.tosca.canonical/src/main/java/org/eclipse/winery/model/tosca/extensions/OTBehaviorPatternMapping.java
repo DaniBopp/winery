@@ -17,6 +17,7 @@ package org.eclipse.winery.model.tosca.extensions;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.eclipse.winery.model.tosca.extensions.kvproperties.PropertyKV;
@@ -33,7 +34,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     @NonNull
     private String behaviorPattern;
 
-    @XmlAttribute(name = "RefinementProperty", required = true)
+    @XmlElement(name = "RefinementProperty", required = true)
     @NonNull
     private PropertyKV refinementProperty;
 
