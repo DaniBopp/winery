@@ -30,7 +30,6 @@ import javax.websocket.server.ServerEndpoint;
 import javax.ws.rs.NotFoundException;
 
 import org.eclipse.winery.common.json.JacksonProvider;
-import org.eclipse.winery.model.adaptation.substitution.patterndetection.DetectorChooser;
 import org.eclipse.winery.model.adaptation.substitution.patterndetection.PatternDetection;
 import org.eclipse.winery.model.adaptation.substitution.refinement.AbstractRefinement;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
@@ -73,7 +72,7 @@ public class RefinementWebSocket implements RefinementChooser {
             } else if ("tests".equals(type)) {
                 this.refinement = new TestRefinement(this);
             } else if ("patternDetection".equals(type)) {
-                this.refinement = new PatternDetection(new DetectorChooser());
+                this.refinement = new PatternDetection(this);
             }
             if (Objects.nonNull(this.refinement)) {
                 LOGGER.info("Opened consistency check web-socket with id: " + session.getId());

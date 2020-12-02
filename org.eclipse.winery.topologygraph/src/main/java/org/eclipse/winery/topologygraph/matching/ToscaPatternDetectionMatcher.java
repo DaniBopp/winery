@@ -12,19 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-package org.eclipse.winery.model.adaptation.substitution.patterndetection;
+package org.eclipse.winery.topologygraph.matching;
 
-import java.util.List;
-
-import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
-import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementChooser;
-import org.eclipse.winery.model.ids.definitions.ServiceTemplateId;
-import org.eclipse.winery.model.tosca.TTopologyTemplate;
-
-public class DetectorChooser implements RefinementChooser {
-
-    @Override
-    public RefinementCandidate chooseRefinement(List<RefinementCandidate> candidates, ServiceTemplateId refinementServiceTemplate, TTopologyTemplate currentTopology) {
-        return null;
-    }
+public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
 }
