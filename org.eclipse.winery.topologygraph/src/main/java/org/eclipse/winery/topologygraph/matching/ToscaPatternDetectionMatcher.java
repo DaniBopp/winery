@@ -45,21 +45,21 @@ public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
     }
 
     private boolean propsCompatible(ToscaEntity left, ToscaEntity right) {
-        TEntityTemplate refinementStructure = this.prm.getRefinementTopology().getNodeTemplateOrRelationshipTemplate()
+        TEntityTemplate refinementElement = this.prm.getRefinementTopology().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
         TEntityTemplate candidate = !this.prm.getRefinementTopology().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
 
         boolean compatible = true;
         // TODO the implementation (currently) works for KV properties only
-        if (hasKvProperties(refinementStructure) && hasKvProperties(candidate)) {
-            Map<String, String> refinementProps = ModelUtilities.getPropertiesKV(refinementStructure);
+        if (hasKvProperties(refinementElement) && hasKvProperties(candidate)) {
+            Map<String, String> refinementProps = ModelUtilities.getPropertiesKV(refinementElement);
             Map<String, String> candidateProps = ModelUtilities.getPropertiesKV(candidate);
 
             compatible = refinementProps.entrySet().stream()
-                .allMatch(entry -> empty(entry)
-                    || entry.getValue().equalsIgnoreCase(candidateProps.get(entry.getKey()))
-                    || relatedBehaviorPatternCanBeRemoved(entry)
+                .allMatch(prop -> empty(prop)
+                    || prop.getValue().equalsIgnoreCase(candidateProps.get(prop.getKey()))
+                    || relatedBehaviorPatternCanBeRemoved(refinementElement, prop.getKey())
                 );
         }
         return compatible;
@@ -74,10 +74,12 @@ public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
         return entry.getValue() == null || entry.getValue().isEmpty();
     }
 
-    private boolean relatedBehaviorPatternCanBeRemoved(Map.Entry<String, String> entry) {
+    private boolean relatedBehaviorPatternCanBeRemoved(TEntityTemplate refinementElement, String propKey) {
         return this.prm.getBehaviorPatternMappings().stream()
-            // we know which behavior pattern is implemented by the property
-            // -> behavior patterns related to non matching properties can be removed later
-            .anyMatch(bpm -> bpm.getRefinementProperty().getKey().equals(entry.getKey()));
+            // props that are referenced by a behavior pattern mapping can be ignored
+            // as the related behavior pattern can be removed later if the props aren't compatible
+            .anyMatch(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
+                && bpm.getRefinementProperty().getKey().equals(propKey)
+            );
     }
 }
