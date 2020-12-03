@@ -31,10 +31,19 @@
                         {{ candidate.refinementModel.name }}
                         <br>
                         <div class="btn-group">
-                            <button class="btn btn-sm btn-info"
-                                    (click)="openModeler($event, candidate.refinementModel.name, candidate.refinementModel.targetNamespace)">
+                            <button *ngIf="refinementType !== 'patternDetection'; else detectionButton"
+                                    class="btn btn-sm btn-info"
+                                    (click)="openModeler($event, candidate.refinementModel.name, 
+                                    candidate.refinementModel.targetNamespace, 'refinementstructure')">
                                 Show Refinement Structure
                             </button>
+                            <ng-template #detectionButton>
+                                <button class="btn btn-sm btn-info"
+                                        (click)="openModeler($event, candidate.refinementModel.name, 
+                                        candidate.refinementModel.targetNamespace, 'detector')">
+                                    Show Detector
+                                </button>
+                            </ng-template>
                             <br>
                             <button class="btn btn-sm btn-primary" (click)="prmChosen($event, candidate)">
                                 Choose
@@ -42,7 +51,7 @@
                         </div>
                     </li>
                 </ul>
-                <button class="btn btn-sm btn-danger" *ngIf="refinementType === 'tests'" (click)="stopRefinement()">
+                <button class="btn btn-sm btn-danger" *ngIf="showStopButton()" (click)="stopRefinement()">
                     Stop
                 </button>
             </ng-template>

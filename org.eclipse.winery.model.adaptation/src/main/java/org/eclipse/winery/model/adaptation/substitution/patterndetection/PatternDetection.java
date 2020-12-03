@@ -36,7 +36,6 @@ public class PatternDetection extends AbstractRefinement {
 
     @Override
     public boolean getLoopCondition(TTopologyTemplate topology) {
-        // TODO: until contains only patterns?
         return true;
     }
 
