@@ -20,6 +20,7 @@ import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCho
 import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
+import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.topologygraph.matching.IToscaMatcher;
 import org.eclipse.winery.topologygraph.matching.ToscaPatternDetectionMatcher;
 
@@ -41,7 +42,7 @@ public class PatternDetection extends AbstractRefinement {
 
     @Override
     public IToscaMatcher getMatcher(OTRefinementModel prm) {
-        return new ToscaPatternDetectionMatcher();
+        return new ToscaPatternDetectionMatcher((OTTopologyFragmentRefinementModel) prm);
     }
 
     @Override
