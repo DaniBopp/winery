@@ -52,26 +52,17 @@ public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
 
         boolean compatible = true;
         // TODO the implementation (currently) works for KV properties only
-        if (hasKvProperties(refinementElement) && hasKvProperties(candidate)) {
+        if (ModelUtilities.hasKvProperties(refinementElement) && ModelUtilities.hasKvProperties(candidate)) {
             Map<String, String> refinementProps = ModelUtilities.getPropertiesKV(refinementElement);
             Map<String, String> candidateProps = ModelUtilities.getPropertiesKV(candidate);
 
             compatible = refinementProps.entrySet().stream()
-                .allMatch(prop -> empty(prop)
-                    || prop.getValue().equalsIgnoreCase(candidateProps.get(prop.getKey()))
-                    || relatedBehaviorPatternCanBeRemoved(refinementElement, prop.getKey())
+                .allMatch(refinementProp -> refinementProp.getValue() == null || refinementProp.getValue().isEmpty()
+                    || refinementProp.getValue().equalsIgnoreCase(candidateProps.get(refinementProp.getKey()))
+                    || relatedBehaviorPatternCanBeRemoved(refinementElement, refinementProp.getKey())
                 );
         }
         return compatible;
-    }
-
-    private boolean hasKvProperties(TEntityTemplate entityTemplate) {
-        return Objects.nonNull(entityTemplate.getProperties())
-            && Objects.nonNull(ModelUtilities.getPropertiesKV(entityTemplate));
-    }
-
-    private boolean empty(Map.Entry<String, String> entry) {
-        return entry.getValue() == null || entry.getValue().isEmpty();
     }
 
     private boolean relatedBehaviorPatternCanBeRemoved(TEntityTemplate refinementElement, String propKey) {
