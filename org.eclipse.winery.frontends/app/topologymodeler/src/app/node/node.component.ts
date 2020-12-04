@@ -342,7 +342,6 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
      * Sets the current type of a node.
      */
     passCurrentType($event): void {
-        console.log($event);
         $event.stopPropagation();
         $event.preventDefault();
         let currentType: string;
@@ -353,8 +352,10 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
         }
 
         // TODO
+        console.log(this.entityTypes.relationshipTypes);
         this.entityTypes.relationshipTypes.some(relType => {
             console.log(relType);
+            console.log(currentType);
             if (relType.qName.includes(currentType)) {
                 this.sendSelectedRelationshipType.emit(relType);
                 return true;

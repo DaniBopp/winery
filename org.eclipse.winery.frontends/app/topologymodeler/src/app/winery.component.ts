@@ -261,7 +261,6 @@ export class WineryComponent implements OnInit, AfterViewInit {
                 this.entityTypes.relationshipTypes = [];
                 entityTypeJSON.forEach((relationshipType: EntityType) => {
                     console.log(relationshipType);
-                    // TODO
                     let visuals = this.entityTypes.relationshipVisuals
                         .find(value => value.typeId === relationshipType.qName);
 
@@ -321,7 +320,6 @@ export class WineryComponent implements OnInit, AfterViewInit {
              * by using Observable.forkJoin(1$, 2$);
              * */
             const topologyData = JSON[2];
-            console.log(topologyData);
             const topologyTemplate = topologyData[0];
             this.entityTypes.nodeVisuals = topologyData[1];
             this.entityTypes.relationshipVisuals = topologyData[2];

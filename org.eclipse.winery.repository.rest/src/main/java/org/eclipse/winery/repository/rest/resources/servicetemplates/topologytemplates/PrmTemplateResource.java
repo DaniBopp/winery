@@ -19,13 +19,10 @@ import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTPrmMapping;
-import org.eclipse.winery.model.tosca.OTRelationMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
-import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources._support.AbstractComponentInstanceResourceContainingATopology;
 
@@ -101,39 +98,15 @@ public class PrmTemplateResource extends TopologyTemplateResource {
                 prmModellingTopologyTemplate.addRelationshipTemplate(templateForMapping);
             }
         }
-
-        /**
-         for (OTPermutationMapping mapping : refinementModel.getPermutationMappings()) {
-         TRelationshipTemplate.SourceOrTargetElement sourceElement = new TRelationshipTemplate.SourceOrTargetElement();
-         sourceElement.setRef(new TNodeTemplate(mapping.getDetectorElement().getId()));
-         TRelationshipTemplate.SourceOrTargetElement targetElement = new TRelationshipTemplate.SourceOrTargetElement();
-         targetElement.setRef(new TNodeTemplate(mapping.getRefinementElement().getId()));
-
-         TRelationshipTemplate.Builder builder = new TRelationshipTemplate.Builder("Permutation Mapping", new QName(mapping.getId()), sourceElement, targetElement);
-         builder.setName(mapping.getId());
-         TRelationshipTemplate templateForMapping = new TRelationshipTemplate(builder);
-         prmModellingTopologyTemplate.addRelationshipTemplate(templateForMapping);
-         }
-         for (OTRelationMapping mapping : refinementModel.getRelationMappings()) {
-         TRelationshipTemplate.SourceOrTargetElement sourceElement = new TRelationshipTemplate.SourceOrTargetElement();
-         sourceElement.setRef(new TNodeTemplate(mapping.getDetectorElement().getId()));
-         TRelationshipTemplate.SourceOrTargetElement targetElement = new TRelationshipTemplate.SourceOrTargetElement();
-         targetElement.setRef(new TNodeTemplate(mapping.getRefinementElement().getId()));
-
-         TRelationshipTemplate.Builder builder = new TRelationshipTemplate.Builder("Relationship Mapping", new QName(mapping.getId()), sourceElement, targetElement);
-         builder.setName(mapping.getId());
-         TRelationshipTemplate templateForMapping = new TRelationshipTemplate(builder);
-         prmModellingTopologyTemplate.addRelationshipTemplate(templateForMapping);
-         }*/
     }
 
     private List<OTPrmMapping> getAllMappings(OTTopologyFragmentRefinementModel refinementModel) {
         List<OTPrmMapping> allPrmMappings = new ArrayList<>();
-        allPrmMappings.add((OTPrmMapping) refinementModel.getRelationMappings());
-        allPrmMappings.add((OTPrmMapping) refinementModel.getAttributeMappings());
-        allPrmMappings.add((OTPrmMapping) refinementModel.getStayMappings());
-        allPrmMappings.add((OTPrmMapping) refinementModel.getDeploymentArtifactMappings());
-        allPrmMappings.add((OTPrmMapping) refinementModel.getPermutationMappings());
+        allPrmMappings.addAll(refinementModel.getRelationMappings());
+        //allPrmMappings.addAll(refinementModel.getAttributeMappings());
+        //allPrmMappings.addAll(refinementModel.getStayMappings());
+        allPrmMappings.addAll(refinementModel.getDeploymentArtifactMappings());
+        allPrmMappings.addAll(refinementModel.getPermutationMappings());
 
         return allPrmMappings;
     }

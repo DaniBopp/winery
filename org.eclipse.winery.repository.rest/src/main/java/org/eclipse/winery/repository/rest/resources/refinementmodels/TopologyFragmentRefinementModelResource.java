@@ -15,6 +15,7 @@
 package org.eclipse.winery.repository.rest.resources.refinementmodels;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,10 +36,12 @@ import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
+import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
+import org.eclipse.winery.repository.rest.resources.apiData.PrmPermutationMappingApiData;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
 
@@ -68,23 +71,50 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     }
 
     //TODO
+
     @GET
     @Path("prmmappingtypes")
     @Produces(MediaType.APPLICATION_JSON)
     public List<TRelationshipType> getPrmMappingTypes() {
-        List<TRelationshipType> prmMappingTypes = new ArrayList<>();
-        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Permutation Mapping")));
-        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Relationship Mapping")));
-        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Stay Mapping")));
-        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Attribute Mapping")));
-        prmMappingTypes.add(new TRelationshipType(new TRelationshipType.Builder("Deployment Artifact Mapping")));
-        return prmMappingTypes;
+        List<TRelationshipType> relationshipTypesForPrmMappingTypes = new ArrayList<>();
+        List<String> mappingTypes = new
+            ArrayList<>(Arrays.asList("Permutation Mapping", "Relationship Mapping", "Deployment Artifact Mapping"));
+
+        for (String mappingType : mappingTypes) {
+            TRelationshipType relType = new TRelationshipType(new
+                TRelationshipType.Builder(mappingType));
+            relType.setTargetNamespace("http://opentosca.org/prmMappingTypes");
+            relationshipTypesForPrmMappingTypes.add(relType);
+        }
+        return relationshipTypesForPrmMappingTypes;
     }
 
     @PUT
     @Path("graphicPrmTopology")
     @Consumes(MediaType.APPLICATION_JSON)
     public Response savePrmMappingTopology(TTopologyTemplate topologyTemplate) {
+        for (TRelationshipTemplate relTemplate : topologyTemplate.getRelationshipTemplates()) {
+            if (relTemplate.getType().getLocalPart().startsWith("permutationMap")) {
+                PrmPermutationMappingApiData mapping = new PrmPermutationMappingApiData();
+                mapping.detectorElement = relTemplate.getSourceElement().getRef().toString();
+                mapping.refinementElement = relTemplate.getTargetElement().getRef().toString();
+                mapping.id = relTemplate.getName();
+
+                this.getPermutationMappings().addPermutationMapping(mapping);
+            }
+            if (relTemplate.getType().getLocalPart().startsWith("relMap")) {
+
+            }
+            if (relTemplate.getType().getLocalPart().startsWith("stayMap")) {
+
+            }
+            if (relTemplate.getType().getLocalPart().startsWith("propMap")) {
+
+            }
+            if (relTemplate.getType().getLocalPart().startsWith("artifactMap")) {
+
+            }
+        }
         //TODO
         return null;
     }
