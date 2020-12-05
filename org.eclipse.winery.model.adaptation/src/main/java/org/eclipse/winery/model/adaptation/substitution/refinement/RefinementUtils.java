@@ -30,13 +30,13 @@ import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTDeploymentArtifactMapping;
+import org.eclipse.winery.model.tosca.extensions.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
 import org.eclipse.winery.model.tosca.extensions.OTRelationDirection;
 import org.eclipse.winery.model.tosca.extensions.OTRelationMapping;
 import org.eclipse.winery.model.tosca.extensions.OTStayMapping;
-import org.eclipse.winery.model.tosca.utils.ModelUtilities;
-import org.eclipse.winery.model.tosca.extensions.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
+import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 
 public abstract class RefinementUtils {
 
@@ -49,6 +49,13 @@ public abstract class RefinementUtils {
         return prm.getStayMappings() == null ? new ArrayList<>() :
             prm.getStayMappings().stream()
                 .map(OTPrmMapping::getRefinementElement)
+                .collect(Collectors.toList());
+    }
+
+    public static List<TEntityTemplate> getStayingDetectorElements(OTTopologyFragmentRefinementModel prm) {
+        return prm.getStayMappings() == null ? new ArrayList<>() :
+            prm.getStayMappings().stream()
+                .map(OTPrmMapping::getDetectorElement)
                 .collect(Collectors.toList());
     }
 
