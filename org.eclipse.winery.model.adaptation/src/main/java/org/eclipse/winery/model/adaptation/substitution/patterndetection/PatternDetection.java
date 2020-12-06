@@ -17,12 +17,11 @@ package org.eclipse.winery.model.adaptation.substitution.patterndetection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.eclipse.winery.model.adaptation.substitution.refinement.AbstractRefinement;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementChooser;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils;
+import org.eclipse.winery.model.adaptation.substitution.refinement.topologyrefinement.TopologyFragmentRefinement;
 import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
@@ -31,7 +30,6 @@ import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
-import org.eclipse.winery.model.tosca.extensions.OTStayMapping;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 import org.eclipse.winery.repository.backend.BackendUtils;
@@ -45,17 +43,36 @@ import org.jgrapht.GraphMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PatternDetection extends AbstractRefinement {
+public class PatternDetection extends TopologyFragmentRefinement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PatternDetection.class);
 
     public PatternDetection(RefinementChooser refinementChooser) {
         super(refinementChooser, PatternRefinementModelId.class, "detected");
-    }
 
-    @Override
-    public TTopologyTemplate getDetector(OTRefinementModel prm) {
-        return prm.getRefinementTopology();
+        // for pattern detection the detector is the "refinement" and the refinement is the detector
+        this.refinementModels.stream()
+            .map(prm -> (OTTopologyFragmentRefinementModel) prm)
+            .forEach(prm -> {
+                TTopologyTemplate refinement = prm.getDetector();
+                prm.setDetector(prm.getRefinementTopology());
+                prm.setRefinementTopology(refinement);
+
+                if (prm.getStayMappings() != null) {
+                    prm.getStayMappings().forEach(stayMapping -> {
+                        TEntityTemplate refinementElement = stayMapping.getDetectorElement();
+                        stayMapping.setDetectorElement(stayMapping.getRefinementElement());
+                        stayMapping.setRefinementElement(refinementElement);
+                    });
+                }
+                if (prm.getBehaviorPatternMappings() != null) {
+                    prm.getBehaviorPatternMappings().forEach(bpm -> {
+                        TEntityTemplate refinementElement = bpm.getDetectorElement();
+                        bpm.setDetectorElement(bpm.getRefinementElement());
+                        bpm.setRefinementElement(refinementElement);
+                    });
+                }
+            });
     }
 
     @Override
@@ -81,15 +98,15 @@ public class PatternDetection extends AbstractRefinement {
         }
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
-        TTopologyTemplate detector = removeIncompatibleBehaviorPatterns(refinement);
-        List<TEntityTemplate> stayingElements = RefinementUtils.getStayingDetectorElements(prm).stream()
+        TTopologyTemplate refinementStructure = removeIncompatibleBehaviorPatterns(refinement);
+        List<TEntityTemplate> stayingElements = RefinementUtils.getStayingRefinementElements(prm).stream()
             // behavior patterns removed -> stayingElement.equals() doesn't work anymore -> get equivalent elements
-            .map(staying -> detector.getNodeTemplateOrRelationshipTemplate().stream()
+            .map(staying -> refinementStructure.getNodeTemplateOrRelationshipTemplate().stream()
                 .filter(entityTemplate -> entityTemplate.getId().equals(staying.getId()))
                 .findFirst().get())
             .collect(Collectors.toList());
         Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
-            detector,
+            refinementStructure,
             topology,
             stayingElements
         );
@@ -115,26 +132,26 @@ public class PatternDetection extends AbstractRefinement {
 
     private TTopologyTemplate removeIncompatibleBehaviorPatterns(RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        TTopologyTemplate detector = prm.getDetector();
+        TTopologyTemplate refinementStructure = prm.getRefinementStructure();
 
         prm.getBehaviorPatternMappings().forEach(bpm -> {
-            ToscaEntity refinementElement = refinement.getDetectorGraph()
-                .getEntity(bpm.getRefinementElement().getId()).get();
-            TEntityTemplate candidateElement = getEntityCorrespondence(refinementElement, refinement.getGraphMapping());
+            ToscaEntity detectorElement = refinement.getDetectorGraph()
+                .getEntity(bpm.getDetectorElement().getId()).get();
+            TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
 
-            if (ModelUtilities.hasKvProperties(refinementElement.getTemplate()) &&
+            if (ModelUtilities.hasKvProperties(detectorElement.getTemplate()) &&
                 ModelUtilities.hasKvProperties(candidateElement)) {
-                String refinementValue = ModelUtilities.getPropertiesKV(refinementElement.getTemplate())
-                    .get(bpm.getRefinementProperty().getKey());
+                String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
+                    .get(bpm.getProperty().getKey());
                 String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
-                    .get(bpm.getRefinementProperty().getKey());
+                    .get(bpm.getProperty().getKey());
 
-                if (refinementValue != null && !refinementValue.isEmpty() &&
-                    !refinementValue.equalsIgnoreCase(candidateValue)) {
-                    TEntityTemplate detectorElement = detector.getNodeTemplateOrRelationshipTemplate().stream()
-                        .filter(et -> et.getId().equals(bpm.getDetectorElement().getId()))
+                if (detectorValue != null && !detectorValue.isEmpty() &&
+                    !detectorValue.equalsIgnoreCase(candidateValue)) {
+                    TEntityTemplate refinementElement = refinementStructure.getNodeTemplateOrRelationshipTemplate().stream()
+                        .filter(et -> et.getId().equals(bpm.getRefinementElement().getId()))
                         .findFirst().get();
-                    List<TPolicy> policies = ((HasPolicies) detectorElement).getPolicies().getPolicy();
+                    List<TPolicy> policies = ((HasPolicies) refinementElement).getPolicies().getPolicy();
 
                     policies.stream()
                         .filter(p -> p.getName().equals(bpm.getBehaviorPattern()))
@@ -143,34 +160,7 @@ public class PatternDetection extends AbstractRefinement {
                 }
             }
         });
-        return detector;
-    }
-
-    // TODO: pull up refactoring?
-    private void redirectInternalRelations(OTTopologyFragmentRefinementModel prm, TNodeTemplate currentDetectorNode,
-                                           TNodeTemplate matchingNodeInTopology, TTopologyTemplate topology) {
-        if (prm.getStayMappings() != null) {
-            topology.getRelationshipTemplates()
-                .forEach(relationship ->
-                    // get all relationships that are either the source or the target of the current node that is staying
-                    this.getStayMappings(currentDetectorNode, prm)
-                        .forEach(staying -> {
-                                String targetId = relationship.getTargetElement().getRef().getId();
-                                String sourceId = relationship.getSourceElement().getRef().getId();
-
-                                String idInRefinementStructure = staying.getDetectorElement().getId();
-
-                                if (targetId.equals(idInRefinementStructure)) {
-                                    LOGGER.debug("Redirecting target of {} to {}", relationship.getId(), matchingNodeInTopology.getId());
-                                    relationship.getTargetElement().setRef(matchingNodeInTopology);
-                                } else if (sourceId.equals(idInRefinementStructure)) {
-                                    LOGGER.debug("Redirecting source of {} to {}", relationship.getId(), matchingNodeInTopology.getId());
-                                    relationship.getSourceElement().setRef(matchingNodeInTopology);
-                                }
-                            }
-                        )
-                );
-        }
+        return refinementStructure;
     }
 
     private TEntityTemplate getEntityCorrespondence(ToscaEntity entity, GraphMapping<ToscaNode, ToscaEdge> graphMapping) {
@@ -181,13 +171,7 @@ public class PatternDetection extends AbstractRefinement {
         }
     }
 
-    private Stream<OTStayMapping> getStayMappings(TEntityTemplate current, OTTopologyFragmentRefinementModel prm) {
-        return prm.getStayMappings() == null ? Stream.of() :
-            prm.getStayMappings().stream()
-                .filter(stayMapping -> stayMapping.getRefinementElement().getId().equals(current.getId()));
-    }
-
     private boolean hasStayMappings(TEntityTemplate current, OTTopologyFragmentRefinementModel prm) {
-        return this.getStayMappings(current, prm).findFirst().isPresent();
+        return getStayMappingsOfCurrentElement(prm, current).findFirst().isPresent();
     }
 }

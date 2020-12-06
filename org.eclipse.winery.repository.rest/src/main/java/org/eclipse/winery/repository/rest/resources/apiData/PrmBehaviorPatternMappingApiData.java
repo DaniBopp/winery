@@ -36,7 +36,7 @@ public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement 
             .setDetectorElement(detectorEntityTemplate)
             .setBehaviorPattern(behaviorPattern)
             .setRefinementElement(refinementEntityTemplate)
-            .setRefinementProperty(this.refinementProperty)
+            .setProperty(this.refinementProperty)
         );
     }
 }

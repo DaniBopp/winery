@@ -15,7 +15,6 @@
 package org.eclipse.winery.topologygraph.matching;
 
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
@@ -45,32 +44,32 @@ public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
     }
 
     private boolean propsCompatible(ToscaEntity left, ToscaEntity right) {
-        TEntityTemplate refinementElement = this.prm.getRefinementTopology().getNodeTemplateOrRelationshipTemplate()
+        TEntityTemplate detectorElement = this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
-        TEntityTemplate candidate = !this.prm.getRefinementTopology().getNodeTemplateOrRelationshipTemplate()
+        TEntityTemplate candidateElement = !this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
 
         boolean compatible = true;
         // TODO the implementation (currently) works for KV properties only
-        if (ModelUtilities.hasKvProperties(refinementElement) && ModelUtilities.hasKvProperties(candidate)) {
-            Map<String, String> refinementProps = ModelUtilities.getPropertiesKV(refinementElement);
-            Map<String, String> candidateProps = ModelUtilities.getPropertiesKV(candidate);
+        if (ModelUtilities.hasKvProperties(detectorElement) && ModelUtilities.hasKvProperties(candidateElement)) {
+            Map<String, String> detectorProps = ModelUtilities.getPropertiesKV(detectorElement);
+            Map<String, String> candidateProps = ModelUtilities.getPropertiesKV(candidateElement);
 
-            compatible = refinementProps.entrySet().stream()
-                .allMatch(refinementProp -> refinementProp.getValue() == null || refinementProp.getValue().isEmpty()
-                    || refinementProp.getValue().equalsIgnoreCase(candidateProps.get(refinementProp.getKey()))
-                    || relatedBehaviorPatternCanBeRemoved(refinementElement, refinementProp.getKey())
+            compatible = detectorProps.entrySet().stream()
+                .allMatch(detectorProp -> detectorProp.getValue() == null || detectorProp.getValue().isEmpty()
+                    || detectorProp.getValue().equalsIgnoreCase(candidateProps.get(detectorProp.getKey()))
+                    || relatedBehaviorPatternCanBeRemoved(detectorElement, detectorProp.getKey())
                 );
         }
         return compatible;
     }
 
-    private boolean relatedBehaviorPatternCanBeRemoved(TEntityTemplate refinementElement, String propKey) {
+    private boolean relatedBehaviorPatternCanBeRemoved(TEntityTemplate detectorElement, String propKey) {
         return this.prm.getBehaviorPatternMappings().stream()
             // props that are referenced by a behavior pattern mapping can be ignored
             // as the related behavior pattern can be removed later if the props aren't compatible
-            .anyMatch(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
-                && bpm.getRefinementProperty().getKey().equals(propKey)
+            .anyMatch(bpm -> bpm.getDetectorElement().getId().equals(detectorElement.getId())
+                && bpm.getProperty().getKey().equals(propKey)
             );
     }
 }

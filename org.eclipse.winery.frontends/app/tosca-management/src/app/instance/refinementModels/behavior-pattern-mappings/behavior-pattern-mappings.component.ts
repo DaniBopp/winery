@@ -44,7 +44,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
         { title: 'Behavior Pattern', name: 'behaviorPattern', sort: true },
         { title: 'Refinement Element', name: 'refinementElement', sort: true },
         {
-            title: 'Refinement Element Property', name: 'refinementProperty', sort: true,
+            title: 'Refinement Element Property', name: 'property', sort: true,
             display: item => new KvProperty(item.key, item.value).toString()
         },
     ];
@@ -121,7 +121,7 @@ export class BehaviorPatternMappingsComponent implements OnInit {
     }
 
     refinementPropertySelected(element: SelectData) {
-        this.mapping.refinementProperty = this.refinementProperties
+        this.mapping.property = this.refinementProperties
             .find(prop => prop.toString() === element.id);
     }
 

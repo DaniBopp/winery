@@ -34,9 +34,9 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     @NonNull
     private String behaviorPattern;
 
-    @XmlElement(name = "RefinementProperty", required = true)
+    @XmlElement(name = "Property", required = true)
     @NonNull
-    private PropertyKV refinementProperty;
+    private PropertyKV property;
 
     @Deprecated // used for XML deserialization of API request content
     public OTBehaviorPatternMapping() {
@@ -45,7 +45,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     public OTBehaviorPatternMapping(Builder builder) {
         super(builder);
         this.behaviorPattern = builder.behaviorPattern;
-        this.refinementProperty = builder.refinementProperty;
+        this.property = builder.property;
     }
 
     public String getBehaviorPattern() {
@@ -56,12 +56,12 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
         this.behaviorPattern = behaviorPattern;
     }
 
-    public PropertyKV getRefinementProperty() {
-        return refinementProperty;
+    public PropertyKV getProperty() {
+        return property;
     }
 
-    public void setRefinementProperty(PropertyKV refinementProperty) {
-        this.refinementProperty = refinementProperty;
+    public void setProperty(PropertyKV property) {
+        this.property = property;
     }
 
     @Override
@@ -78,7 +78,7 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
     public static class Builder extends OTPrmMapping.Builder<Builder> {
 
         private String behaviorPattern;
-        private PropertyKV refinementProperty;
+        private PropertyKV property;
 
         public Builder() {
             super();
@@ -93,8 +93,8 @@ public class OTBehaviorPatternMapping extends OTPrmMapping {
             return self();
         }
 
-        public OTBehaviorPatternMapping.Builder setRefinementProperty(PropertyKV refinementProperty) {
-            this.refinementProperty = refinementProperty;
+        public OTBehaviorPatternMapping.Builder setProperty(PropertyKV property) {
+            this.property = property;
             return self();
         }
 

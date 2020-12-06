@@ -20,7 +20,7 @@ export class BehaviorPatternMapping extends RefinementMappings {
     public static readonly idPrefix = 'behaviorPatternMap';
 
     public behaviorPattern: string;
-    public refinementProperty: KvProperty;
+    public property: KvProperty;
 
     constructor(id: number) {
         super(id);

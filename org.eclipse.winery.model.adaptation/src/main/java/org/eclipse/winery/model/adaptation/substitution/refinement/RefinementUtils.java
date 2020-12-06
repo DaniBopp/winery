@@ -52,13 +52,6 @@ public abstract class RefinementUtils {
                 .collect(Collectors.toList());
     }
 
-    public static List<TEntityTemplate> getStayingDetectorElements(OTTopologyFragmentRefinementModel prm) {
-        return prm.getStayMappings() == null ? new ArrayList<>() :
-            prm.getStayMappings().stream()
-                .map(OTPrmMapping::getDetectorElement)
-                .collect(Collectors.toList());
-    }
-
     public static boolean isStayPlaceholder(TEntityTemplate element, OTTopologyFragmentRefinementModel prm) {
         return getStayPlaceholders(prm).stream()
             .anyMatch(stayingElement -> stayingElement.getId().equals(element.getId()));

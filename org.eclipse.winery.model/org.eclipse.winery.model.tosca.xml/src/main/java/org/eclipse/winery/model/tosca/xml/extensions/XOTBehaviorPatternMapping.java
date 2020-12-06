@@ -33,9 +33,9 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
     @NonNull
     private String behaviorPattern;
 
-    @XmlElement(name = "RefinementProperty", required = true)
+    @XmlElement(name = "Property", required = true)
     @NonNull
-    private PropertyKV refinementProperty;
+    private PropertyKV property;
 
     @Deprecated // used for XML deserialization of API request content
     public XOTBehaviorPatternMapping() {
@@ -44,7 +44,7 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
     public XOTBehaviorPatternMapping(Builder builder) {
         super(builder);
         this.behaviorPattern = builder.behaviorPattern;
-        this.refinementProperty = builder.refinementProperty;
+        this.property = builder.property;
     }
 
     public String getBehaviorPattern() {
@@ -55,12 +55,12 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
         this.behaviorPattern = behaviorPattern;
     }
 
-    public PropertyKV getRefinementProperty() {
-        return refinementProperty;
+    public PropertyKV getProperty() {
+        return property;
     }
 
-    public void setRefinementProperty(PropertyKV refinementProperty) {
-        this.refinementProperty = refinementProperty;
+    public void setProperty(PropertyKV property) {
+        this.property = property;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
     public static class Builder extends XOTPrmMapping.Builder<Builder> {
 
         private String behaviorPattern;
-        private PropertyKV refinementProperty;
+        private PropertyKV property;
 
         public Builder() {
             super();
@@ -92,8 +92,8 @@ public class XOTBehaviorPatternMapping extends XOTPrmMapping {
             return self();
         }
 
-        public Builder setRefinementProperty(PropertyKV refinementProperty) {
-            this.refinementProperty = refinementProperty;
+        public Builder setProperty(PropertyKV property) {
+            this.property = property;
             return self();
         }
 

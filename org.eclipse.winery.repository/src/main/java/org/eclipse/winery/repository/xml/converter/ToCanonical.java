@@ -1208,9 +1208,9 @@ public class ToCanonical {
     private OTBehaviorPatternMapping convert(XOTBehaviorPatternMapping xml) {
         OTBehaviorPatternMapping.Builder builder = new OTBehaviorPatternMapping.Builder(xml.getId());
         builder.setBehaviorPattern(xml.getBehaviorPattern());
-        builder.setRefinementProperty(new PropertyKV(
-            xml.getRefinementProperty().getKey(),
-            xml.getRefinementProperty().getValue()
+        builder.setProperty(new PropertyKV(
+            xml.getProperty().getKey(),
+            xml.getProperty().getValue()
         ));
         fillOTPrmMappingProperties(builder, xml);
         return builder.build();
