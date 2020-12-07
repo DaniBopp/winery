@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement {
 
     public String behaviorPattern;
-    public PropertyKV refinementProperty;
+    public PropertyKV property;
 
     public PrmBehaviorPatternMappingApiData() {
     }
@@ -36,7 +36,7 @@ public class PrmBehaviorPatternMappingApiData extends AbstractPrmMappingElement 
             .setDetectorElement(detectorEntityTemplate)
             .setBehaviorPattern(behaviorPattern)
             .setRefinementElement(refinementEntityTemplate)
-            .setProperty(this.refinementProperty)
+            .setProperty(this.property)
         );
     }
 }
