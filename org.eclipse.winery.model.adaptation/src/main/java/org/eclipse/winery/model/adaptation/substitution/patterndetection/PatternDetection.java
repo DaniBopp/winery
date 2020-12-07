@@ -26,9 +26,9 @@ import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TNodeTemplate;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
+import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
@@ -134,32 +134,34 @@ public class PatternDetection extends TopologyFragmentRefinement {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TTopologyTemplate refinementStructure = prm.getRefinementStructure();
 
-        prm.getBehaviorPatternMappings().forEach(bpm -> {
-            ToscaEntity detectorElement = refinement.getDetectorGraph()
-                .getEntity(bpm.getDetectorElement().getId()).get();
-            TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
-
-            if (ModelUtilities.hasKvProperties(detectorElement.getTemplate()) &&
-                ModelUtilities.hasKvProperties(candidateElement)) {
-                String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
-                    .get(bpm.getProperty().getKey());
-                String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
-                    .get(bpm.getProperty().getKey());
-
-                if (detectorValue != null && !detectorValue.isEmpty() &&
-                    !detectorValue.equalsIgnoreCase(candidateValue)) {
-                    TEntityTemplate refinementElement = refinementStructure.getNodeTemplateOrRelationshipTemplate().stream()
-                        .filter(et -> et.getId().equals(bpm.getRefinementElement().getId()))
-                        .findFirst().get();
-                    List<TPolicy> policies = ((HasPolicies) refinementElement).getPolicies().getPolicy();
-
-                    policies.stream()
-                        .filter(p -> p.getName().equals(bpm.getBehaviorPattern()))
-                        .findFirst()
-                        .ifPresent(policies::remove);
-                }
+        for (TEntityTemplate refinementElement : refinementStructure.getNodeTemplateOrRelationshipTemplate()) {
+            if (((HasPolicies) refinementElement).getPolicies() == null) {
+                continue;
             }
-        });
+            ((HasPolicies) refinementElement).getPolicies().getPolicy().removeIf(refinementPolicy -> {
+                for (OTBehaviorPatternMapping bpm : prm.getBehaviorPatternMappings()) {
+                    if (!bpm.getRefinementElement().getId().equals(refinementElement.getId())
+                        || !bpm.getBehaviorPattern().equals(refinementPolicy.getName())) {
+                        continue;
+                    }
+                    ToscaEntity detectorElement = refinement.getDetectorGraph()
+                        .getEntity(bpm.getDetectorElement().getId()).get();
+                    TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
+
+                    if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
+                        && ModelUtilities.hasKvProperties(candidateElement)) {
+                        String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
+                            .get(bpm.getProperty().getKey());
+                        String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
+                            .get(bpm.getProperty().getKey());
+                        return detectorValue != null && !detectorValue.isEmpty() &&
+                            !detectorValue.equalsIgnoreCase(candidateValue);
+                    }
+                }
+                // behavior patterns without mapping will be removed
+                return true;
+            });
+        }
         return refinementStructure;
     }
 
