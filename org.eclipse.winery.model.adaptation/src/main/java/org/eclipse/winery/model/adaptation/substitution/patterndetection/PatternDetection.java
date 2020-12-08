@@ -139,36 +139,38 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     private void removeIncompatibleBehaviorPatterns(RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        TTopologyTemplate refinementStructure = prm.getRefinementStructure();
 
-        for (TEntityTemplate refinementElement : refinementStructure.getNodeTemplateOrRelationshipTemplate()) {
-            if (((HasPolicies) refinementElement).getPolicies() == null) {
-                continue;
-            }
-            ((HasPolicies) refinementElement).getPolicies().getPolicy().removeIf(refinementPolicy -> {
-                for (OTBehaviorPatternMapping bpm : prm.getBehaviorPatternMappings()) {
-                    if (!bpm.getRefinementElement().getId().equals(refinementElement.getId())
-                        || !bpm.getBehaviorPattern().equals(refinementPolicy.getName())) {
-                        continue;
-                    }
-                    ToscaEntity detectorElement = refinement.getDetectorGraph()
-                        .getEntity(bpm.getDetectorElement().getId()).get();
-                    TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
+        prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
+            .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
+            .forEach(refinementElement -> ((HasPolicies) refinementElement).getPolicies().getPolicy()
 
-                    if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
-                        && ModelUtilities.hasKvProperties(candidateElement)) {
-                        String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
-                            .get(bpm.getProperty().getKey());
-                        String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
-                            .get(bpm.getProperty().getKey());
-                        return detectorValue != null && !detectorValue.isEmpty() &&
-                            !detectorValue.equalsIgnoreCase(candidateValue);
-                    }
-                }
-                // behavior patterns without mapping will be removed
-                return true;
-            });
-        }
+                .removeIf(refinementPolicy -> {
+                    List<OTBehaviorPatternMapping> bpms = prm.getBehaviorPatternMappings().stream()
+                        .filter(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
+                            && bpm.getBehaviorPattern().equals(refinementPolicy.getName()))
+                        .collect(Collectors.toList());
+
+                    return bpms.isEmpty() || bpms.stream().anyMatch(bpm -> {
+                        ToscaEntity detectorElement = refinement.getDetectorGraph()
+                            .getEntity(bpm.getDetectorElement().getId()).get();
+                        TEntityTemplate candidateElement = getEntityCorrespondence(
+                            detectorElement,
+                            refinement.getGraphMapping()
+                        );
+
+                        if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
+                            && ModelUtilities.hasKvProperties(candidateElement)) {
+                            String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
+                                .get(bpm.getProperty().getKey());
+                            String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
+                                .get(bpm.getProperty().getKey());
+                            return detectorValue != null && !detectorValue.isEmpty() &&
+                                !detectorValue.equalsIgnoreCase(candidateValue);
+                        }
+                        return false;
+                    });
+                })
+            );
     }
 
     private TEntityTemplate getEntityCorrespondence(ToscaEntity entity, GraphMapping<ToscaNode, ToscaEdge> graphMapping) {
