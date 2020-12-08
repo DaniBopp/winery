@@ -967,7 +967,6 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
             this.addPolicyIcon(currentRelationships);
             this.updateRelName(currentRelationships);
         }
-        console.log(this.allRelationshipTemplates);
     }
 
     /**
@@ -1678,7 +1677,6 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
                 }
             }
         });
-        console.log(this.entityTypes.relationshipTypes);
         this.entityTypes.relationshipTypes.forEach(value => this.assignRelTypes(value));
         this.policyService.policyEventListener().subscribe(data => this.toggleModalHandler(data));
         this.reqCapRelationshipService.sourceSelectedEvent.subscribe(source => this.setSource(source));

@@ -36,12 +36,16 @@ import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
+import org.eclipse.winery.model.tosca.TExtensibleElements;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
+import org.eclipse.winery.repository.rest.resources._support.AbstractComponentInstanceResource;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
 import org.eclipse.winery.repository.rest.resources.apiData.PrmPermutationMappingApiData;
+import org.eclipse.winery.repository.rest.resources.entitytypes.EntityTypeResource;
+import org.eclipse.winery.repository.rest.resources.entitytypes.relationshiptypes.RelationshipTypeResource;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
 
@@ -78,7 +82,7 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     public List<TRelationshipType> getPrmMappingTypes() {
         List<TRelationshipType> relationshipTypesForPrmMappingTypes = new ArrayList<>();
         List<String> mappingTypes = new
-            ArrayList<>(Arrays.asList("Permutation Mapping", "Relationship Mapping", "Deployment Artifact Mapping"));
+            ArrayList<>(Arrays.asList("PermutationMapping", "RelationshipMapping", "DeploymentArtifactMapping"));
 
         for (String mappingType : mappingTypes) {
             TRelationshipType relType = new TRelationshipType(new

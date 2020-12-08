@@ -351,11 +351,7 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
             currentType = $event.target.innerText.replace(/\n/g, '').replace(/\s+/g, '');
         }
 
-        // TODO
-        console.log(this.entityTypes.relationshipTypes);
         this.entityTypes.relationshipTypes.some(relType => {
-            console.log(relType);
-            console.log(currentType);
             if (relType.qName.includes(currentType)) {
                 this.sendSelectedRelationshipType.emit(relType);
                 return true;

@@ -260,12 +260,12 @@ export class WineryComponent implements OnInit, AfterViewInit {
             case 'relationshipTypes': {
                 this.entityTypes.relationshipTypes = [];
                 entityTypeJSON.forEach((relationshipType: EntityType) => {
-                    console.log(relationshipType);
                     let visuals = this.entityTypes.relationshipVisuals
                         .find(value => value.typeId === relationshipType.qName);
 
                     if (this.templateParameter.elementPath === this.prmModellingUrlFragment) {
                         visuals = new Visuals('black', null, null, null, null);
+                        relationshipType = this.createPrmRelationshipType(relationshipType);
                     }
                     this.entityTypes.relationshipTypes
                         .push(new VisualEntityType(
@@ -282,6 +282,20 @@ export class WineryComponent implements OnInit, AfterViewInit {
             }
         }
     }
+
+    createPrmRelationshipType(relationshipType: EntityType): EntityType {
+        const serviceTemplateOrNodeTypeOrNodeTypeImplementation = relationshipType;
+        // @ts-ignore
+        relationshipType.namespace = relationshipType.targetNamespace;
+        relationshipType.qName = '{' + relationshipType.namespace + '}' + relationshipType.name;
+        relationshipType.id = relationshipType.name;
+
+        const newRelationshipType = new EntityType(relationshipType.id, relationshipType.qName, relationshipType.name,
+            relationshipType.namespace, null, { serviceTemplateOrNodeTypeOrNodeTypeImplementation: [EntityType] });
+        newRelationshipType.full.serviceTemplateOrNodeTypeOrNodeTypeImplementation.push(serviceTemplateOrNodeTypeOrNodeTypeImplementation);
+        return newRelationshipType;
+    }
+
 
     initiateLocalRendering(tmData: TopologyModelerInputDataFormat): void {
         const nodeTemplateArray: Array<TNodeTemplate>
@@ -351,11 +365,8 @@ export class WineryComponent implements OnInit, AfterViewInit {
             // PolicyTemplates
             this.initEntityType(JSON[7], 'policyTemplates');
 
-
             // Relationship Types
             this.initEntityType(JSON[8], 'relationshipTypes');
-            console.log(JSON[8]);
-
 
             // NodeTypes
             this.initEntityType(JSON[9], 'unGroupedNodeTypes');

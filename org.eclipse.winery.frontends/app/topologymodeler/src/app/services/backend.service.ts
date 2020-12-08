@@ -34,6 +34,7 @@ import { WineryRepositoryConfigurationService } from '../../../../tosca-manageme
 import { takeLast } from 'rxjs/operators';
 import { TPolicy } from '../models/policiesModalData';
 import { SubMenuItems } from '../../../../tosca-management/src/app/model/subMenuItem';
+import { QName } from '../models/qname';
 
 /**
  * Responsible for interchanging data between the app and the server.
@@ -257,7 +258,7 @@ export class BackendService {
     }
 
     /**
-     * Request all Prm Mapping Types as Relationship Types fot graphic prm modelling
+     * Request all Prm Mapping Types as Relationship Types for graphic prm modelling
      */
     requestPrmMappingTypes(): Observable<any> {
         return this.http.get(this.configuration.parentElementUrl + 'prmmappingtypes');
