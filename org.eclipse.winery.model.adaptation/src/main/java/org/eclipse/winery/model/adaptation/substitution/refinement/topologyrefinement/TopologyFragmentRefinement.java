@@ -115,22 +115,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
         );
 
         // only for UI: position the imported nodes next to the nodes to be refined
-        Map<String, Map<String, Integer>> coordinates = calculateNewPositions(
-            refinement.getDetectorGraph(),
-            refinement.getGraphMapping(),
-            refinement.getRefinementModel().getRefinementTopology()
-        );
-        refinement.getRefinementModel().getRefinementTopology().getNodeTemplates().stream()
-            .filter(element -> !stayingRefinementElements.contains(element))
-            .forEach(node -> {
-                    Map<String, Integer> newCoordinates = coordinates.get(node.getId());
-                    TNodeTemplate nodeTemplate = topology.getNodeTemplate(idMapping.get(node.getId()));
-                    if (nodeTemplate != null) {
-                        nodeTemplate.setX(newCoordinates.get("x").toString());
-                        nodeTemplate.setY(newCoordinates.get("y").toString());
-                    }
-                }
-            );
+        repositionRefinementNodes(refinement, topology, stayingRefinementElements, idMapping);
 
         // iterate over the detector nodes
         refinement.getDetectorGraph().vertexSet().forEach(vertex -> {
@@ -305,6 +290,26 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                         return edgeCorrespondence.getTemplate().equals(relationship);
                     });
             });
+    }
+
+    protected void repositionRefinementNodes(RefinementCandidate refinement, TTopologyTemplate topology,
+                                             List<TEntityTemplate> stayingRefinementElements, Map<String, String> idMapping) {
+        Map<String, Map<String, Integer>> coordinates = calculateNewPositions(
+            refinement.getDetectorGraph(),
+            refinement.getGraphMapping(),
+            refinement.getRefinementModel().getRefinementTopology()
+        );
+        refinement.getRefinementModel().getRefinementTopology().getNodeTemplates().stream()
+            .filter(element -> !stayingRefinementElements.contains(element))
+            .forEach(node -> {
+                    Map<String, Integer> newCoordinates = coordinates.get(node.getId());
+                    TNodeTemplate nodeTemplate = topology.getNodeTemplate(idMapping.get(node.getId()));
+                    if (nodeTemplate != null) {
+                        nodeTemplate.setX(newCoordinates.get("x").toString());
+                        nodeTemplate.setY(newCoordinates.get("y").toString());
+                    }
+                }
+            );
     }
 
     private Map<String, Map<String, Integer>> calculateNewPositions(ToscaGraph detectorGraph, GraphMapping<ToscaNode, ToscaEdge> mapping, TTopologyTemplate refinementStructure) {

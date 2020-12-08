@@ -40,16 +40,15 @@ import org.eclipse.winery.topologygraph.model.ToscaEntity;
 import org.eclipse.winery.topologygraph.model.ToscaNode;
 
 import org.jgrapht.GraphMapping;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class PatternDetection extends TopologyFragmentRefinement {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PatternDetection.class);
-
     public PatternDetection(RefinementChooser refinementChooser) {
         super(refinementChooser, PatternRefinementModelId.class, "detected");
+        swapDetectorWithRefinement();
+    }
 
+    private void swapDetectorWithRefinement() {
         // for pattern detection the detector is the "refinement" and the refinement is the detector
         this.refinementModels.stream()
             .map(prm -> (OTTopologyFragmentRefinementModel) prm)
@@ -97,19 +96,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
             throw new UnsupportedOperationException("The refinement candidate is not a PRM!");
         }
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-
-        TTopologyTemplate refinementStructure = removeIncompatibleBehaviorPatterns(refinement);
-        List<TEntityTemplate> stayingElements = RefinementUtils.getStayingRefinementElements(prm).stream()
-            // behavior patterns removed -> stayingElement.equals() doesn't work anymore -> get equivalent elements
-            .map(staying -> refinementStructure.getNodeTemplateOrRelationshipTemplate().stream()
-                .filter(entityTemplate -> entityTemplate.getId().equals(staying.getId()))
-                .findFirst().get())
-            .collect(Collectors.toList());
-        Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
-            refinementStructure,
-            topology,
-            stayingElements
-        );
+        Map<String, String> idMapping = importRefinementStructure(refinement, topology);
 
         refinement.getDetectorGraph().vertexSet().forEach(vertex -> {
             TNodeTemplate candidateElement = refinement.getGraphMapping().getVertexCorrespondence(vertex, false)
@@ -130,7 +117,27 @@ public class PatternDetection extends TopologyFragmentRefinement {
         });
     }
 
-    private TTopologyTemplate removeIncompatibleBehaviorPatterns(RefinementCandidate refinement) {
+    private Map<String, String> importRefinementStructure(RefinementCandidate refinement, TTopologyTemplate topology) {
+        OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
+        removeIncompatibleBehaviorPatterns(refinement);
+
+        List<TEntityTemplate> stayingElements = RefinementUtils.getStayingRefinementElements(prm).stream()
+            // behavior patterns removed -> stayingElement.equals() doesn't work anymore -> get equivalent elements
+            .map(staying -> prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
+                .filter(entityTemplate -> entityTemplate.getId().equals(staying.getId()))
+                .findFirst().get())
+            .collect(Collectors.toList());
+        Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
+            prm.getRefinementStructure(),
+            topology,
+            stayingElements
+        );
+
+        repositionRefinementNodes(refinement, topology, stayingElements, idMapping);
+        return idMapping;
+    }
+
+    private void removeIncompatibleBehaviorPatterns(RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TTopologyTemplate refinementStructure = prm.getRefinementStructure();
 
@@ -162,7 +169,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 return true;
             });
         }
-        return refinementStructure;
     }
 
     private TEntityTemplate getEntityCorrespondence(ToscaEntity entity, GraphMapping<ToscaNode, ToscaEdge> graphMapping) {
