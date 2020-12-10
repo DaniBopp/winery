@@ -115,17 +115,22 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 topology.getNodeTemplateOrRelationshipTemplate().remove(candidateElement);
             }
         });
+
+        prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
+            .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
+            .forEach(refinementElement -> {
+                String newId = idMapping.get(refinementElement.getId());
+                TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
+                removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
+            });
     }
 
     private Map<String, String> importRefinementStructure(RefinementCandidate refinement, TTopologyTemplate topology) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        removeIncompatibleBehaviorPatterns(refinement);
 
         List<TEntityTemplate> stayingElements = RefinementUtils.getStayingRefinementElements(prm).stream()
-            // behavior patterns removed -> stayingElement.equals() doesn't work anymore -> get equivalent elements
-            .map(staying -> prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
-                .filter(entityTemplate -> entityTemplate.getId().equals(staying.getId()))
-                .findFirst().get())
+            // TODO
+            .map(stayingElement -> prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate(stayingElement.getId()))
             .collect(Collectors.toList());
         Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
             prm.getRefinementStructure(),
@@ -137,40 +142,37 @@ public class PatternDetection extends TopologyFragmentRefinement {
         return idMapping;
     }
 
-    private void removeIncompatibleBehaviorPatterns(RefinementCandidate refinement) {
+    private void removeIncompatibleBehaviorPatterns(TEntityTemplate refinementElement, TEntityTemplate addedElement,
+                                                    RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
-        prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
-            .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
-            .forEach(refinementElement -> ((HasPolicies) refinementElement).getPolicies().getPolicy()
+        ((HasPolicies) addedElement).getPolicies().getPolicy()
+            .removeIf(policy -> {
+                List<OTBehaviorPatternMapping> bpms = prm.getBehaviorPatternMappings().stream()
+                    .filter(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
+                        && bpm.getBehaviorPattern().equals(policy.getName()))
+                    .collect(Collectors.toList());
 
-                .removeIf(refinementPolicy -> {
-                    List<OTBehaviorPatternMapping> bpms = prm.getBehaviorPatternMappings().stream()
-                        .filter(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
-                            && bpm.getBehaviorPattern().equals(refinementPolicy.getName()))
-                        .collect(Collectors.toList());
+                return bpms.isEmpty() || bpms.stream().anyMatch(bpm -> {
+                    ToscaEntity detectorElement = refinement.getDetectorGraph()
+                        .getEntity(bpm.getDetectorElement().getId()).get();
+                    TEntityTemplate candidateElement = getEntityCorrespondence(
+                        detectorElement,
+                        refinement.getGraphMapping()
+                    );
 
-                    return bpms.isEmpty() || bpms.stream().anyMatch(bpm -> {
-                        ToscaEntity detectorElement = refinement.getDetectorGraph()
-                            .getEntity(bpm.getDetectorElement().getId()).get();
-                        TEntityTemplate candidateElement = getEntityCorrespondence(
-                            detectorElement,
-                            refinement.getGraphMapping()
-                        );
-
-                        if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
-                            && ModelUtilities.hasKvProperties(candidateElement)) {
-                            String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
-                                .get(bpm.getProperty().getKey());
-                            String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
-                                .get(bpm.getProperty().getKey());
-                            return detectorValue != null && !detectorValue.isEmpty() &&
-                                !detectorValue.equalsIgnoreCase(candidateValue);
-                        }
-                        return false;
-                    });
-                })
-            );
+                    if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
+                        && ModelUtilities.hasKvProperties(candidateElement)) {
+                        String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
+                            .get(bpm.getProperty().getKey());
+                        String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
+                            .get(bpm.getProperty().getKey());
+                        return detectorValue != null && !detectorValue.isEmpty() &&
+                            !detectorValue.equalsIgnoreCase(candidateValue);
+                    }
+                    return false;
+                });
+            });
     }
 
     private TEntityTemplate getEntityCorrespondence(ToscaEntity entity, GraphMapping<ToscaNode, ToscaEdge> graphMapping) {
