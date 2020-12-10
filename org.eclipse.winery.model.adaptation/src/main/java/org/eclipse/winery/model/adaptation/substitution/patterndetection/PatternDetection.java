@@ -90,8 +90,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
         Map<String, String> idMapping = super.applyRefinement(refinement, topology);
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
-        // TODO: fix stay elements being inserted
-
         // TODO: add compatible behavior patterns to staying elements
         prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
             // element may not have been inserted because of stay mappings
@@ -102,6 +100,13 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
                 removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
             });
+
+        // stay elements have been falsely imported (equals does not work anymore because of swapping?)
+        topology.getNodeTemplateOrRelationshipTemplate()
+            .removeIf(entityTemplate -> prm.getRelationMappings() != null
+                && prm.getStayMappings().stream()
+                .anyMatch(stayMapping -> stayMapping.getRefinementElement().getId().equals(entityTemplate.getId()))
+            );
         return idMapping;
     }
 
