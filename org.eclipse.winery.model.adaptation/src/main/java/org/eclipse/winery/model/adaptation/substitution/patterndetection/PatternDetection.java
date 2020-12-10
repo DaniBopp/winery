@@ -26,6 +26,7 @@ import org.eclipse.winery.model.adaptation.substitution.refinement.topologyrefin
 import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
+import org.eclipse.winery.model.tosca.TPolicies;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
@@ -90,24 +91,48 @@ public class PatternDetection extends TopologyFragmentRefinement {
         Map<String, String> idMapping = super.applyRefinement(refinement, topology);
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
-        // TODO: add compatible behavior patterns to staying elements
-        prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
-            // element may not have been inserted because of stay mappings
-            .filter(refinementElement -> idMapping.get(refinementElement.getId()) != null)
-            .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
-            .forEach(refinementElement -> {
-                String newId = idMapping.get(refinementElement.getId());
-                TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
-                removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
-            });
-
         // stay elements have been falsely imported (equals does not work anymore because of swapping?)
         topology.getNodeTemplateOrRelationshipTemplate()
             .removeIf(entityTemplate -> prm.getRelationMappings() != null
                 && prm.getStayMappings().stream()
                 .anyMatch(stayMapping -> stayMapping.getRefinementElement().getId().equals(entityTemplate.getId()))
             );
+
+        prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
+            .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
+            .forEach(refinementElement -> {
+                String newId = idMapping.get(refinementElement.getId());
+                TEntityTemplate addedElement = newId != null ? topology.getNodeTemplateOrRelationshipTemplate(newId) : null;
+
+                if (addedElement == null) {
+                    // for staying elements
+                    addCompatibleBehaviorPatterns(refinementElement, refinement);
+                } else {
+                    removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
+                }
+            });
         return idMapping;
+    }
+
+    private void addCompatibleBehaviorPatterns(TEntityTemplate refinementElement, RefinementCandidate refinement) {
+        OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
+        TEntityTemplate detectorElement = prm.getStayMappings().stream()
+            .filter(stayMapping -> stayMapping.getRefinementElement().getId().equals(refinementElement.getId()))
+            .findFirst().get()
+            .getDetectorElement();
+        ToscaEntity detectorEntity = refinement.getDetectorGraph().getEntity(detectorElement.getId()).get();
+        TEntityTemplate stayingElement = getEntityCorrespondence(detectorEntity, refinement.getGraphMapping());
+
+        TPolicies behaviorPatterns = ((HasPolicies) refinementElement).getPolicies();
+        TPolicies policies = ((HasPolicies) stayingElement).getPolicies();
+        if (behaviorPatterns != null) {
+            if (policies != null) {
+                policies.getPolicy().addAll(behaviorPatterns.getPolicy());
+            } else {
+                ((HasPolicies) stayingElement).setPolicies(behaviorPatterns);
+            }
+            removeIncompatibleBehaviorPatterns(refinementElement, stayingElement, refinement);
+        }
     }
 
     private void removeIncompatibleBehaviorPatterns(TEntityTemplate refinementElement, TEntityTemplate addedElement,
@@ -116,19 +141,23 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
         ((HasPolicies) addedElement).getPolicies().getPolicy()
             .removeIf(policy -> {
+                // TODO: duplicate behavior patterns?
+                boolean isExistingPolicy = ((HasPolicies) refinementElement).getPolicies().getPolicy().stream()
+                    .noneMatch(behaviorPattern -> behaviorPattern.getPolicyType().equals(policy.getPolicyType())
+                        && behaviorPattern.getName().equals(policy.getName()));
+
                 List<OTBehaviorPatternMapping> bpms = prm.getBehaviorPatternMappings().stream()
                     .filter(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
                         && bpm.getBehaviorPattern().equals(policy.getName()))
                     .collect(Collectors.toList());
 
-                return bpms.isEmpty() || bpms.stream().anyMatch(bpm -> {
+                boolean propsNotCompatible = bpms.stream().anyMatch(bpm -> {
                     ToscaEntity detectorElement = refinement.getDetectorGraph()
                         .getEntity(bpm.getDetectorElement().getId()).get();
                     TEntityTemplate candidateElement = getEntityCorrespondence(
                         detectorElement,
                         refinement.getGraphMapping()
                     );
-
                     if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
                         && ModelUtilities.hasKvProperties(candidateElement)) {
                         String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
@@ -140,6 +169,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
                     }
                     return false;
                 });
+                return !isExistingPolicy && (bpms.isEmpty() || propsNotCompatible);
             });
     }
 
