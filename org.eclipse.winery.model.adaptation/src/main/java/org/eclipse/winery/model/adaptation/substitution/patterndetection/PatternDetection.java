@@ -117,6 +117,8 @@ public class PatternDetection extends TopologyFragmentRefinement {
         });
 
         prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
+            // element may not have been inserted because of stay mappings
+            .filter(refinementElement -> idMapping.get(refinementElement.getId()) != null)
             .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
             .forEach(refinementElement -> {
                 String newId = idMapping.get(refinementElement.getId());
