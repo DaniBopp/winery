@@ -98,7 +98,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
     }
 
     @Override
-    public void applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology) {
+    public Map<String, String> applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology) {
         if (!(refinement.getRefinementModel() instanceof OTTopologyFragmentRefinementModel)) {
             throw new UnsupportedOperationException("The refinement candidate is not a PRM!");
         }
@@ -115,7 +115,22 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
         );
 
         // only for UI: position the imported nodes next to the nodes to be refined
-        repositionRefinementNodes(refinement, topology, stayingRefinementElements, idMapping);
+        Map<String, Map<String, Integer>> coordinates = calculateNewPositions(
+            refinement.getDetectorGraph(),
+            refinement.getGraphMapping(),
+            refinement.getRefinementModel().getRefinementTopology()
+        );
+        refinement.getRefinementModel().getRefinementTopology().getNodeTemplates().stream()
+            .filter(element -> !stayingRefinementElements.contains(element))
+            .forEach(node -> {
+                    Map<String, Integer> newCoordinates = coordinates.get(node.getId());
+                    TNodeTemplate nodeTemplate = topology.getNodeTemplate(idMapping.get(node.getId()));
+                    if (nodeTemplate != null) {
+                        nodeTemplate.setX(newCoordinates.get("x").toString());
+                        nodeTemplate.setY(newCoordinates.get("y").toString());
+                    }
+                }
+            );
 
         // iterate over the detector nodes
         refinement.getDetectorGraph().vertexSet().forEach(vertex -> {
@@ -147,6 +162,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                     topology.getNodeTemplateOrRelationshipTemplate().remove(relationshipTemplate);
                 }
             });
+        return idMapping;
     }
 
     private boolean applyDeploymentArtifactMapping(RefinementCandidate refinement, TNodeTemplate detectorNode, TNodeTemplate matchingNode,
@@ -290,26 +306,6 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                         return edgeCorrespondence.getTemplate().equals(relationship);
                     });
             });
-    }
-
-    protected void repositionRefinementNodes(RefinementCandidate refinement, TTopologyTemplate topology,
-                                             List<TEntityTemplate> stayingRefinementElements, Map<String, String> idMapping) {
-        Map<String, Map<String, Integer>> coordinates = calculateNewPositions(
-            refinement.getDetectorGraph(),
-            refinement.getGraphMapping(),
-            refinement.getRefinementModel().getRefinementTopology()
-        );
-        refinement.getRefinementModel().getRefinementTopology().getNodeTemplates().stream()
-            .filter(element -> !stayingRefinementElements.contains(element))
-            .forEach(node -> {
-                    Map<String, Integer> newCoordinates = coordinates.get(node.getId());
-                    TNodeTemplate nodeTemplate = topology.getNodeTemplate(idMapping.get(node.getId()));
-                    if (nodeTemplate != null) {
-                        nodeTemplate.setX(newCoordinates.get("x").toString());
-                        nodeTemplate.setY(newCoordinates.get("y").toString());
-                    }
-                }
-            );
     }
 
     private Map<String, Map<String, Integer>> calculateNewPositions(ToscaGraph detectorGraph, GraphMapping<ToscaNode, ToscaEdge> mapping, TTopologyTemplate refinementStructure) {

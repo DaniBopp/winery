@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -111,5 +112,5 @@ public abstract class AbstractRefinement extends AbstractSubstitution {
 
     public abstract boolean isApplicable(RefinementCandidate candidate, TTopologyTemplate topology);
 
-    public abstract void applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology);
+    public abstract Map<String, String> applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology);
 }

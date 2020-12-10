@@ -16,23 +16,22 @@ package org.eclipse.winery.model.adaptation.substitution.patterndetection;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementChooser;
-import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementUtils;
 import org.eclipse.winery.model.adaptation.substitution.refinement.topologyrefinement.TopologyFragmentRefinement;
 import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
-import org.eclipse.winery.model.tosca.TNodeTemplate;
-import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
+import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
-import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.topologygraph.matching.IToscaMatcher;
 import org.eclipse.winery.topologygraph.matching.ToscaPatternDetectionMatcher;
 import org.eclipse.winery.topologygraph.model.ToscaEdge;
@@ -57,20 +56,16 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 prm.setDetector(prm.getRefinementTopology());
                 prm.setRefinementTopology(refinement);
 
-                if (prm.getStayMappings() != null) {
-                    prm.getStayMappings().forEach(stayMapping -> {
-                        TEntityTemplate refinementElement = stayMapping.getDetectorElement();
-                        stayMapping.setDetectorElement(stayMapping.getRefinementElement());
-                        stayMapping.setRefinementElement(refinementElement);
-                    });
-                }
-                if (prm.getBehaviorPatternMappings() != null) {
-                    prm.getBehaviorPatternMappings().forEach(bpm -> {
-                        TEntityTemplate refinementElement = bpm.getDetectorElement();
-                        bpm.setDetectorElement(bpm.getRefinementElement());
-                        bpm.setRefinementElement(refinementElement);
-                    });
-                }
+                // TODO: other mappings
+                Stream.of(
+                    prm.getRelationMappings().stream().map(OTPrmMapping.class::cast),
+                    prm.getStayMappings().stream().map(OTPrmMapping.class::cast),
+                    prm.getBehaviorPatternMappings().stream().map(OTPrmMapping.class::cast)
+                ).flatMap(Function.identity()).forEach(mapping -> {
+                    TEntityTemplate refinementElement = mapping.getDetectorElement();
+                    mapping.setDetectorElement(mapping.getRefinementElement());
+                    mapping.setRefinementElement(refinementElement);
+                });
             });
     }
 
@@ -86,36 +81,18 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     @Override
     public boolean isApplicable(RefinementCandidate candidate, TTopologyTemplate topology) {
-        // TODO
-        return true;
+        return super.isApplicable(candidate, topology);
     }
 
     @Override
-    public void applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology) {
-        if (!(refinement.getRefinementModel() instanceof OTTopologyFragmentRefinementModel)) {
-            throw new UnsupportedOperationException("The refinement candidate is not a PRM!");
-        }
+    public Map<String, String> applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology) {
+        // TODO: better option than returning from super?
+        Map<String, String> idMapping = super.applyRefinement(refinement, topology);
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-        Map<String, String> idMapping = importRefinementStructure(refinement, topology);
 
-        refinement.getDetectorGraph().vertexSet().forEach(vertex -> {
-            TNodeTemplate candidateElement = refinement.getGraphMapping().getVertexCorrespondence(vertex, false)
-                .getTemplate();
+        // TODO: fix stay elements being inserted
 
-            redirectInternalRelations(prm, vertex.getTemplate(), candidateElement, topology);
-            if (!hasStayMappings(vertex.getTemplate(), prm)) {
-                topology.getNodeTemplateOrRelationshipTemplate().remove(candidateElement);
-            }
-        });
-
-        refinement.getDetectorGraph().edgeSet().forEach(edge -> {
-            TRelationshipTemplate candidateElement = refinement.getGraphMapping().getEdgeCorrespondence(edge, false)
-                .getTemplate();
-            if (!hasStayMappings(edge.getTemplate(), prm)) {
-                topology.getNodeTemplateOrRelationshipTemplate().remove(candidateElement);
-            }
-        });
-
+        // TODO: add compatible behavior patterns to staying elements
         prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
             // element may not have been inserted because of stay mappings
             .filter(refinementElement -> idMapping.get(refinementElement.getId()) != null)
@@ -125,22 +102,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
                 removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
             });
-    }
-
-    private Map<String, String> importRefinementStructure(RefinementCandidate refinement, TTopologyTemplate topology) {
-        OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
-
-        List<TEntityTemplate> stayingElements = RefinementUtils.getStayingRefinementElements(prm).stream()
-            // TODO
-            .map(stayingElement -> prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate(stayingElement.getId()))
-            .collect(Collectors.toList());
-        Map<String, String> idMapping = BackendUtils.mergeTopologyTemplateAinTopologyTemplateB(
-            prm.getRefinementStructure(),
-            topology,
-            stayingElements
-        );
-
-        repositionRefinementNodes(refinement, topology, stayingElements, idMapping);
         return idMapping;
     }
 
@@ -183,9 +144,5 @@ public class PatternDetection extends TopologyFragmentRefinement {
         } else {
             return graphMapping.getEdgeCorrespondence((ToscaEdge) entity, false).getTemplate();
         }
-    }
-
-    private boolean hasStayMappings(TEntityTemplate current, OTTopologyFragmentRefinementModel prm) {
-        return getStayMappingsOfCurrentElement(prm, current).findFirst().isPresent();
     }
 }
