@@ -253,10 +253,8 @@ public abstract class AbstractComponentInstanceResource implements Comparable<Ab
         }
         CsarExportOptions options = new CsarExportOptions();
         options.setAddToProvenance(Objects.nonNull(addToProvenance));
-
-        boolean dependencyFlag = Boolean.parseBoolean(includeDependencies);
-
-        return RestUtils.getCsarOfSelectedResource(this, options, dependencyFlag);
+        options.setIncludeDependencies(Objects.nonNull(includeDependencies));
+        return RestUtils.getCsarOfSelectedResource(this, options);
     }
 
     /**
@@ -297,7 +295,7 @@ public abstract class AbstractComponentInstanceResource implements Comparable<Ab
         } else {
             CsarExportOptions options = new CsarExportOptions();
             options.setAddToProvenance(Objects.nonNull(addToProvenance));
-            return RestUtils.getCsarOfSelectedResource(this, options, Objects.nonNull(includeDependencies));
+            return RestUtils.getCsarOfSelectedResource(this, options);
         }
     }
 
@@ -311,7 +309,7 @@ public abstract class AbstractComponentInstanceResource implements Comparable<Ab
             String filename = getXmlId().getEncoded() + Constants.SUFFIX_CSAR;
             File file = new File(Environments.getInstance().getRepositoryConfig().getCsarOutputPath(), filename);
             try (FileOutputStream fos = new FileOutputStream(file, false)) {
-                exporter.writeCsar(RepositoryFactory.getRepository(), getId(), fos, exportConfiguration, false);
+                exporter.writeCsar(RepositoryFactory.getRepository(), getId(), fos, exportConfiguration);
                 LOGGER.debug("CSAR export to filesystem lasted {}", Duration.between(LocalDateTime.now(), start).toString());
             } catch (Exception e) {
                 LOGGER.error("Error exporting CSAR to filesystem", e);

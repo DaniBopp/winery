@@ -128,7 +128,7 @@ public class CsarExporter {
     }
 
     public CompletableFuture<String> writeCsarAndSaveManifestInProvenanceLayer(IRepository repository, DefinitionsChildId entryId, OutputStream out)
-        throws IOException, RepositoryCorruptException, AccountabilityException, InterruptedException, ExecutionException, JAXBException {
+        throws IOException, RepositoryCorruptException, AccountabilityException, InterruptedException, ExecutionException {
         LocalDateTime start = LocalDateTime.now();
         AccountabilityManager accountabilityManager = AccountabilityManagerFactory.getAccountabilityManager();
 
@@ -136,7 +136,7 @@ public class CsarExporter {
         exportConfiguration.put(CsarExportConfiguration.INCLUDE_HASHES.name(), null);
         exportConfiguration.put(CsarExportConfiguration.STORE_IMMUTABLY.name(), null);
 
-        String manifestString = this.writeCsar(repository, entryId, out, exportConfiguration, false);
+        String manifestString = this.writeCsar(repository, entryId, out, exportConfiguration);
         String qNameWithComponentVersionOnly = VersionUtils.getQNameWithComponentVersionOnly(entryId);
         LOGGER.debug("Preparing CSAR export (provenance) lasted {}", Duration.between(LocalDateTime.now(), start).toString());
 
@@ -150,72 +150,21 @@ public class CsarExporter {
      * @param out     the output stream to write to
      * @return the TOSCA meta file for the generated Csar
      */
-    public String writeCsar(IRepository repository, DefinitionsChildId entryId, OutputStream out, Map<String, Object> exportConfiguration, boolean includeDependencies)
-        throws IOException, RepositoryCorruptException, InterruptedException, AccountabilityException, ExecutionException, JAXBException {
+    public String writeCsar(IRepository repository, DefinitionsChildId entryId, OutputStream out, Map<String, Object> exportConfiguration)
+        throws IOException, RepositoryCorruptException, InterruptedException, AccountabilityException, ExecutionException {
         CsarExporter.LOGGER.trace("Starting CSAR export with {}", entryId.toString());
 
         Map<CsarContentProperties, CsarEntry> refMap = new HashMap<>();
         ToscaExportUtil exporter = new ToscaExportUtil();
         ExportedState exportedState = new ExportedState();
-        ExportedState exportedStateTemp = new ExportedState();
         DefinitionsChildId currentId = entryId;
-        DefinitionsChildId loopId;
         Collection<DefinitionsChildId> referencedIds;
-        SelfContainmentUtil packager = new SelfContainmentUtil();
-
-        if (includeDependencies) {
-            ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(QName.valueOf(entryId.getQName() + "-self"));
-            if (repository.exists(newServiceTemplateId)) {
-                entryId = newServiceTemplateId;
-                currentId = newServiceTemplateId;
-            } else {
-                repository.duplicate(entryId, newServiceTemplateId);
-                entryId = newServiceTemplateId;
-                currentId = newServiceTemplateId;
-
-                Collection<DefinitionsChildId> nodeTypeIds = repository.getReferencedDefinitionsChildIds(currentId);
-
-                for (DefinitionsChildId nodeTypeId : nodeTypeIds) {
-                    loopId = nodeTypeId;
-                    if (loopId instanceof NodeTypeId) {
-                        do {
-                            Collection<DefinitionsChildId> referencedDefinitionsChildIds = repository.getReferencedDefinitionsChildIds(loopId);
-
-                            Map<String, Collection<DefinitionsChildId>> updatedIds = packager.manageSelfContainedDefinitions(referencedDefinitionsChildIds, repository);
-
-                            if (!updatedIds.isEmpty()) {
-                                TNodeTypeImplementation nodeTypeImplementation = getNodeTypeImplementation(nodeTypeId.getQName(), repository);
-                                SelfContainmentUtil.createNodeTypeImplSelf((NodeTypeId) nodeTypeId, nodeTypeImplementation, repository, updatedIds);
-                            }
-
-                            exportedStateTemp.flagAsExported(loopId);
-                            exportedStateTemp.flagAsExportRequired(referencedDefinitionsChildIds);
-
-                            loopId = exportedStateTemp.pop();
-                        } while (loopId != null);
-                    } else if (loopId instanceof ArtifactTemplateId) {
-                        Collection<DefinitionsChildId> onlyArtifactList = new HashSet<>();
-                        onlyArtifactList.add(loopId);
-                        Map<String, Collection<DefinitionsChildId>> updatedArtifactIds = packager.manageSelfContainedDefinitions(onlyArtifactList, repository);
-
-                        if (!updatedArtifactIds.isEmpty()) {
-                            Collection<DefinitionsChildId> deploymentArtifacts = updatedArtifactIds.get("DeploymentArtifacts");
-                            if (!deploymentArtifacts.isEmpty()) {
-                                TopologyTemplateUtils.updateServiceTemplateWithResolvedDa(entryId, repository, loopId, deploymentArtifacts.iterator().next());
-                            }
-                        }
-                    }
-                }
-
-                currentId = entryId;
-            }
-        }
 
         // Process definitions and referenced files
         do {
             String definitionsPathInsideCSAR = CsarExporter.getDefinitionsPathInsideCSAR(repository, currentId);
             CsarContentProperties definitionsFileProperties = new CsarContentProperties(definitionsPathInsideCSAR);
-            referencedIds = exporter.processTOSCA(repository, currentId, definitionsFileProperties, refMap, exportConfiguration, includeDependencies);
+            referencedIds = exporter.processTOSCA(repository, currentId, definitionsFileProperties, refMap, exportConfiguration);
 
             // for each entryId add license and readme files (if they exist) to the refMap
             addLicenseAndReadmeFiles(repository, currentId, refMap);
@@ -686,5 +635,59 @@ public class CsarExporter {
         out.closeEntry();
 
         return manifestString;
+    }
+
+    public void writeSelfContainedCsar(IRepository repository, DefinitionsChildId entryId, OutputStream output, Map<String, Object> exportConfiguration) throws IOException, RepositoryCorruptException, InterruptedException, AccountabilityException, ExecutionException {
+        ExportedState exportedStateTemp = new ExportedState();
+        DefinitionsChildId currentId = entryId;
+        DefinitionsChildId loopId;
+        SelfContainmentUtil packager = new SelfContainmentUtil();
+        ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(QName.valueOf(entryId.getQName() + "-self"));
+        
+        if (!repository.exists(newServiceTemplateId)) {
+            repository.duplicate(entryId, newServiceTemplateId);
+            entryId = newServiceTemplateId;
+
+            Collection<DefinitionsChildId> nodeTypeIds = repository.getReferencedDefinitionsChildIds(currentId);
+
+            try {
+                for (DefinitionsChildId nodeTypeId : nodeTypeIds) {
+                    loopId = nodeTypeId;
+                    if (loopId instanceof NodeTypeId) {
+                        do {
+                            Collection<DefinitionsChildId> referencedDefinitionsChildIds = repository.getReferencedDefinitionsChildIds(loopId);
+
+                            Map<String, Collection<DefinitionsChildId>> updatedIds = null;
+                            updatedIds = packager.manageSelfContainedDefinitions(referencedDefinitionsChildIds, repository);
+
+                            if (!updatedIds.isEmpty()) {
+                                TNodeTypeImplementation nodeTypeImplementation = getNodeTypeImplementation(nodeTypeId.getQName(), repository);
+                                SelfContainmentUtil.createNodeTypeImplSelf((NodeTypeId) nodeTypeId, nodeTypeImplementation, repository, updatedIds);
+                            }
+
+                            exportedStateTemp.flagAsExported(loopId);
+                            exportedStateTemp.flagAsExportRequired(referencedDefinitionsChildIds);
+
+                            loopId = exportedStateTemp.pop();
+                        } while (loopId != null);
+                    } else if (loopId instanceof ArtifactTemplateId) {
+                        Collection<DefinitionsChildId> onlyArtifactList = new HashSet<>();
+                        onlyArtifactList.add(loopId);
+                        Map<String, Collection<DefinitionsChildId>> updatedArtifactIds = packager.manageSelfContainedDefinitions(onlyArtifactList, repository);
+
+                        if (!updatedArtifactIds.isEmpty()) {
+                            Collection<DefinitionsChildId> deploymentArtifacts = updatedArtifactIds.get("DeploymentArtifacts");
+                            if (!deploymentArtifacts.isEmpty()) {
+                                TopologyTemplateUtils.updateServiceTemplateWithResolvedDa(entryId, repository, loopId, deploymentArtifacts.iterator().next());
+                            }
+                        }
+                    }
+                }
+            } catch (JAXBException e) {
+                e.printStackTrace();
+            }
+        }
+
+        this.writeCsar(repository, newServiceTemplateId, output, exportConfiguration);
     }
 }

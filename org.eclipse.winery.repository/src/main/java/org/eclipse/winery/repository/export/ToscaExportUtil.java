@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.SortedSet;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
 import org.eclipse.winery.common.RepositoryFileReference;
@@ -83,8 +82,8 @@ public class ToscaExportUtil {
 
     public void writeTOSCA(IRepository repository, DefinitionsChildId id,
                            Map<String, Object> conf, OutputStream outputStream)
-        throws RepositoryCorruptException, IOException, JAXBException {
-        this.processTOSCA(repository, id, new CsarContentProperties(id.getQName().toString()), conf, false);
+        throws RepositoryCorruptException, IOException {
+        this.processTOSCA(repository, id, new CsarContentProperties(id.getQName().toString()), conf);
         CsarEntry csarEntry = this.referencesToPathInCSARMap.values().stream()
             .filter(entry -> entry instanceof XMLDefinitionsBasedCsarEntry)
             .findFirst()
@@ -101,14 +100,13 @@ public class ToscaExportUtil {
      *
      * @param id                  the id of the definition child to export
      * @param exportConfiguration the configuration map for the export.
-     * @param includeDependencies the option to build and include dependency files.
      * @return a collection of DefinitionsChildIds referenced by the given component
      */
     public Collection<DefinitionsChildId> processTOSCA(IRepository repository, DefinitionsChildId id, CsarContentProperties definitionsFileProperties
-        , Map<String, Object> exportConfiguration, boolean includeDependencies) throws IOException, RepositoryCorruptException, JAXBException {
+        , Map<String, Object> exportConfiguration) throws IOException, RepositoryCorruptException {
         this.exportConfiguration = exportConfiguration;
         this.initializeExport();
-        return this.processDefinitionsElement(repository, id, definitionsFileProperties, includeDependencies);
+        return this.processDefinitionsElement(repository, id, definitionsFileProperties);
     }
 
     private void initializeExport() {
@@ -131,14 +129,13 @@ public class ToscaExportUtil {
      * @param id                        the component instance to export
      * @param exportConfiguration       Configures the exporter
      * @param referencesToPathInCSARMap collects the references to export. It is updated during the export
-     * @param includeDependencies       the option to build and include dependency files.
      * @return a collection of DefinitionsChildIds referenced by the given component
      */
     protected Collection<DefinitionsChildId> processTOSCA(IRepository repository, DefinitionsChildId id, CsarContentProperties definitionsFileProperties,
                                                           Map<CsarContentProperties, CsarEntry> referencesToPathInCSARMap,
-                                                          Map<String, Object> exportConfiguration, boolean includeDependencies) throws IOException, RepositoryCorruptException, JAXBException {
+                                                          Map<String, Object> exportConfiguration) throws IOException, RepositoryCorruptException {
         this.referencesToPathInCSARMap = referencesToPathInCSARMap;
-        return this.processTOSCA(repository, id, definitionsFileProperties, exportConfiguration, includeDependencies);
+        return this.processTOSCA(repository, id, definitionsFileProperties, exportConfiguration);
     }
 
     /**
@@ -147,8 +144,8 @@ public class ToscaExportUtil {
      * @return a collection of DefinitionsChildIds referenced by the given component
      * @throws RepositoryCorruptException if tcId does not exist
      */
-    protected Collection<DefinitionsChildId> processDefinitionsElement(IRepository repository, DefinitionsChildId tcId, CsarContentProperties definitionsFileProperties, boolean includeDependencies)
-        throws RepositoryCorruptException, IOException, JAXBException {
+    protected Collection<DefinitionsChildId> processDefinitionsElement(IRepository repository, DefinitionsChildId tcId, CsarContentProperties definitionsFileProperties)
+        throws RepositoryCorruptException, IOException {
 
         if (!repository.exists(tcId)) {
             String error = "Component instance " + tcId.toReadableString() + " does not exist.";
@@ -196,10 +193,6 @@ public class ToscaExportUtil {
         }
 
         Collection<DefinitionsChildId> referencedDefinitionsChildIds = repository.getReferencedDefinitionsChildIds(tcId);
-
-        if (includeDependencies && tcId instanceof NodeTypeId) {
-            referencedDefinitionsChildIds = SelfContainmentUtil.fetchSelfNodeTypeImpls(referencedDefinitionsChildIds, repository);
-        }
 
         // adjust imports: add imports of definitions to it
         Collection<TImport> imports = new ArrayList<>();
