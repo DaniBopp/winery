@@ -11,7 +11,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.repository.export;
+package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,9 +38,6 @@ import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
 import org.eclipse.winery.model.tosca.constants.OpenToscaBaseTypes;
 import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
-import org.eclipse.winery.repository.converter.support.DockerUtils;
-import org.eclipse.winery.repository.converter.support.ScriptUtils;
-import org.eclipse.winery.repository.converter.support.VirtualMachineUtils;
 import org.eclipse.winery.repository.exceptions.RepositoryCorruptException;
 
 import org.apache.commons.lang3.StringUtils;
@@ -131,7 +128,7 @@ public class SelfContainmentUtil {
                     artifactTemplates.put("DeploymentArtifacts", deploymentArtifactList);
                     continue;
                 } else {
-                    ArtifactTemplateId artifactTemplateForUbuntuNew = VirtualMachineUtils.createSelfArtifactTemplateForUbuntu((NodeTypeImplementationId) childid, repository);
+                    ArtifactTemplateId artifactTemplateForUbuntuNew = VirtualMachinePlugin.createSelfArtifactTemplateForUbuntu((NodeTypeImplementationId) childid, repository);
                     deploymentArtifactList.add(artifactTemplateForUbuntuNew);
                     artifactTemplates.put("DeploymentArtifacts", deploymentArtifactList);
                     continue;
@@ -144,7 +141,7 @@ public class SelfContainmentUtil {
                     DefinitionsChildId supportedId = doesSelfContainedArtifactTemplateExist(childid, repository);
                     if (supportedId == null) {
                         supportedId = createArtifactTemplate((ArtifactTemplateId) childid, repository, "-self");
-                        DockerUtils.buildDockerImage((ArtifactTemplateId) supportedId, repository);
+                        DockerPlugin.buildDockerImage((ArtifactTemplateId) supportedId, repository);
                     }
                     deploymentArtifactList.add(supportedId);
                     artifactTemplates.put("DeploymentArtifacts", deploymentArtifactList);
@@ -160,7 +157,7 @@ public class SelfContainmentUtil {
                     ArtifactTemplateId newScriptDeploymentArtifactId = createArtifactTemplate((ArtifactTemplateId) childid, repository, "-self");
                     ArtifactTemplateId updatedScriptArtifactId = createArtifactTemplate((ArtifactTemplateId) childid, repository, "-script-self");
 
-                    String updatedScript = ScriptUtils.resolveScriptArtifact(newScriptDeploymentArtifactId, updatedScriptArtifactId, repository);
+                    String updatedScript = ScriptPlugin.resolveScriptArtifact(newScriptDeploymentArtifactId, updatedScriptArtifactId, repository);
 
                     if (StringUtils.isNotBlank(updatedScript)) {
                         implementationArtifactList.add(updatedScriptArtifactId);

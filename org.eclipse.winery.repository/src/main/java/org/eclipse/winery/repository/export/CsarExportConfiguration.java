@@ -24,5 +24,10 @@ public enum CsarExportConfiguration {
     /**
      * Indicates the hash of all files referenced in the exported CSAR should be included in the tosca meta-file
      */
-    INCLUDE_HASHES;
+    INCLUDE_HASHES,
+
+    /**
+     * Indicates that the CSAR should be self contained. 
+     */
+    INCLUDE_DEPENDENCIES;
 }

@@ -11,7 +11,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.repository.converter.support;
+package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -28,10 +28,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
+import javax.xml.namespace.QName;
+
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
 import org.eclipse.winery.model.tosca.TArtifactTemplate;
+import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
+import org.eclipse.winery.model.tosca.constants.OpenToscaBaseTypes;
 import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
+import org.eclipse.winery.repository.converter.support.Utils;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
@@ -40,21 +45,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ScriptUtils {
+public class ScriptPlugin implements SelfContainmentPlugin {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScriptUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScriptPlugin.class);
 
     public static String resolveScriptArtifact(ArtifactTemplateId newScriptDeploymentArtifactId, ArtifactTemplateId updatedScriptArtifactId, IRepository repository) throws IOException {
 
         TArtifactTemplate scriptDeploymentArtifactTemplate = repository.getElement(newScriptDeploymentArtifactId);
         String targetFileLocation = Utils.findFileLocation(scriptDeploymentArtifactTemplate, repository);
+            
 
         TArtifactTemplate updatedScriptArtifactTemplate = repository.getElement(updatedScriptArtifactId);
         String originalScriptFileLocation = Utils.findFileLocation(updatedScriptArtifactTemplate, repository);
 
         String tempLocation = new File(targetFileLocation).getParentFile().getPath();
         new File(tempLocation).mkdirs();
-        ScriptUtils.deleteFilesInFolder(new File(tempLocation), "tar");
+        ScriptPlugin.deleteFilesInFolder(new File(tempLocation), "tar");
 
         final BufferedReader br = new BufferedReader(new FileReader(originalScriptFileLocation));
         String line = null;
@@ -224,5 +230,20 @@ public class ScriptUtils {
         } catch (Exception e) {
             LOGGER.error("Error while downloading artifacts...", e);
         }
+    }
+
+    @Override
+    public boolean canHandleArtifactType(QName artifactType) {
+        return artifactType != null && artifactType.equals(OpenToscaBaseTypes.scriptArtifactType);
+    }
+
+    @Override
+    public boolean canHandleNodeType(QName nodeType) {
+        return false;
+    }
+
+    @Override
+    public GeneratedArtifacts downloadDependencies(QName selfContainedArtifactId, TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+        return null;
     }
 }

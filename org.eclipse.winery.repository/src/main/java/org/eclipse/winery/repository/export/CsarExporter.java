@@ -27,7 +27,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
 import org.eclipse.winery.accountability.AccountabilityManager;
@@ -55,7 +53,6 @@ import org.eclipse.winery.common.ids.IdNames;
 import org.eclipse.winery.common.ids.admin.NamespacesId;
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
 import org.eclipse.winery.common.ids.definitions.DefinitionsChildId;
-import org.eclipse.winery.common.ids.definitions.NodeTypeId;
 import org.eclipse.winery.common.ids.definitions.NodeTypeImplementationId;
 import org.eclipse.winery.common.ids.definitions.ServiceTemplateId;
 import org.eclipse.winery.common.version.VersionUtils;
@@ -70,7 +67,7 @@ import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
 import org.eclipse.winery.repository.backend.SelfServiceMetaDataUtils;
 import org.eclipse.winery.repository.backend.constants.MediaTypes;
-import org.eclipse.winery.repository.converter.support.TopologyTemplateUtils;
+import org.eclipse.winery.repository.backend.selfcontainmentpackager.SelfContainmentPacker;
 import org.eclipse.winery.repository.datatypes.ids.elements.DirectoryId;
 import org.eclipse.winery.repository.datatypes.ids.elements.SelfServiceMetaDataId;
 import org.eclipse.winery.repository.datatypes.ids.elements.ServiceTemplateSelfServiceFilesDirectoryId;
@@ -221,22 +218,6 @@ public class CsarExporter {
             // create manifest file and add it to archive
             return this.addManifest(repository, entryId, refMap, zos, exportConfiguration);
         }
-    }
-
-    private TNodeTypeImplementation getNodeTypeImplementation(QName nodeType, IRepository repository) {
-        return repository.getAllDefinitionsChildIds(NodeTypeImplementationId.class)
-            .stream()
-            .map(repository::getElement)
-            .filter(entry -> entry.getNodeType().equals(nodeType))
-            .findAny().orElse(null);
-    }
-
-    private List<TNodeTypeImplementation> getNodeTypeImplementationList(QName nodeType, IRepository repository) {
-        return repository.getAllDefinitionsChildIds(NodeTypeImplementationId.class)
-            .stream()
-            .map(repository::getElement)
-            .filter(entry -> entry.getNodeType().equals(nodeType))
-            .collect(Collectors.toList());
     }
 
     private void calculateFileHashes(Map<CsarContentProperties, CsarEntry> files) {
@@ -638,56 +619,9 @@ public class CsarExporter {
     }
 
     public void writeSelfContainedCsar(IRepository repository, DefinitionsChildId entryId, OutputStream output, Map<String, Object> exportConfiguration) throws IOException, RepositoryCorruptException, InterruptedException, AccountabilityException, ExecutionException {
-        ExportedState exportedStateTemp = new ExportedState();
-        DefinitionsChildId currentId = entryId;
-        DefinitionsChildId loopId;
-        SelfContainmentUtil packager = new SelfContainmentUtil();
-        ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(QName.valueOf(entryId.getQName() + "-self"));
-        
-        if (!repository.exists(newServiceTemplateId)) {
-            repository.duplicate(entryId, newServiceTemplateId);
-            entryId = newServiceTemplateId;
-
-            Collection<DefinitionsChildId> nodeTypeIds = repository.getReferencedDefinitionsChildIds(currentId);
-
-            try {
-                for (DefinitionsChildId nodeTypeId : nodeTypeIds) {
-                    loopId = nodeTypeId;
-                    if (loopId instanceof NodeTypeId) {
-                        do {
-                            Collection<DefinitionsChildId> referencedDefinitionsChildIds = repository.getReferencedDefinitionsChildIds(loopId);
-
-                            Map<String, Collection<DefinitionsChildId>> updatedIds = null;
-                            updatedIds = packager.manageSelfContainedDefinitions(referencedDefinitionsChildIds, repository);
-
-                            if (!updatedIds.isEmpty()) {
-                                TNodeTypeImplementation nodeTypeImplementation = getNodeTypeImplementation(nodeTypeId.getQName(), repository);
-                                SelfContainmentUtil.createNodeTypeImplSelf((NodeTypeId) nodeTypeId, nodeTypeImplementation, repository, updatedIds);
-                            }
-
-                            exportedStateTemp.flagAsExported(loopId);
-                            exportedStateTemp.flagAsExportRequired(referencedDefinitionsChildIds);
-
-                            loopId = exportedStateTemp.pop();
-                        } while (loopId != null);
-                    } else if (loopId instanceof ArtifactTemplateId) {
-                        Collection<DefinitionsChildId> onlyArtifactList = new HashSet<>();
-                        onlyArtifactList.add(loopId);
-                        Map<String, Collection<DefinitionsChildId>> updatedArtifactIds = packager.manageSelfContainedDefinitions(onlyArtifactList, repository);
-
-                        if (!updatedArtifactIds.isEmpty()) {
-                            Collection<DefinitionsChildId> deploymentArtifacts = updatedArtifactIds.get("DeploymentArtifacts");
-                            if (!deploymentArtifacts.isEmpty()) {
-                                TopologyTemplateUtils.updateServiceTemplateWithResolvedDa(entryId, repository, loopId, deploymentArtifacts.iterator().next());
-                            }
-                        }
-                    }
-                }
-            } catch (JAXBException e) {
-                e.printStackTrace();
-            }
-        }
-
+        SelfContainmentPacker selfContainmentPacker = new SelfContainmentPacker(repository);
+        DefinitionsChildId newServiceTemplateId = selfContainmentPacker.createSelfContainedVersion(entryId);
+        exportConfiguration.put(CsarExportConfiguration.INCLUDE_DEPENDENCIES.name(), true);
         this.writeCsar(repository, newServiceTemplateId, output, exportConfiguration);
     }
 }

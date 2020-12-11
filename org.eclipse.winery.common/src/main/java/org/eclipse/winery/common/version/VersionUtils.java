@@ -50,6 +50,9 @@ import io.github.adr.embedded.ADR;
 public class VersionUtils {
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("_(([^_]*)-)?w([0-9]+)(-wip([0-9]+))?$");
+
+    private static final String SELF_CONTAINMENT_VERSION_SUFFIX = WineryVersion.WINERY_VERSION_SEPARATOR + "selfContained";
+
     private static final int COMPONENT_VERSION_GROUP = 2;
     private static final int WINERY_VERSION_GROUP = 3;
     private static final int WIP_VERSION_GROUP_EXISTS = 4;
@@ -198,11 +201,19 @@ public class VersionUtils {
     }
 
     public static String getNewComponentVersionId(DefinitionsChildId oldId, String appendixName) {
-        WineryVersion version = VersionUtils.getVersion(oldId);
+        return getNewComponentVersionId(oldId.getQName(), appendixName);
+    }
+
+    public static String getNewComponentVersionId(QName oldId, String appendixName) {
+        WineryVersion version = VersionUtils.getVersion(oldId.getLocalPart());
         String oldVersion = version.toString();
 
-        if (Objects.nonNull(oldVersion) && !oldVersion.isEmpty()) {
-            version.setComponentVersion(oldVersion + "-" + appendixName);
+        if (Objects.nonNull(oldVersion) && !oldVersion.isEmpty() && appendixName != null && !appendixName.isEmpty()) {
+            if (appendixName.startsWith("-")) {
+                version.setComponentVersion(oldVersion + appendixName);
+            } else {
+                version.setComponentVersion(oldVersion + "-" + appendixName);
+            }
         } else {
             version.setComponentVersion(appendixName);
         }
@@ -210,7 +221,7 @@ public class VersionUtils {
         version.setWineryVersion(1);
         version.setWorkInProgressVersion(1);
 
-        return VersionUtils.getNameWithoutVersion(oldId) + WineryVersion.WINERY_NAME_FROM_VERSION_SEPARATOR + version.toString();
+        return VersionUtils.getNameWithoutVersion(oldId.getLocalPart()) + WineryVersion.WINERY_NAME_FROM_VERSION_SEPARATOR + version.toString();
     }
 
     public static WineryVersion getNewWineryVersion(List<WineryVersion> versions) {
@@ -229,5 +240,22 @@ public class VersionUtils {
         }
 
         return new WineryVersion(version[0].getComponentVersion(), version[0].getWineryVersion() + 1, 1);
+    }
+
+    public static boolean isSelfContained(DefinitionsChildId element) {
+        return isSelfContained(element.getQName());
+    }
+
+    public static boolean isSelfContained(QName element) {
+        WineryVersion version = getVersion(element.getLocalPart());
+        return version.getComponentVersion() != null
+            && version.getComponentVersion().endsWith(SELF_CONTAINMENT_VERSION_SUFFIX);
+    }
+
+    public static QName getSelfContainedVersion(QName element) {
+        return new QName(
+            element.getNamespaceURI(),
+            getNewComponentVersionId(element, SELF_CONTAINMENT_VERSION_SUFFIX)
+        );
     }
 }

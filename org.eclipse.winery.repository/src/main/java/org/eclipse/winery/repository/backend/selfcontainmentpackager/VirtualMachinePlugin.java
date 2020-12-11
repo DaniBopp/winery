@@ -11,7 +11,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.repository.converter.support;
+package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,14 +21,17 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import javax.xml.namespace.QName;
+
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
 import org.eclipse.winery.common.ids.definitions.NodeTypeImplementationId;
 import org.eclipse.winery.model.tosca.TArtifactTemplate;
+import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
 import org.eclipse.winery.model.tosca.constants.OpenToscaBaseTypes;
 import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
 
-public class VirtualMachineUtils {
+public class VirtualMachinePlugin implements SelfContainmentPlugin {
 
     public static ArtifactTemplateId createSelfArtifactTemplateForUbuntu(NodeTypeImplementationId childid, IRepository repository) throws IOException {
         String repositoryPath = repository.getRepositoryRoot().toString();
@@ -71,5 +74,22 @@ public class VirtualMachineUtils {
         ReadableByteChannel rbc = Channels.newChannel(website.openStream());
         FileOutputStream fos = new FileOutputStream(path);
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+    }
+
+    @Override
+    public boolean canHandleNodeType(QName nodeType) {
+        return nodeType != null && (
+            nodeType.toString().startsWith(OpenToscaBaseTypes.ubuntuNodeType.toString())
+        );
+    }
+
+    @Override
+    public boolean canHandleArtifactType(QName artifactType) {
+        return false;
+    }
+
+    @Override
+    public GeneratedArtifacts downloadDependencies(QName selfContainedArtifactId, TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+        return null;
     }
 }

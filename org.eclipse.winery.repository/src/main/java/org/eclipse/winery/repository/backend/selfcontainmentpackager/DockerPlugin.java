@@ -11,7 +11,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.repository.converter.support;
+package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,14 +19,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.ZipInputStream;
 
+import javax.xml.namespace.QName;
+
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
 import org.eclipse.winery.model.tosca.TArtifactTemplate;
+import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
+import org.eclipse.winery.model.tosca.constants.OpenToscaBaseTypes;
 import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
+import org.eclipse.winery.repository.converter.support.Utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-public class DockerUtils {
+public class DockerPlugin implements SelfContainmentPlugin {
 
     public static String buildDockerImage(ArtifactTemplateId artifactTemplateId, IRepository repository) throws IOException {
         TArtifactTemplate newDockerArtifactTemplate = repository.getElement(artifactTemplateId);
@@ -74,5 +79,20 @@ public class DockerUtils {
 
         pb.start()
             .waitFor();
+    }
+
+    @Override
+    public boolean canHandleArtifactType(QName artifactType) {
+        return false;
+    }
+
+    @Override
+    public boolean canHandleNodeType(QName nodeType) {
+        return nodeType != null && nodeType.equals(OpenToscaBaseTypes.dockerContainerArtifactType);
+    }
+
+    @Override
+    public GeneratedArtifacts downloadDependencies(QName selfContainedArtifactId, TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+        return null;
     }
 }
