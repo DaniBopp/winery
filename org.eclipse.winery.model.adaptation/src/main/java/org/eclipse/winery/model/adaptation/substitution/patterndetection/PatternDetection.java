@@ -28,6 +28,7 @@ import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TPolicies;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
+import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.extensions.OTBehaviorPatternMapping;
 import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
@@ -57,15 +58,24 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 prm.setDetector(prm.getRefinementTopology());
                 prm.setRefinementTopology(refinement);
 
-                // TODO: other mappings
                 Stream.of(
                     prm.getRelationMappings().stream().map(OTPrmMapping.class::cast),
+                    prm.getPermutationMappings().stream().map(OTPrmMapping.class::cast),
+                    prm.getAttributeMappings().stream().map(OTPrmMapping.class::cast),
                     prm.getStayMappings().stream().map(OTPrmMapping.class::cast),
+                    prm.getDeploymentArtifactMappings().stream().map(OTPrmMapping.class::cast),
                     prm.getBehaviorPatternMappings().stream().map(OTPrmMapping.class::cast)
                 ).flatMap(Function.identity()).forEach(mapping -> {
                     TEntityTemplate refinementElement = mapping.getDetectorElement();
                     mapping.setDetectorElement(mapping.getRefinementElement());
                     mapping.setRefinementElement(refinementElement);
+
+                    if (mapping instanceof OTAttributeMapping) {
+                        OTAttributeMapping attributeMapping = (OTAttributeMapping) mapping;
+                        String refinementProp = attributeMapping.getDetectorProperty();
+                        attributeMapping.setDetectorProperty(attributeMapping.getRefinementProperty());
+                        attributeMapping.setRefinementProperty(refinementProp);
+                    }
                 });
             });
     }
