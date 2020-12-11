@@ -36,16 +36,14 @@ import org.eclipse.winery.model.tosca.OTPatternRefinementModel;
 import org.eclipse.winery.model.tosca.OTPermutationMapping;
 import org.eclipse.winery.model.tosca.OTStayMapping;
 import org.eclipse.winery.model.tosca.OTTopologyFragmentRefinementModel;
-import org.eclipse.winery.model.tosca.TExtensibleElements;
 import org.eclipse.winery.model.tosca.TRelationshipTemplate;
 import org.eclipse.winery.model.tosca.TRelationshipType;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
-import org.eclipse.winery.repository.rest.resources._support.AbstractComponentInstanceResource;
 import org.eclipse.winery.repository.rest.resources._support.AbstractRefinementModelResource;
 import org.eclipse.winery.repository.rest.resources.apiData.PermutationsResponse;
+import org.eclipse.winery.repository.rest.resources.apiData.PrmDeploymentArtifactMappingApiData;
 import org.eclipse.winery.repository.rest.resources.apiData.PrmPermutationMappingApiData;
-import org.eclipse.winery.repository.rest.resources.entitytypes.EntityTypeResource;
-import org.eclipse.winery.repository.rest.resources.entitytypes.relationshiptypes.RelationshipTypeResource;
+import org.eclipse.winery.repository.rest.resources.apiData.RelationMappingApiData;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.PrmTemplateResource;
 import org.eclipse.winery.repository.rest.resources.servicetemplates.topologytemplates.TopologyTemplateResource;
 
@@ -96,31 +94,41 @@ public class TopologyFragmentRefinementModelResource extends AbstractRefinementM
     @PUT
     @Path("graphicPrmTopology")
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response savePrmMappingTopology(TTopologyTemplate topologyTemplate) {
+    public TopologyTemplateResource savePrmMappingTopology(TTopologyTemplate topologyTemplate) {
         for (TRelationshipTemplate relTemplate : topologyTemplate.getRelationshipTemplates()) {
-            if (relTemplate.getType().getLocalPart().startsWith("permutationMap")) {
-                PrmPermutationMappingApiData mapping = new PrmPermutationMappingApiData();
-                mapping.detectorElement = relTemplate.getSourceElement().getRef().toString();
-                mapping.refinementElement = relTemplate.getTargetElement().getRef().toString();
-                mapping.id = relTemplate.getName();
-
-                this.getPermutationMappings().addPermutationMapping(mapping);
+            if (relTemplate.getType().getLocalPart().startsWith("PermutationMapping")) {
+                PrmPermutationMappingApiData newPermutationMapping = new PrmPermutationMappingApiData();
+                newPermutationMapping.id = relTemplate.getId().substring(relTemplate.getId().indexOf("_") + 1);
+                newPermutationMapping.detectorElement = relTemplate.getSourceElement().getRef().getId();
+                newPermutationMapping.refinementElement = relTemplate.getTargetElement().getRef().getId();
+                this.getPermutationMappings().addPermutationMapping(newPermutationMapping);
             }
-            if (relTemplate.getType().getLocalPart().startsWith("relMap")) {
+            if (relTemplate.getType().getLocalPart().startsWith("RelationshipMapping")) {
+                RelationMappingApiData newRelationshipMapping = new RelationMappingApiData();
+                newRelationshipMapping.id = relTemplate.getId().substring(relTemplate.getId().indexOf("_") + 1);
+                newRelationshipMapping.detectorElement = relTemplate.getSourceElement().getRef().getId();
+                newRelationshipMapping.refinementElement = relTemplate.getTargetElement().getRef().getId();
+                newRelationshipMapping.direction = null;
+                newRelationshipMapping.relationType = null;
+                newRelationshipMapping.validSourceOrTarget = null;
+                this.getRelationMappings().addRelationMappingFromApi(newRelationshipMapping);
+            }
+            if (relTemplate.getType().getLocalPart().startsWith("StayMapping")) {
 
             }
-            if (relTemplate.getType().getLocalPart().startsWith("stayMap")) {
+            if (relTemplate.getType().getLocalPart().startsWith("AttributeMapping")) {
 
             }
-            if (relTemplate.getType().getLocalPart().startsWith("propMap")) {
-
-            }
-            if (relTemplate.getType().getLocalPart().startsWith("artifactMap")) {
-
+            if (relTemplate.getType().getLocalPart().startsWith("DeploymentArtifactMapping")) {
+                PrmDeploymentArtifactMappingApiData newDeploymentArtifactMapping = new PrmDeploymentArtifactMappingApiData();
+                newDeploymentArtifactMapping.id = relTemplate.getId().substring(relTemplate.getId().indexOf("_") + 1);
+                newDeploymentArtifactMapping.detectorElement = relTemplate.getSourceElement().getRef().getId();
+                newDeploymentArtifactMapping.refinementElement = relTemplate.getTargetElement().getRef().getId();
+                newDeploymentArtifactMapping.artifactType = null;
+                this.getDeploymentArtifactMappings().addDeploymentArtifactMapping(newDeploymentArtifactMapping);
             }
         }
-        //TODO
-        return null;
+        return new PrmTemplateResource(this, this.getTRefinementModel(), GRAFIC_PRM_MODEL);
     }
 
     @Path("attributemappings")
