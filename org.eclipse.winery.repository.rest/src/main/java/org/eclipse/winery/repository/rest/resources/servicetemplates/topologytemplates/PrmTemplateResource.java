@@ -72,7 +72,7 @@ public class PrmTemplateResource extends TopologyTemplateResource {
             TRelationshipTemplate.SourceOrTargetElement targetElement = new TRelationshipTemplate.SourceOrTargetElement();
             targetElement.setRef(new TNodeTemplate(mapping.getRefinementElement().getId()));
             TRelationshipTemplate.Builder builder = new TRelationshipTemplate.Builder(mapping.getId(), new QName(mapping.getId()), sourceElement, targetElement);
-            if (mapping instanceof OTPermutationMapping){
+            if (mapping instanceof OTPermutationMapping) {
                 builder.setName("PermutationMapping");
             }
             if (mapping instanceof OTRelationMapping) {
