@@ -29,8 +29,10 @@ import javax.xml.namespace.QName;
 
 import org.eclipse.winery.common.RepositoryFileReference;
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
+import org.eclipse.winery.common.ids.definitions.ArtifactTypeId;
 import org.eclipse.winery.common.ids.definitions.NodeTypeId;
 import org.eclipse.winery.common.version.VersionUtils;
+import org.eclipse.winery.model.tosca.TArtifactType;
 import org.eclipse.winery.model.tosca.TNodeType;
 import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
 import org.eclipse.winery.model.tosca.constants.OpenToscaBaseTypes;
@@ -51,15 +53,18 @@ public class DockerPlugin implements SelfContainmentPlugin {
     private static final Logger logger = LoggerFactory.getLogger(DockerPlugin.class);
 
     private final Map<QName, TNodeType> nodeTypes;
+    private final Map<QName, TArtifactType> artifactTypes;
 
     public DockerPlugin() {
         IRepository repository = RepositoryFactory.getRepository();
         nodeTypes = repository.getQNameToElementMapping(NodeTypeId.class);
+        artifactTypes = repository.getQNameToElementMapping(ArtifactTypeId.class);
     }
 
     @Override
     public boolean canHandleArtifactType(QName artifactType, IRepository repository) {
-        return false;
+        return artifactType != null &&
+            ModelUtilities.isOfType(OpenToscaBaseTypes.dockerContainerArtifactType, artifactType, artifactTypes);
     }
 
     @Override
@@ -123,7 +128,7 @@ public class DockerPlugin implements SelfContainmentPlugin {
         String dockerImageName = artifactTemplate.getQName().getLocalPart().toLowerCase().replaceAll("(\\s)|(_)|(-)", "");
         QName selfContainedVersion = VersionUtils.getSelfContainedVersion(artifactTemplate.getQName());
         ArtifactTemplateId generatedArtifactTemplateId = new ArtifactTemplateId(selfContainedVersion);
-        
+
         if (!repository.exists(generatedArtifactTemplateId)) {
             try {
                 commandLineExecutor(tempDirectory.toString(), "docker", "build", "-t", dockerImageName, ".");
