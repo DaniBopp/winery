@@ -53,7 +53,6 @@ public class ScriptPlugin implements SelfContainmentPlugin {
 
         TArtifactTemplate scriptDeploymentArtifactTemplate = repository.getElement(newScriptDeploymentArtifactId);
         String targetFileLocation = Utils.findFileLocation(scriptDeploymentArtifactTemplate, repository);
-            
 
         TArtifactTemplate updatedScriptArtifactTemplate = repository.getElement(updatedScriptArtifactId);
         String originalScriptFileLocation = Utils.findFileLocation(updatedScriptArtifactTemplate, repository);
@@ -119,7 +118,7 @@ public class ScriptPlugin implements SelfContainmentPlugin {
         try (
             FileOutputStream fos = new FileOutputStream(tarlocation);
             GZIPOutputStream gos = new GZIPOutputStream(new BufferedOutputStream(fos));
-            TarArchiveOutputStream tarOs = new TarArchiveOutputStream(gos);
+            TarArchiveOutputStream tarOs = new TarArchiveOutputStream(gos)
         ) {
             final File folder = new File(source);
             final File[] fileNames = folder.listFiles();

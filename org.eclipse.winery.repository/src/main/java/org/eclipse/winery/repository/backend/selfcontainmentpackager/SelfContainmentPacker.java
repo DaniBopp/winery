@@ -17,14 +17,12 @@ package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 
 import org.eclipse.winery.common.ids.definitions.ArtifactTemplateId;
@@ -37,9 +35,6 @@ import org.eclipse.winery.model.tosca.TDeploymentArtifact;
 import org.eclipse.winery.model.tosca.TDeploymentArtifacts;
 import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
 import org.eclipse.winery.repository.backend.IRepository;
-import org.eclipse.winery.repository.converter.support.TopologyTemplateUtils;
-import org.eclipse.winery.repository.exceptions.RepositoryCorruptException;
-import org.eclipse.winery.repository.export.ExportedState;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,9 +55,6 @@ public class SelfContainmentPacker {
     }
 
     public DefinitionsChildId createSelfContainedVersion(DefinitionsChildId entryId) throws IOException {
-        ExportedState exportedStateTemp = new ExportedState();
-        DefinitionsChildId loopId;
-        SelfContainmentUtil packager = new SelfContainmentUtil();
         ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(QName.valueOf(entryId.getQName() + "-self"));
 
         if (!repository.exists(newServiceTemplateId)) {
@@ -125,7 +117,7 @@ public class SelfContainmentPacker {
                                         generatedArtifacts.forEach(generatedArtifact -> {
                                             implementation.getImplementationArtifacts().getImplementationArtifact()
                                                 .forEach(ia -> {
-                                                    if (generatedArtifact.artifactTemplateToReplace.equals(ia.getArtifactRef())) {
+                                                    if (generatedArtifact.artifactToReplaceQName.equals(ia.getArtifactRef())) {
                                                         ia.setArtifactRef(generatedArtifact.selfContainedArtifactQName);
                                                         ia.setArtifactType(generatedArtifact.selfContainedArtifactTemplate.getType());
                                                     }
@@ -156,49 +148,10 @@ public class SelfContainmentPacker {
                         }
                     }
                 } else if (elementId instanceof ArtifactTemplateId) {
-
                     // todo - somehow same stuff as starting from ia handling oder halt au id
 
                 }
             });
-
-            // EMRE:
-            try {
-                for (DefinitionsChildId nodeTypeId : referencedElements) {
-                    loopId = nodeTypeId;
-                    if (loopId instanceof NodeTypeId) {
-                        do {
-                            Collection<DefinitionsChildId> referencedDefinitionsChildIds = repository.getReferencedDefinitionsChildIds(loopId);
-
-                            Map<String, Collection<DefinitionsChildId>> updatedIds = null;
-                            updatedIds = packager.manageSelfContainedDefinitions(referencedDefinitionsChildIds, repository);
-
-                            if (!updatedIds.isEmpty()) {
-                                TNodeTypeImplementation nodeTypeImplementation = getNodeTypeImplementation(nodeTypeId.getQName(), repository);
-                                SelfContainmentUtil.createNodeTypeImplSelf((NodeTypeId) nodeTypeId, nodeTypeImplementation, repository, updatedIds);
-                            }
-
-                            exportedStateTemp.flagAsExported(loopId);
-                            exportedStateTemp.flagAsExportRequired(referencedDefinitionsChildIds);
-
-                            loopId = exportedStateTemp.pop();
-                        } while (loopId != null);
-                    } else if (loopId instanceof ArtifactTemplateId) {
-                        Collection<DefinitionsChildId> onlyArtifactList = new HashSet<>();
-                        onlyArtifactList.add(loopId);
-                        Map<String, Collection<DefinitionsChildId>> updatedArtifactIds = packager.manageSelfContainedDefinitions(onlyArtifactList, repository);
-
-                        if (!updatedArtifactIds.isEmpty()) {
-                            Collection<DefinitionsChildId> deploymentArtifacts = updatedArtifactIds.get("DeploymentArtifacts");
-                            if (!deploymentArtifacts.isEmpty()) {
-                                TopologyTemplateUtils.updateServiceTemplateWithResolvedDa(entryId, repository, loopId, deploymentArtifacts.iterator().next());
-                            }
-                        }
-                    }
-                }
-            } catch (JAXBException | RepositoryCorruptException e) {
-                e.printStackTrace();
-            }
         }
 
         return newServiceTemplateId;
