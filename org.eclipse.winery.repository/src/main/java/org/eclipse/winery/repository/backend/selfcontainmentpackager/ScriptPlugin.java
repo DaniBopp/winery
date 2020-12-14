@@ -232,17 +232,21 @@ public class ScriptPlugin implements SelfContainmentPlugin {
     }
 
     @Override
-    public boolean canHandleArtifactType(QName artifactType) {
+    public boolean canHandleArtifactType(QName artifactType, IRepository repository) {
         return artifactType != null && artifactType.equals(OpenToscaBaseTypes.scriptArtifactType);
     }
 
     @Override
-    public boolean canHandleNodeType(QName nodeType) {
+    public boolean canHandleNodeType(QName nodeType, IRepository repository) {
         return false;
     }
 
     @Override
-    public GeneratedArtifacts downloadDependencies(QName selfContainedArtifactId, TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+    public void downloadDependenciesBasedOnNodeType(TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+    }
+
+    @Override
+    public GeneratedArtifacts downloadDependenciesBasedOnArtifact(QName original, IRepository repository) {
         return null;
     }
 }

@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +30,7 @@ import org.eclipse.winery.common.ids.definitions.NodeTypeId;
 import org.eclipse.winery.common.ids.definitions.NodeTypeImplementationId;
 import org.eclipse.winery.common.ids.definitions.ServiceTemplateId;
 import org.eclipse.winery.common.version.VersionUtils;
+import org.eclipse.winery.model.tosca.TArtifactTemplate;
 import org.eclipse.winery.model.tosca.TDeploymentArtifact;
 import org.eclipse.winery.model.tosca.TDeploymentArtifacts;
 import org.eclipse.winery.model.tosca.TNodeTypeImplementation;
@@ -54,12 +54,17 @@ public class SelfContainmentPacker {
         );
     }
 
+    // For now, this constructor is only intended for testing.
+    public SelfContainmentPacker(IRepository repository, List<SelfContainmentPlugin> selfContainmentPlugins) {
+        this.repository = repository;
+        this.selfContainmentPlugins = selfContainmentPlugins;
+    }
+
     public DefinitionsChildId createSelfContainedVersion(DefinitionsChildId entryId) throws IOException {
-        ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(QName.valueOf(entryId.getQName() + "-self"));
+        ServiceTemplateId newServiceTemplateId = new ServiceTemplateId(VersionUtils.getSelfContainedVersion(entryId.getQName()));
 
         if (!repository.exists(newServiceTemplateId)) {
             repository.duplicate(entryId, newServiceTemplateId);
-            entryId = newServiceTemplateId;
 
             Collection<DefinitionsChildId> referencedElements = repository.getReferencedDefinitionsChildIds(newServiceTemplateId);
 
@@ -77,11 +82,24 @@ public class SelfContainmentPacker {
 
                         for (TNodeTypeImplementation impl : nodeTypeImplementations) {
                             Optional<SelfContainmentPlugin> nodeTypeBasedPlugin = this.selfContainmentPlugins.stream()
-                                .filter(plugin -> plugin.canHandleNodeType(elementId.getQName()))
+                                .filter(plugin -> plugin.canHandleNodeType(elementId.getQName(), repository))
                                 .findFirst();
 
                             if (nodeTypeBasedPlugin.isPresent()) {
-                                nodeTypeBasedPlugin.get().downloadDependencies(elementId.getQName(), impl, this.repository);
+                                QName implQName = new QName(impl.getTargetNamespace(), impl.getIdFromIdOrNameField());
+                                QName selfContainedVersion = VersionUtils.getSelfContainedVersion(implQName);
+                                NodeTypeImplementationId nodeTypeImplementationId = new NodeTypeImplementationId(selfContainedVersion);
+                                try {
+                                    repository.duplicate(new NodeTypeImplementationId(implQName), nodeTypeImplementationId);
+                                    
+                                    TNodeTypeImplementation selfContained = this.repository.getElement(nodeTypeImplementationId);
+                                    nodeTypeBasedPlugin.get()
+                                        .downloadDependenciesBasedOnNodeType(selfContained, this.repository);
+                                    
+                                    repository.setElement(nodeTypeImplementationId, selfContained);
+                                } catch (IOException e) {
+                                    logger.error("While creating self-contained Node Type Implementation", e);
+                                }
                             } else if (impl.getImplementationArtifacts() != null) {
                                 List<SelfContainmentPlugin.GeneratedArtifacts> generatedArtifacts = impl.getImplementationArtifacts().getImplementationArtifact().stream()
                                     .filter(ia -> Objects.nonNull(ia.getArtifactRef()))
@@ -90,11 +108,11 @@ public class SelfContainmentPacker {
                                         QName artifact = ia.getArtifactRef();
 
                                         Optional<SelfContainmentPlugin> optionalPlugin = this.selfContainmentPlugins.stream()
-                                            .filter(plugin -> plugin.canHandleArtifactType(ia.getArtifactType()))
+                                            .filter(plugin -> plugin.canHandleArtifactType(ia.getArtifactType(), repository))
                                             .findFirst();
 
                                         if (optionalPlugin.isPresent()) {
-                                            return optionalPlugin.get().downloadDependencies(artifact, impl, repository);
+                                            return optionalPlugin.get().downloadDependenciesBasedOnArtifact(artifact, repository);
                                         } else {
                                             logger.info(
                                                 "Did not find self-containment plugin for ArtifactTemplate {} of type {}",
@@ -130,13 +148,14 @@ public class SelfContainmentPacker {
                                                     .removeIf(da -> da.getArtifactRef() != null
                                                         && generatedArtifact.deploymentArtifactsToRemove.contains(da.getArtifactRef()));
                                             }
-                                            for (Map.Entry<QName, QName> entry : generatedArtifact.deploymentArtifactsToAdd.entrySet()) {
-                                                QName artifactTemplate = entry.getKey();
-                                                QName artifactType = entry.getValue();
+                                            for (QName artifactTemplate : generatedArtifact.deploymentArtifactsToAdd) {
+                                                TArtifactTemplate generatedAT = repository.getElement(new ArtifactTemplateId(artifactTemplate));
+
                                                 TDeploymentArtifact da = new TDeploymentArtifact();
                                                 da.setArtifactRef(artifactTemplate);
                                                 da.setName(artifactTemplate.getLocalPart());
-                                                da.setArtifactType(artifactType);
+                                                da.setArtifactType(generatedAT.getType());
+
                                                 deploymentArtifacts.getDeploymentArtifact().add(da);
                                             }
                                         });

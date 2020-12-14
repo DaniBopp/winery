@@ -26,6 +26,7 @@ public class OpenToscaBaseTypes {
     public static final QName scriptArtifactType = QName.valueOf("{http://opentosca.org/artifacttypes}ScriptArtifact");
     public static final QName ubuntuNodeTypeImpl = QName.valueOf("{http://opentosca.org/nodetypeimplementations}Ubuntu-VM");
     public static final QName ubuntuNodeType = QName.valueOf("{http://opentosca.org/nodetypes}Ubuntu-VM");
+    public static final QName dockerContainerNodeType = QName.valueOf("{http://opentosca.org/nodetypes}DockerContainer");
     public static final QName dockerContainerArtifactType = QName.valueOf("{http://opentosca.org/artifacttypes}DockerContainerArtifact");
 
     // region ********** secure elements **********

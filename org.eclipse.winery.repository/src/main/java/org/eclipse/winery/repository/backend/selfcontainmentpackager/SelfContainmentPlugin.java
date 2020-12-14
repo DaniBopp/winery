@@ -16,9 +16,7 @@ package org.eclipse.winery.repository.backend.selfcontainmentpackager;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -32,18 +30,24 @@ import org.slf4j.LoggerFactory;
 
 public interface SelfContainmentPlugin {
 
-    boolean canHandleNodeType(QName nodeType);
-    
-    boolean canHandleArtifactType(QName artifactType);
+    boolean canHandleNodeType(QName nodeType, IRepository repository);
+
+    boolean canHandleArtifactType(QName artifactType, IRepository repository);
+
+    /**
+     * Downloads or generates the respective artifact.
+     *
+     * @param nodeTypeImplementation - the original NodeTypeImplementation
+     */
+    void downloadDependenciesBasedOnNodeType(TNodeTypeImplementation nodeTypeImplementation, IRepository repository);
 
     /**
      * Downloads or generates the respective artifact.
      *
      * @param original - the QName of the original, NOT-self-contained TOSCA Definition
-     * @param nodeTypeImplementation - the original NodeTypeImplementation
      * @return - the list of generated ArtifactTemplates to attach as DeploymentArtifacts.
      */
-    GeneratedArtifacts downloadDependencies(QName original, TNodeTypeImplementation nodeTypeImplementation, IRepository repository);
+    GeneratedArtifacts downloadDependenciesBasedOnArtifact(QName original, IRepository repository);
 
     default TArtifactTemplate crateSelfContainedArtifact(IRepository repository, QName artifact) {
         QName selfContainedVersion = VersionUtils.getSelfContainedVersion(artifact);
@@ -69,14 +73,13 @@ public interface SelfContainmentPlugin {
         /**
          * ArtifactTemplate QName as key, ArtifactType as value.
          */
-        public Map<QName, QName> deploymentArtifactsToAdd = new HashMap<>();
+        public List<QName> deploymentArtifactsToAdd = new ArrayList<>();
         public List<QName> deploymentArtifactsToRemove = new ArrayList<>();
 
-        public GeneratedArtifacts(QName artifactToReplace, TArtifactTemplate artifactTemplateToReplace) {
+        public GeneratedArtifacts(QName artifactToReplace) {
             this.artifactToReplaceQName = artifactToReplace;
-            this.artifactTemplateToReplace = artifactTemplateToReplace;
         }
-        
+
         public boolean containsNewElements() {
             return selfContainedArtifactTemplate != null
                 || !deploymentArtifactsToAdd.isEmpty()

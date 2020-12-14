@@ -77,19 +77,23 @@ public class VirtualMachinePlugin implements SelfContainmentPlugin {
     }
 
     @Override
-    public boolean canHandleNodeType(QName nodeType) {
+    public boolean canHandleNodeType(QName nodeType, IRepository repository) {
         return nodeType != null && (
             nodeType.toString().startsWith(OpenToscaBaseTypes.ubuntuNodeType.toString())
         );
     }
 
     @Override
-    public boolean canHandleArtifactType(QName artifactType) {
+    public boolean canHandleArtifactType(QName artifactType, IRepository repository) {
         return false;
     }
 
     @Override
-    public GeneratedArtifacts downloadDependencies(QName selfContainedArtifactId, TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+    public void downloadDependenciesBasedOnNodeType(TNodeTypeImplementation nodeTypeImplementation, IRepository repository) {
+    }
+
+    @Override
+    public GeneratedArtifacts downloadDependenciesBasedOnArtifact(QName original, IRepository repository) {
         return null;
     }
 }

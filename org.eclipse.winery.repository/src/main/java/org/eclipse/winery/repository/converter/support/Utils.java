@@ -91,7 +91,7 @@ public class Utils {
 
             while (entry != null) {
                 final String fileName = entry.getName();
-                final File newFile = new File(outputFolder + fileName);
+                final File newFile = new File(outputFolder + File.separator + fileName);
                 if (!entry.isDirectory()) {
                     unpackedFileList.add(entry.getName());
                     // create all non exists folders
@@ -175,7 +175,7 @@ public class Utils {
             logger.error("Error wile compressing tar bal", e);
         }
 
-        return tarFile.getName() + ".gz";
+        return tarFile.getAbsolutePath() + ".gz";
     }
 
     public static String findFileLocation(TArtifactTemplate artifactTemplate, IRepository repository) throws UnsupportedEncodingException {

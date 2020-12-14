@@ -208,14 +208,20 @@ public class VersionUtils {
         WineryVersion version = VersionUtils.getVersion(oldId.getLocalPart());
         String oldVersion = version.toString();
 
-        if (Objects.nonNull(oldVersion) && !oldVersion.isEmpty() && appendixName != null && !appendixName.isEmpty()) {
-            if (appendixName.startsWith("-")) {
-                version.setComponentVersion(oldVersion + appendixName);
+        if (appendixName != null && !appendixName.isEmpty()) {
+            if (Objects.nonNull(oldVersion) && !oldVersion.isEmpty()) {
+                if (appendixName.startsWith("-")) {
+                    version.setComponentVersion(oldVersion + appendixName);
+                } else {
+                    version.setComponentVersion(oldVersion + "-" + appendixName);
+                }
             } else {
-                version.setComponentVersion(oldVersion + "-" + appendixName);
+                if (appendixName.startsWith("-")) {
+                    version.setComponentVersion(appendixName);
+                } else {
+                    version.setComponentVersion(appendixName);
+                }
             }
-        } else {
-            version.setComponentVersion(appendixName);
         }
 
         version.setWineryVersion(1);
