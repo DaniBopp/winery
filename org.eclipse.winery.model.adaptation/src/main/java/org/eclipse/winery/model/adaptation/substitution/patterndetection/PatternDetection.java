@@ -35,7 +35,7 @@ import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 import org.eclipse.winery.topologygraph.matching.IToscaMatcher;
-import org.eclipse.winery.topologygraph.matching.ToscaPatternDetectionMatcher;
+import org.eclipse.winery.topologygraph.matching.ToscaBehaviorPatternMatcher;
 import org.eclipse.winery.topologygraph.model.ToscaEdge;
 import org.eclipse.winery.topologygraph.model.ToscaEntity;
 import org.eclipse.winery.topologygraph.model.ToscaNode;
@@ -87,7 +87,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     @Override
     public IToscaMatcher getMatcher(OTRefinementModel prm) {
-        return new ToscaPatternDetectionMatcher((OTTopologyFragmentRefinementModel) prm);
+        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm);
     }
 
     @Override
@@ -103,7 +103,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
         // stay elements have been falsely imported (equals does not work anymore because of swapping?)
         topology.getNodeTemplateOrRelationshipTemplate()
-            .removeIf(entityTemplate -> prm.getRelationMappings() != null
+            .removeIf(entityTemplate -> prm.getStayMappings() != null
                 && prm.getStayMappings().stream()
                 .anyMatch(stayMapping -> stayMapping.getRefinementElement().getId().equals(entityTemplate.getId()))
             );

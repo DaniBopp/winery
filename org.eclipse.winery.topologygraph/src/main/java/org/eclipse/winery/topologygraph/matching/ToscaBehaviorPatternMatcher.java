@@ -23,11 +23,11 @@ import org.eclipse.winery.topologygraph.model.ToscaEdge;
 import org.eclipse.winery.topologygraph.model.ToscaEntity;
 import org.eclipse.winery.topologygraph.model.ToscaNode;
 
-public class ToscaPatternDetectionMatcher extends ToscaTypeMatcher {
+public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
 
     private final OTTopologyFragmentRefinementModel prm;
 
-    public ToscaPatternDetectionMatcher(OTTopologyFragmentRefinementModel prm) {
+    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm) {
         this.prm = prm;
     }
 
