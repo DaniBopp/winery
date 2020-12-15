@@ -99,13 +99,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
         Map<String, String> idMapping = super.applyRefinement(refinement, topology);
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
-        // stay elements have been falsely imported (equals does not work anymore because of swapping?)
-        topology.getNodeTemplateOrRelationshipTemplate()
-            .removeIf(entityTemplate -> prm.getStayMappings() != null
-                && prm.getStayMappings().stream()
-                .anyMatch(stayMapping -> stayMapping.getRefinementElement().getId().equals(entityTemplate.getId()))
-            );
-
         prm.getRefinementStructure().getNodeTemplateOrRelationshipTemplate().stream()
             .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
             .forEach(refinementElement -> {
