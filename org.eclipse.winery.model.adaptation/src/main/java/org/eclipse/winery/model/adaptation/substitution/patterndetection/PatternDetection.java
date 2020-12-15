@@ -55,6 +55,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 prm.setDetector(prm.getRefinementTopology());
                 prm.setRefinementTopology(refinement);
 
+                // TODO: double check if this makes sense
                 Stream.of(
                     prm.getRelationMappings() == null ? Stream.empty() : prm.getRelationMappings().stream(),
                     prm.getPermutationMappings() == null ? Stream.empty() : prm.getPermutationMappings().stream(),
@@ -103,19 +104,19 @@ public class PatternDetection extends TopologyFragmentRefinement {
             .filter(refinementElement -> ((HasPolicies) refinementElement).getPolicies() != null)
             .forEach(refinementElement -> {
                 String newId = idMapping.get(refinementElement.getId());
-                TEntityTemplate addedElement = newId != null ? topology.getNodeTemplateOrRelationshipTemplate(newId) : null;
+                boolean isStayingElement = newId == null;
 
-                if (addedElement == null) {
-                    // for staying elements
-                    addCompatibleBehaviorPatterns(refinementElement, refinement);
+                if (isStayingElement) {
+                    setCompatibleBehaviorPatterns(refinementElement, refinement);
                 } else {
+                    TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
                     removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
                 }
             });
         return idMapping;
     }
 
-    private void addCompatibleBehaviorPatterns(TEntityTemplate refinementElement, RefinementCandidate refinement) {
+    private void setCompatibleBehaviorPatterns(TEntityTemplate refinementElement, RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TEntityTemplate detectorElement = prm.getStayMappings().stream()
             .filter(stayMapping -> stayMapping.getRefinementElement().getId().equals(refinementElement.getId()))
@@ -124,21 +125,9 @@ public class PatternDetection extends TopologyFragmentRefinement {
         ToscaEntity detectorEntity = refinement.getDetectorGraph().getEntity(detectorElement.getId()).get();
         TEntityTemplate stayingElement = getEntityCorrespondence(detectorEntity, refinement.getGraphMapping());
 
-        TPolicies behaviorPatterns = ((HasPolicies) refinementElement).getPolicies();
-        TPolicies policies = ((HasPolicies) stayingElement).getPolicies();
-        if (behaviorPatterns != null) {
-            if (policies != null) {
-                // avoid duplicate behavior patterns
-                behaviorPatterns.getPolicy().forEach(behaviorPattern -> {
-                    boolean behaviorPatternExists = policies.getPolicy().stream()
-                        .anyMatch(policy -> policy.getPolicyType().equals(behaviorPattern.getPolicyType()));
-                    if (!behaviorPatternExists) {
-                        policies.getPolicy().add(behaviorPattern);
-                    }
-                });
-            } else {
-                ((HasPolicies) stayingElement).setPolicies(behaviorPatterns);
-            }
+        TPolicies refinementElementPolicies = ((HasPolicies) refinementElement).getPolicies();
+        if (refinementElementPolicies != null) {
+            ((HasPolicies) stayingElement).setPolicies(refinementElementPolicies);
             removeIncompatibleBehaviorPatterns(refinementElement, stayingElement, refinement);
         }
     }
@@ -148,7 +137,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TPolicies addedElementPolicies = ((HasPolicies) addedElement).getPolicies();
 
-        // TODO: remove non behavior pattern policies?
         prm.getBehaviorPatternMappings().forEach(bpm -> {
             ToscaEntity detectorElement = refinement.getDetectorGraph()
                 .getEntity(bpm.getDetectorElement().getId()).get();
@@ -169,7 +157,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
                             && bpm.getBehaviorPattern().equals(policy.getName()));
                 }
             }
-            // TODO: add existing policies of candidateElement to addedElement?
         });
     }
 

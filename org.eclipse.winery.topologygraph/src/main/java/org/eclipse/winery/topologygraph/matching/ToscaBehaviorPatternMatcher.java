@@ -79,6 +79,7 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
                 && bpm.getProperty().getKey().equals(propKey));
     }
 
+    // TODO: use super method?
     private boolean behaviorPatternsCompatible(ToscaEntity left, ToscaEntity right) {
         TEntityTemplate detectorElement = this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
