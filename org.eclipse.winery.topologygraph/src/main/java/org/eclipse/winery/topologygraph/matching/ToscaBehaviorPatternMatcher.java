@@ -16,42 +16,23 @@ package org.eclipse.winery.topologygraph.matching;
 
 import java.util.Map;
 
-import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
-import org.eclipse.winery.model.tosca.TPolicies;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
-import org.eclipse.winery.repository.backend.NamespaceManager;
 import org.eclipse.winery.repository.backend.RepositoryFactory;
-import org.eclipse.winery.topologygraph.model.ToscaEdge;
 import org.eclipse.winery.topologygraph.model.ToscaEntity;
-import org.eclipse.winery.topologygraph.model.ToscaNode;
 
-public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
+public class ToscaBehaviorPatternMatcher extends ToscaPrmPropertyMatcher {
 
-    private final NamespaceManager namespaceManager;
     private final OTTopologyFragmentRefinementModel prm;
 
     public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm) {
-        this.namespaceManager = RepositoryFactory.getRepository().getNamespaceManager();
+        super(prm.getDetector().getNodeTemplateOrRelationshipTemplate(), RepositoryFactory.getRepository().getNamespaceManager());
         this.prm = prm;
     }
 
     @Override
-    public boolean isCompatible(ToscaNode left, ToscaNode right) {
-        return super.isCompatible(left, right)
-            && propsCompatible(left, right)
-            && behaviorPatternsCompatible(left, right);
-    }
-
-    @Override
-    public boolean isCompatible(ToscaEdge left, ToscaEdge right) {
-        return super.isCompatible(left, right)
-            && propsCompatible(left, right)
-            && behaviorPatternsCompatible(left, right);
-    }
-
-    private boolean propsCompatible(ToscaEntity left, ToscaEntity right) {
+    public boolean propertiesCompatible(ToscaEntity left, ToscaEntity right) {
         TEntityTemplate detectorElement = this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
             .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
         TEntityTemplate candidateElement = !this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
@@ -77,29 +58,5 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
             // as the related behavior pattern can be removed later if the props aren't compatible
             .anyMatch(bpm -> bpm.getDetectorElement().getId().equals(detectorElement.getId())
                 && bpm.getProperty().getKey().equals(propKey));
-    }
-
-    // TODO: use super method?
-    private boolean behaviorPatternsCompatible(ToscaEntity left, ToscaEntity right) {
-        TEntityTemplate detectorElement = this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
-            .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
-        TEntityTemplate candidateElement = !this.prm.getDetector().getNodeTemplateOrRelationshipTemplate()
-            .contains(left.getTemplate()) ? left.getTemplate() : right.getTemplate();
-        TPolicies detectorPolicies = ((HasPolicies) detectorElement).getPolicies();
-        TPolicies candidatePolicies = ((HasPolicies) candidateElement).getPolicies();
-
-        boolean compatible = true;
-        if (detectorPolicies != null && candidatePolicies != null) {
-            compatible = detectorPolicies.getPolicy().stream()
-                .filter(detectorPolicy -> namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI()))
-                .allMatch(detectorPolicy -> detectorPolicies.getPolicy().stream()
-                    .anyMatch(candidatePolicy -> candidatePolicy.getPolicyType().equals(detectorPolicy.getPolicyType())));
-        } else if (detectorPolicies != null) {
-            compatible = detectorPolicies.getPolicy().stream()
-                .noneMatch(detectorPolicy ->
-                    this.namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI())
-                );
-        }
-        return compatible;
     }
 }

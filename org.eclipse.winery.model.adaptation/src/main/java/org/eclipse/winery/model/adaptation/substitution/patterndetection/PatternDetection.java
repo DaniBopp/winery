@@ -51,11 +51,10 @@ public class PatternDetection extends TopologyFragmentRefinement {
         this.refinementModels.stream()
             .map(prm -> (OTTopologyFragmentRefinementModel) prm)
             .forEach(prm -> {
-                TTopologyTemplate refinement = prm.getDetector();
+                TTopologyTemplate detector = prm.getDetector();
                 prm.setDetector(prm.getRefinementTopology());
-                prm.setRefinementTopology(refinement);
+                prm.setRefinementTopology(detector);
 
-                // TODO: double check if this makes sense
                 Stream.of(
                     prm.getRelationMappings() == null ? Stream.empty() : prm.getRelationMappings().stream(),
                     prm.getPermutationMappings() == null ? Stream.empty() : prm.getPermutationMappings().stream(),
@@ -66,15 +65,15 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 ).flatMap(Function.identity())
                     .map(OTPrmMapping.class::cast)
                     .forEach(mapping -> {
-                        TEntityTemplate refinementElement = mapping.getDetectorElement();
+                        TEntityTemplate detectorElement = mapping.getDetectorElement();
                         mapping.setDetectorElement(mapping.getRefinementElement());
-                        mapping.setRefinementElement(refinementElement);
+                        mapping.setRefinementElement(detectorElement);
 
                         if (mapping instanceof OTAttributeMapping) {
                             OTAttributeMapping attributeMapping = (OTAttributeMapping) mapping;
-                            String refinementProp = attributeMapping.getDetectorProperty();
+                            String detectorProp = attributeMapping.getDetectorProperty();
                             attributeMapping.setDetectorProperty(attributeMapping.getRefinementProperty());
-                            attributeMapping.setRefinementProperty(refinementProp);
+                            attributeMapping.setRefinementProperty(detectorProp);
                         }
                     });
             });
