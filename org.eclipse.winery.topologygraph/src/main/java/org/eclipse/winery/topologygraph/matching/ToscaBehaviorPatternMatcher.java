@@ -14,28 +14,27 @@
 
 package org.eclipse.winery.topologygraph.matching;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TPolicies;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
+import org.eclipse.winery.repository.backend.NamespaceManager;
+import org.eclipse.winery.repository.backend.RepositoryFactory;
 import org.eclipse.winery.topologygraph.model.ToscaEdge;
 import org.eclipse.winery.topologygraph.model.ToscaEntity;
 import org.eclipse.winery.topologygraph.model.ToscaNode;
 
 public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
 
+    private final NamespaceManager namespaceManager;
     private final OTTopologyFragmentRefinementModel prm;
-    private final List<TPolicy> existingBehaviorPatterns;
 
-    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm, List<TPolicy> existingBehaviorPatterns) {
+    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm) {
+        this.namespaceManager = RepositoryFactory.getRepository().getNamespaceManager();
         this.prm = prm;
-        this.existingBehaviorPatterns = existingBehaviorPatterns;
     }
 
     @Override
@@ -89,8 +88,16 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
         TPolicies candidatePolicies = ((HasPolicies) candidateElement).getPolicies();
 
         boolean compatible = true;
-        if (Objects.nonNull(detectorPolicies) && Objects.nonNull(candidatePolicies)) {
-            // TODO
+        if (detectorPolicies != null && candidatePolicies != null) {
+            compatible = detectorPolicies.getPolicy().stream()
+                .filter(detectorPolicy -> namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI()))
+                .allMatch(detectorPolicy -> detectorPolicies.getPolicy().stream()
+                    .anyMatch(candidatePolicy -> candidatePolicy.getPolicyType().equals(detectorPolicy.getPolicyType())));
+        } else if (detectorPolicies != null) {
+            compatible = detectorPolicies.getPolicy().stream()
+                .noneMatch(detectorPolicy ->
+                    this.namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI())
+                );
         }
         return compatible;
     }

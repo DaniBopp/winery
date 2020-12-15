@@ -14,11 +14,8 @@
 
 package org.eclipse.winery.model.adaptation.substitution.patterndetection;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
@@ -28,7 +25,6 @@ import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TPolicies;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
@@ -45,8 +41,6 @@ import org.jgrapht.GraphMapping;
 
 public class PatternDetection extends TopologyFragmentRefinement {
 
-    private List<TPolicy> existingBehaviorPatterns;
-
     public PatternDetection(RefinementChooser refinementChooser) {
         super(refinementChooser, PatternRefinementModelId.class, "detected");
         swapDetectorWithRefinement();
@@ -61,39 +55,28 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 prm.setDetector(prm.getRefinementTopology());
                 prm.setRefinementTopology(refinement);
 
-                // TODO: null checks?
                 Stream.of(
-                    prm.getRelationMappings().stream().map(OTPrmMapping.class::cast),
-                    prm.getPermutationMappings().stream().map(OTPrmMapping.class::cast),
-                    prm.getAttributeMappings().stream().map(OTPrmMapping.class::cast),
-                    prm.getStayMappings().stream().map(OTPrmMapping.class::cast),
-                    prm.getDeploymentArtifactMappings().stream().map(OTPrmMapping.class::cast),
-                    prm.getBehaviorPatternMappings().stream().map(OTPrmMapping.class::cast)
-                ).flatMap(Function.identity()).forEach(mapping -> {
-                    TEntityTemplate refinementElement = mapping.getDetectorElement();
-                    mapping.setDetectorElement(mapping.getRefinementElement());
-                    mapping.setRefinementElement(refinementElement);
+                    prm.getRelationMappings() == null ? Stream.empty() : prm.getRelationMappings().stream(),
+                    prm.getPermutationMappings() == null ? Stream.empty() : prm.getPermutationMappings().stream(),
+                    prm.getAttributeMappings() == null ? Stream.empty() : prm.getAttributeMappings().stream(),
+                    prm.getStayMappings() == null ? Stream.empty() : prm.getStayMappings().stream(),
+                    prm.getDeploymentArtifactMappings() == null ? Stream.empty() : prm.getDeploymentArtifactMappings().stream(),
+                    prm.getBehaviorPatternMappings() == null ? Stream.empty() : prm.getBehaviorPatternMappings().stream()
+                ).flatMap(Function.identity())
+                    .map(OTPrmMapping.class::cast)
+                    .forEach(mapping -> {
+                        TEntityTemplate refinementElement = mapping.getDetectorElement();
+                        mapping.setDetectorElement(mapping.getRefinementElement());
+                        mapping.setRefinementElement(refinementElement);
 
-                    if (mapping instanceof OTAttributeMapping) {
-                        OTAttributeMapping attributeMapping = (OTAttributeMapping) mapping;
-                        String refinementProp = attributeMapping.getDetectorProperty();
-                        attributeMapping.setDetectorProperty(attributeMapping.getRefinementProperty());
-                        attributeMapping.setRefinementProperty(refinementProp);
-                    }
-                });
+                        if (mapping instanceof OTAttributeMapping) {
+                            OTAttributeMapping attributeMapping = (OTAttributeMapping) mapping;
+                            String refinementProp = attributeMapping.getDetectorProperty();
+                            attributeMapping.setDetectorProperty(attributeMapping.getRefinementProperty());
+                            attributeMapping.setRefinementProperty(refinementProp);
+                        }
+                    });
             });
-    }
-
-    @Override
-    public void refineTopology(TTopologyTemplate topology) {
-        existingBehaviorPatterns = topology.getNodeTemplateOrRelationshipTemplate().stream()
-            .map(entityTemplate -> ((HasPolicies) entityTemplate).getPolicies())
-            .filter(Objects::nonNull)
-            .flatMap(policies -> policies.getPolicy().stream())
-            .filter(policy -> repository.getNamespaceManager().isPatternNamespace(policy.getPolicyType().getNamespaceURI()))
-            .collect(Collectors.toList());
-
-        super.refineTopology(topology);
     }
 
     @Override
@@ -103,7 +86,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     @Override
     public IToscaMatcher getMatcher(OTRefinementModel prm) {
-        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm, existingBehaviorPatterns);
+        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm);
     }
 
     @Override
@@ -113,7 +96,6 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     @Override
     public Map<String, String> applyRefinement(RefinementCandidate refinement, TTopologyTemplate topology) {
-        // TODO: better option than returning from super?
         Map<String, String> idMapping = super.applyRefinement(refinement, topology);
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
 
@@ -173,6 +155,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TPolicies addedElementPolicies = ((HasPolicies) addedElement).getPolicies();
 
+        // TODO: remove non behavior pattern policies?
         prm.getBehaviorPatternMappings().forEach(bpm -> {
             ToscaEntity detectorElement = refinement.getDetectorGraph()
                 .getEntity(bpm.getDetectorElement().getId()).get();
