@@ -289,23 +289,13 @@ export class NavbarComponent implements OnDestroy {
      */
     saveTopologyTemplateToRepository() {
         // The topology gets saved here.
-        if (this.templateParameter.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
-            this.backendService.saveTopologyTemplateToCreatePrmMappings(this.currentTopologyTemplate)
-                .subscribe(res => {
-                    res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
-                        + res.statusText + ' ' + res.status + '</p>')
-                        : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
-                        + res.statusText + ' ' + res.status + '</p>');
-                }, err => this.alert.error(err.error));
-        } else {
-            this.backendService.saveTopologyTemplate(this.currentTopologyTemplate)
-                .subscribe(res => {
-                    res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
-                        + res.statusText + ' ' + res.status + '</p>')
-                        : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
-                        + res.statusText + ' ' + res.status + '</p>');
-                }, err => this.alert.error(err.error));
-        }
+        this.backendService.saveTopologyTemplate(this.currentTopologyTemplate)
+            .subscribe(res => {
+                res.ok === true ? this.alert.success('<p>Saved the topology!<br>' + 'Response Status: '
+                    + res.statusText + ' ' + res.status + '</p>')
+                    : this.alert.info('<p>Something went wrong! <br>' + 'Response Status: '
+                    + res.statusText + ' ' + res.status + '</p>');
+            }, err => this.alert.error(err.error));
     }
 
     /**

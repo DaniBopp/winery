@@ -344,8 +344,12 @@ export class BackendService {
             case 'relationshipTypes': {
                 this.storedModel.relationshipTypes = [];
                 entityTypeJSON.forEach((relationshipType: EntityType) => {
-                    const visuals = this.storedModel.relationshipVisuals
+                    let visuals = this.storedModel.relationshipVisuals
                         .find(value => value.typeId === relationshipType.qName);
+                    if (this.configuration.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+                        visuals = new Visuals('black', null, null, null, null);
+                        relationshipType = this.createPrmRelationshipType(relationshipType);
+                    }
                     this.storedModel.relationshipTypes
                         .push(new VisualEntityType(
                             relationshipType.id,
@@ -382,6 +386,19 @@ export class BackendService {
                 console.log(`attempting to add unhandled entityTypes of type ${entityType}`);
             }
         }
+    }
+
+    createPrmRelationshipType(relationshipType: EntityType): EntityType {
+        const serviceTemplateOrNodeTypeOrNodeTypeImplementation = relationshipType;
+        // @ts-ignore
+        relationshipType.namespace = relationshipType.targetNamespace;
+        relationshipType.qName = '{' + relationshipType.namespace + '}' + relationshipType.name;
+        relationshipType.id = relationshipType.name;
+
+        const newRelationshipType = new EntityType(relationshipType.id, relationshipType.qName, relationshipType.name,
+            relationshipType.namespace, null, { serviceTemplateOrNodeTypeOrNodeTypeImplementation: [EntityType] });
+        newRelationshipType.full.serviceTemplateOrNodeTypeOrNodeTypeImplementation.push(serviceTemplateOrNodeTypeOrNodeTypeImplementation);
+        return newRelationshipType;
     }
 
     /**
@@ -429,47 +446,18 @@ export class BackendService {
      */
     saveTopologyTemplate(topologyTemplate: TTopologyTemplate): Observable<HttpResponse<string>> {
         if (this.configuration) {
+            let url = '';
+            if (this.configuration.elementPath === SubMenuItems.graficPrmModelling.urlFragment) {
+                url = this.configuration.parentElementUrl + 'graphicPrmTopology';
+            } else {
+                url = this.configuration.elementUrl;
+            }
             const headers = new HttpHeaders().set('Content-Type', 'application/json');
-            return this.http.put(this.configuration.elementUrl,
+            return this.http.put(url,
                 TopologyTemplateUtil.prepareSave(topologyTemplate),
                 { headers: headers, responseType: 'text', observe: 'response' }
             );
         }
-    }
-
-    saveTopologyTemplateToCreatePrmMappings(topologyTemplate: TTopologyTemplate): Observable<HttpResponse<string>> {
-
-        if (this.configuration) {
-            // Initialization
-            const topologySkeleton = {
-                documentation: [],
-                any: [],
-                otherAttributes: {},
-                relationshipTemplates: [],
-                nodeTemplates: [],
-                policies: { policy: new Array<TPolicy>() }
-            };
-            // Prepare for saving by updating the existing topology with the current topology state inside the Redux store
-            topologySkeleton.nodeTemplates = topologyTemplate.nodeTemplates;
-            topologySkeleton.relationshipTemplates = topologyTemplate.relationshipTemplates;
-            topologySkeleton.relationshipTemplates.map(relationship => {
-                delete relationship.state;
-            });
-            // remove the 'Color' field from all nodeTemplates as the REST Api does not recognize it.
-            topologySkeleton.nodeTemplates.map(nodeTemplate => {
-                delete nodeTemplate.visuals;
-                delete nodeTemplate._state;
-            });
-            topologySkeleton.policies = topologyTemplate.policies;
-            console.log(topologySkeleton);
-
-            const headers = new HttpHeaders().set('Content-Type', 'application/json');
-            return this.http.put(this.configuration.parentElementUrl + 'graphicPrmTopology',
-                topologySkeleton,
-                { headers: headers, responseType: 'text', observe: 'response' }
-            );
-        }
-
     }
 
     saveYamlArtifact(topology: TTopologyTemplate,
