@@ -40,23 +40,23 @@ import org.eclipse.winery.repository.backend.IRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SelfContainmentPacker {
+public class SelfContainmentPackager {
 
-    private final static Logger logger = LoggerFactory.getLogger(SelfContainmentPacker.class);
+    private final static Logger logger = LoggerFactory.getLogger(SelfContainmentPackager.class);
     private final IRepository repository;
     private final List<SelfContainmentPlugin> selfContainmentPlugins;
 
-    public SelfContainmentPacker(IRepository repository) {
+    public SelfContainmentPackager(IRepository repository) {
         this.repository = repository;
         this.selfContainmentPlugins = Arrays.asList(
             new DockerPlugin(),
-            new VirtualMachinePlugin(),
+            new UbuntuVMPlugin(),
             new ScriptPlugin()
         );
     }
 
     // For now, this constructor is only intended for testing.
-    public SelfContainmentPacker(IRepository repository, List<SelfContainmentPlugin> selfContainmentPlugins) {
+    public SelfContainmentPackager(IRepository repository, List<SelfContainmentPlugin> selfContainmentPlugins) {
         this.repository = repository;
         this.selfContainmentPlugins = selfContainmentPlugins;
     }

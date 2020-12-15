@@ -45,4 +45,7 @@ public class OpenToscaBaseTypes {
     // region ********** management features **********
     public static final QName managementFeatureRequirement = QName.valueOf("{http://opentosca.org/management/features/requirementtypes}FeatureRequirement");
     // endregion
+    
+    public static final String namespaceBase = "http://opentosca.org/";
+    public static final String artifactTemplateNamespace = namespaceBase + "artifacttemplates";
 }

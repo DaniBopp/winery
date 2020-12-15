@@ -62,7 +62,7 @@ import org.eclipse.winery.repository.backend.BackendUtils;
 import org.eclipse.winery.repository.backend.IRepository;
 import org.eclipse.winery.repository.backend.SelfServiceMetaDataUtils;
 import org.eclipse.winery.repository.backend.constants.MediaTypes;
-import org.eclipse.winery.repository.backend.selfcontainmentpackager.SelfContainmentPacker;
+import org.eclipse.winery.repository.backend.selfcontainmentpackager.SelfContainmentPackager;
 import org.eclipse.winery.repository.datatypes.ids.elements.DirectoryId;
 import org.eclipse.winery.repository.datatypes.ids.elements.SelfServiceMetaDataId;
 import org.eclipse.winery.repository.datatypes.ids.elements.ServiceTemplateSelfServiceFilesDirectoryId;
@@ -245,9 +245,9 @@ public class CsarExporter {
             .storeState(filesMap)
             .get();
 
-        filesToStore.keySet().forEach((CsarContentProperties properties) -> {
-            properties.setImmutableAddress(addressMap.get(properties.getPathInsideCsar()));
-        });
+        filesToStore.keySet().forEach((CsarContentProperties properties) -> 
+            properties.setImmutableAddress(addressMap.get(properties.getPathInsideCsar()))
+        );
     }
 
     /**
@@ -369,29 +369,31 @@ public class CsarExporter {
             boolean foundInclude = false;
             boolean included = false;
             boolean excluded = false;
-            for (TArtifactReference artifactReference : template.getArtifactReferences().getArtifactReference()) {
-                for (Object includeOrExclude : artifactReference.getIncludeOrExclude()) {
-                    if (includeOrExclude instanceof TArtifactReference.Include) {
-                        foundInclude = true;
-                        TArtifactReference.Include include = (TArtifactReference.Include) includeOrExclude;
-                        String reference = artifactReference.getReference();
-                        if (reference.endsWith("/")) {
-                            reference += include.getPattern();
-                        } else {
-                            reference += "/" + include.getPattern();
+            if (template.getArtifactReferences() != null) {
+                for (TArtifactReference artifactReference : template.getArtifactReferences().getArtifactReference()) {
+                    for (Object includeOrExclude : artifactReference.getIncludeOrExclude()) {
+                        if (includeOrExclude instanceof TArtifactReference.Include) {
+                            foundInclude = true;
+                            TArtifactReference.Include include = (TArtifactReference.Include) includeOrExclude;
+                            String reference = artifactReference.getReference();
+                            if (reference.endsWith("/")) {
+                                reference += include.getPattern();
+                            } else {
+                                reference += "/" + include.getPattern();
+                            }
+                            reference = reference.substring(1);
+                            included |= BackendUtils.isGlobMatch(reference, rootDir.relativize(file.toPath()));
+                        } else if (includeOrExclude instanceof TArtifactReference.Exclude) {
+                            TArtifactReference.Exclude exclude = (TArtifactReference.Exclude) includeOrExclude;
+                            String reference = artifactReference.getReference();
+                            if (reference.endsWith("/")) {
+                                reference += exclude.getPattern();
+                            } else {
+                                reference += "/" + exclude.getPattern();
+                            }
+                            reference = reference.substring(1);
+                            excluded |= BackendUtils.isGlobMatch(reference, rootDir.relativize(file.toPath()));
                         }
-                        reference = reference.substring(1);
-                        included |= BackendUtils.isGlobMatch(reference, rootDir.relativize(file.toPath()));
-                    } else if (includeOrExclude instanceof TArtifactReference.Exclude) {
-                        TArtifactReference.Exclude exclude = (TArtifactReference.Exclude) includeOrExclude;
-                        String reference = artifactReference.getReference();
-                        if (reference.endsWith("/")) {
-                            reference += exclude.getPattern();
-                        } else {
-                            reference += "/" + exclude.getPattern();
-                        }
-                        reference = reference.substring(1);
-                        excluded |= BackendUtils.isGlobMatch(reference, rootDir.relativize(file.toPath()));
                     }
                 }
             }
@@ -415,7 +417,7 @@ public class CsarExporter {
      * This is kind of a quick hack. TODO: during the import, the prefixes should be extracted using JAXB and stored in
      * the NamespacesResource
      */
-    private void addNamespacePrefixes(IRepository repository, Map<CsarContentProperties, CsarEntry> refMap) throws IOException {
+    private void addNamespacePrefixes(IRepository repository, Map<CsarContentProperties, CsarEntry> refMap) {
         // ensure that the namespaces are saved as json
         SortedSet<RepositoryFileReference> references = repository.getContainedFiles(new NamespacesId());
 
@@ -581,7 +583,7 @@ public class CsarExporter {
 
             stringBuilder.append(NAME).append(": ").append(fileProperties.getPathInsideCsar()).append("\n");
 
-            String mimeType = "";
+            String mimeType;
 
             if (csarEntry instanceof DocumentBasedCsarEntry) {
                 mimeType = MimeTypes.MIMETYPE_XSD;
@@ -614,8 +616,8 @@ public class CsarExporter {
     }
 
     public void writeSelfContainedCsar(IRepository repository, DefinitionsChildId entryId, OutputStream output, Map<String, Object> exportConfiguration) throws IOException, RepositoryCorruptException, InterruptedException, AccountabilityException, ExecutionException {
-        SelfContainmentPacker selfContainmentPacker = new SelfContainmentPacker(repository);
-        DefinitionsChildId newServiceTemplateId = selfContainmentPacker.createSelfContainedVersion(entryId);
+        SelfContainmentPackager selfContainmentPackager = new SelfContainmentPackager(repository);
+        DefinitionsChildId newServiceTemplateId = selfContainmentPackager.createSelfContainedVersion(entryId);
         exportConfiguration.put(CsarExportConfiguration.INCLUDE_DEPENDENCIES.name(), true);
         this.writeCsar(repository, newServiceTemplateId, output, exportConfiguration);
     }
