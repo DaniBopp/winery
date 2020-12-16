@@ -121,7 +121,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
             .filter(stayMapping -> stayMapping.getRefinementElement().getId().equals(refinementElement.getId()))
             .findFirst().get()
             .getDetectorElement();
-        ToscaEntity detectorEntity = refinement.getDetectorGraph().getEntity(detectorElement.getId()).get();
+        ToscaEntity detectorEntity = refinement.getDetectorGraph().getVertexOrEdge(detectorElement.getId()).get();
         TEntityTemplate stayingElement = getEntityCorrespondence(detectorEntity, refinement.getGraphMapping());
 
         TPolicies refinementElementPolicies = ((HasPolicies) refinementElement).getPolicies();
@@ -138,7 +138,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
         prm.getBehaviorPatternMappings().forEach(bpm -> {
             ToscaEntity detectorElement = refinement.getDetectorGraph()
-                .getEntity(bpm.getDetectorElement().getId()).get();
+                .getVertexOrEdge(bpm.getDetectorElement().getId()).get();
             TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
 
             if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())

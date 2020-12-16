@@ -37,15 +37,15 @@ public class ToscaGraph extends SimpleDirectedGraph<ToscaNode, ToscaEdge> {
         return vertexSet().stream().findAny().orElse(null);
     }
 
-    public Set<ToscaEntity> entitySet() {
+    public Set<ToscaEntity> vertexAndEdgeSet() {
         return Stream.concat(
             vertexSet().stream().map(v -> (ToscaEntity) v),
             edgeSet().stream().map(e -> (ToscaEntity) e)
         ).collect(Collectors.toSet());
     }
 
-    public Optional<ToscaEntity> getEntity(String id) {
-        return entitySet().stream()
+    public Optional<ToscaEntity> getVertexOrEdge(String id) {
+        return vertexAndEdgeSet().stream()
             .filter(e -> e.getId().equals(id))
             .findFirst();
     }
