@@ -267,8 +267,8 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
                 );
     }
 
-    protected void redirectInternalRelations(OTTopologyFragmentRefinementModel prm, TNodeTemplate currentDetectorNode,
-                                             TNodeTemplate matchingNodeInTopology, TTopologyTemplate topology) {
+    private void redirectInternalRelations(OTTopologyFragmentRefinementModel prm, TNodeTemplate currentDetectorNode,
+                                           TNodeTemplate matchingNodeInTopology, TTopologyTemplate topology) {
         if (prm.getStayMappings() != null) {
             topology.getRelationshipTemplates()
                 .forEach(relationship ->
@@ -353,7 +353,7 @@ public class TopologyFragmentRefinement extends AbstractRefinement {
         }
     }
 
-    protected Stream<OTStayMapping> getStayMappingsOfCurrentElement(OTTopologyFragmentRefinementModel prm, TEntityTemplate currentDetectorNode) {
+    private Stream<OTStayMapping> getStayMappingsOfCurrentElement(OTTopologyFragmentRefinementModel prm, TEntityTemplate currentDetectorNode) {
         return prm.getStayMappings() == null ? Stream.of() :
             prm.getStayMappings().stream()
                 .filter(stayMapping -> stayMapping.getDetectorElement().getId().equals(currentDetectorNode.getId()));

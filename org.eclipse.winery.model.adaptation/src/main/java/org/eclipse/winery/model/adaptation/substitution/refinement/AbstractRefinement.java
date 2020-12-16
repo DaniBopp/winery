@@ -46,7 +46,7 @@ public abstract class AbstractRefinement extends AbstractSubstitution {
     protected ServiceTemplateId refinementServiceTemplateId;
 
     protected final List<OTRefinementModel> refinementModels;
-    protected final RefinementChooser refinementChooser;
+    private final RefinementChooser refinementChooser;
 
     public AbstractRefinement(RefinementChooser refinementChooser, Class<? extends RefinementId> idClass, String versionAppendix) {
         this.refinementChooser = refinementChooser;
