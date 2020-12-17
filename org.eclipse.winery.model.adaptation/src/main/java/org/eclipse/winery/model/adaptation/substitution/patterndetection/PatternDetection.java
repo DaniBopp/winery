@@ -14,8 +14,10 @@
 
 package org.eclipse.winery.model.adaptation.substitution.patterndetection;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.winery.model.adaptation.substitution.refinement.RefinementCandidate;
@@ -25,12 +27,15 @@ import org.eclipse.winery.model.ids.extensions.PatternRefinementModelId;
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TPolicies;
+import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.TTopologyTemplate;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMapping;
 import org.eclipse.winery.model.tosca.extensions.OTPrmMapping;
 import org.eclipse.winery.model.tosca.extensions.OTRefinementModel;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
+import org.eclipse.winery.repository.backend.NamespaceManager;
+import org.eclipse.winery.repository.backend.RepositoryFactory;
 import org.eclipse.winery.topologygraph.matching.IToscaMatcher;
 import org.eclipse.winery.topologygraph.matching.ToscaBehaviorPatternMatcher;
 import org.eclipse.winery.topologygraph.model.ToscaEdge;
@@ -41,8 +46,12 @@ import org.jgrapht.GraphMapping;
 
 public class PatternDetection extends TopologyFragmentRefinement {
 
+    private final NamespaceManager namespaceManager;
+    private List<TPolicy> initialBehaviorPatterns;
+
     public PatternDetection(RefinementChooser refinementChooser) {
         super(refinementChooser, PatternRefinementModelId.class, "detected");
+        this.namespaceManager = RepositoryFactory.getRepository().getNamespaceManager();
         swapDetectorWithRefinement();
     }
 
@@ -80,13 +89,25 @@ public class PatternDetection extends TopologyFragmentRefinement {
     }
 
     @Override
+    public void refineTopology(TTopologyTemplate topology) {
+        initialBehaviorPatterns = topology.getNodeTemplateOrRelationshipTemplate().stream()
+            .map(HasPolicies.class::cast)
+            .filter(entityTemplate -> entityTemplate.getPolicies() != null)
+            .flatMap(entityTemplate -> entityTemplate.getPolicies().getPolicy().stream())
+            .filter(policy -> namespaceManager.isPatternNamespace(policy.getPolicyType().getNamespaceURI()))
+            .collect(Collectors.toList());
+
+        super.refineTopology(topology);
+    }
+
+    @Override
     public boolean getLoopCondition(TTopologyTemplate topology) {
         return true;
     }
 
     @Override
     public IToscaMatcher getMatcher(OTRefinementModel prm) {
-        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm);
+        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm, initialBehaviorPatterns);
     }
 
     @Override
