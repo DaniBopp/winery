@@ -14,13 +14,11 @@
 
 package org.eclipse.winery.topologygraph.matching;
 
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.winery.model.tosca.HasPolicies;
 import org.eclipse.winery.model.tosca.TEntityTemplate;
 import org.eclipse.winery.model.tosca.TPolicies;
-import org.eclipse.winery.model.tosca.TPolicy;
 import org.eclipse.winery.model.tosca.extensions.OTAttributeMappingType;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
@@ -38,12 +36,10 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
     private static final Logger LOGGER = LoggerFactory.getLogger(ToscaBehaviorPatternMatcher.class);
     private final NamespaceManager namespaceManager;
     private final OTTopologyFragmentRefinementModel prm;
-    private final List<TPolicy> initialBehaviorPatterns;
 
-    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm, List<TPolicy> initialBehaviorPatterns) {
+    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm) {
         this.namespaceManager = RepositoryFactory.getRepository().getNamespaceManager();
         this.prm = prm;
-        this.initialBehaviorPatterns = initialBehaviorPatterns;
     }
 
     @Override
@@ -123,10 +119,7 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
 
         if (detectorPolicies != null && candidatePolices != null) {
             compatible = detectorPolicies.getPolicy().stream().allMatch(detectorPolicy -> {
-                boolean isBehaviorPattern = namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI());
-                boolean isInitialBehaviorPattern = initialBehaviorPatterns.contains(detectorPolicy);
-
-                if (isBehaviorPattern && !isInitialBehaviorPattern) {
+                if (namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI())) {
                     return candidatePolices.getPolicy().stream().anyMatch(candidatePolicy -> {
                         boolean typeEquals = candidatePolicy.getPolicyType().equals(detectorPolicy.getPolicyType());
 
@@ -140,11 +133,9 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
                 return true;
             });
         } else if (detectorPolicies != null) {
-            compatible = detectorPolicies.getPolicy().stream().noneMatch(detectorPolicy -> {
-                boolean isBehaviorPattern = namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI());
-                boolean isInitialBehaviorPattern = initialBehaviorPatterns.contains(detectorPolicy);
-                return isBehaviorPattern && !isInitialBehaviorPattern;
-            });
+            compatible = detectorPolicies.getPolicy().stream().noneMatch(
+                detectorPolicy -> namespaceManager.isPatternNamespace(detectorPolicy.getPolicyType().getNamespaceURI())
+            );
         }
         return compatible;
     }
