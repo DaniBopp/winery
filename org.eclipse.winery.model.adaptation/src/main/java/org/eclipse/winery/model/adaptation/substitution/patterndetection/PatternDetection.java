@@ -127,7 +127,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
                 boolean isStayingElement = newId == null;
 
                 if (isStayingElement) {
-                    setCompatibleBehaviorPatterns(refinementElement, refinement);
+                    addCompatibleBehaviorPatterns(refinementElement, refinement);
                 } else {
                     TEntityTemplate addedElement = topology.getNodeTemplateOrRelationshipTemplate(newId);
                     removeIncompatibleBehaviorPatterns(refinementElement, addedElement, refinement);
@@ -136,7 +136,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
         return idMapping;
     }
 
-    private void setCompatibleBehaviorPatterns(TEntityTemplate refinementElement, RefinementCandidate refinement) {
+    private void addCompatibleBehaviorPatterns(TEntityTemplate refinementElement, RefinementCandidate refinement) {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TEntityTemplate detectorElement = prm.getStayMappings().stream()
             .filter(stayMapping -> stayMapping.getRefinementElement().getId().equals(refinementElement.getId()))
@@ -145,9 +145,21 @@ public class PatternDetection extends TopologyFragmentRefinement {
         ToscaEntity detectorEntity = refinement.getDetectorGraph().getVertexOrEdge(detectorElement.getId()).get();
         TEntityTemplate stayingElement = getEntityCorrespondence(detectorEntity, refinement.getGraphMapping());
 
-        TPolicies refinementElementPolicies = ((HasPolicies) refinementElement).getPolicies();
-        if (refinementElementPolicies != null) {
-            ((HasPolicies) stayingElement).setPolicies(refinementElementPolicies);
+        TPolicies refinementPolicies = ((HasPolicies) refinementElement).getPolicies();
+        TPolicies stayingPolicies = ((HasPolicies) stayingElement).getPolicies();
+        if (refinementPolicies != null) {
+            if (stayingPolicies != null) {
+                // avoid duplicates
+                refinementPolicies.getPolicy().forEach(refinementPolicy -> {
+                    boolean policyExists = stayingPolicies.getPolicy().stream()
+                        .anyMatch(stayingPolicy -> stayingPolicy.getPolicyType().equals(refinementPolicy.getPolicyType()));
+                    if (!policyExists) {
+                        stayingPolicies.getPolicy().add(refinementPolicy);
+                    }
+                });
+            } else {
+                ((HasPolicies) stayingElement).setPolicies(refinementPolicies);
+            }
             removeIncompatibleBehaviorPatterns(refinementElement, stayingElement, refinement);
         }
     }
@@ -157,27 +169,43 @@ public class PatternDetection extends TopologyFragmentRefinement {
         OTTopologyFragmentRefinementModel prm = (OTTopologyFragmentRefinementModel) refinement.getRefinementModel();
         TPolicies addedElementPolicies = ((HasPolicies) addedElement).getPolicies();
 
-        prm.getBehaviorPatternMappings().forEach(bpm -> {
-            ToscaEntity detectorElement = refinement.getDetectorGraph()
-                .getVertexOrEdge(bpm.getDetectorElement().getId()).get();
-            TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
+        prm.getBehaviorPatternMappings().stream()
+            .filter(bpm -> bpm.getRefinementElement().getId().equals(refinementElement.getId()))
+            .forEach(bpm -> {
+                ToscaEntity detectorElement = refinement.getDetectorGraph()
+                    .getVertexOrEdge(bpm.getDetectorElement().getId()).get();
+                TEntityTemplate candidateElement = getEntityCorrespondence(detectorElement, refinement.getGraphMapping());
+                TPolicies candidatePolicies = ((HasPolicies) candidateElement).getPolicies();
 
-            if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
-                && ModelUtilities.hasKvProperties(candidateElement)) {
-                String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
-                    .get(bpm.getProperty().getKey());
-                String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
-                    .get(bpm.getProperty().getKey());
-                boolean propsNotCompatible = detectorValue != null && !detectorValue.isEmpty()
-                    && !detectorValue.equalsIgnoreCase(candidateValue);
+                if (ModelUtilities.hasKvProperties(detectorElement.getTemplate())
+                    && ModelUtilities.hasKvProperties(candidateElement)) {
+                    String detectorValue = ModelUtilities.getPropertiesKV(detectorElement.getTemplate())
+                        .get(bpm.getProperty().getKey());
+                    String candidateValue = ModelUtilities.getPropertiesKV(candidateElement)
+                        .get(bpm.getProperty().getKey());
+                    boolean propsNotCompatible = detectorValue != null && !detectorValue.isEmpty()
+                        && !detectorValue.equalsIgnoreCase(candidateValue);
 
-                if (propsNotCompatible) {
-                    addedElementPolicies.getPolicy()
-                        .removeIf(policy -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
-                            && bpm.getBehaviorPattern().equals(policy.getName()));
+                    if (propsNotCompatible) {
+                        addedElementPolicies.getPolicy()
+                            .removeIf(policy -> bpm.getRefinementElement().getId().equals(refinementElement.getId())
+                                && bpm.getBehaviorPattern().equals(policy.getName()));
+                    }
                 }
-            }
-        });
+
+                // transfer initial behavior patterns from replaced element
+                if (candidatePolicies != null) {
+                    candidatePolicies.getPolicy().stream()
+                        .filter(candidatePolicy -> initialBehaviorPatterns.contains(candidatePolicy))
+                        .forEach(candidatePolicy -> {
+                            boolean behaviorPatternExists = addedElementPolicies.getPolicy().stream()
+                                .anyMatch(addedElementPolicy -> addedElementPolicy.getPolicyType().equals(candidatePolicy.getPolicyType()));
+                            if (!behaviorPatternExists) {
+                                addedElementPolicies.getPolicy().add(candidatePolicy);
+                            }
+                        });
+                }
+            });
     }
 
     private TEntityTemplate getEntityCorrespondence(ToscaEntity entity, GraphMapping<ToscaNode, ToscaEdge> graphMapping) {
