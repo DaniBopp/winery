@@ -12,7 +12,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  ********************************************************************************/
 import {
-    AfterViewInit, Component, ElementRef, HostListener, Input, KeyValueDiffers, NgZone, OnChanges, OnDestroy, OnInit, QueryList, Renderer2, SimpleChanges,
+    AfterViewInit, Component, ElementRef, HostListener, Input, KeyValueDiffers, NgZone, OnChanges, OnDestroy, OnInit,
+    QueryList, Renderer2, SimpleChanges,
     ViewChild, ViewChildren
 } from '@angular/core';
 import { JsPlumbService } from '../services/jsPlumb.service';
@@ -80,6 +81,7 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
     @ViewChild('threatModelingModal') threatModelingModal: ModalDirective;
     @ViewChild('manageYamlPoliciesModal') manageYamlPoliciesModal: ModalDirective;
     @ViewChild('addYamlPolicyModal') addYamlPolicyModal: ModalDirective;
+    @ViewChild('prmPropertiesModal') prmPropertiesModal: ModalDirective;
     @Input() readonly: boolean;
     @Input() entityTypes: EntityTypesModel;
     @Input() diffMode = false;
@@ -488,6 +490,11 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
                 this.capabilitiesModal.show();
                 break;
         }
+    }
+
+    togglePrmPropertiesModalHandler(data: any): void {
+        console.log(data);
+        this.prmPropertiesModal.show();
     }
 
     /**
@@ -2141,6 +2148,7 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
                     } while (this.allRelationshipTemplates.find(value => value.id === relationshipId));
 
                     if (sourceElement !== info.targetId) {
+                        // TODO: set other attributes for Relationship Template
                         const newRelationship = new TRelationshipTemplate(
                             { ref: sourceElement },
                             { ref: info.targetId },
@@ -2504,5 +2512,9 @@ export class CanvasComponent implements OnInit, OnDestroy, OnChanges, AfterViewI
         // no need to encode the namespace since we assume dotted namespaces in YAML mode
         const absoluteURL = `${this.backendService.configuration.uiURL}${refType}/${typeQName.nameSpace}/${typeQName.localName}`;
         return '<a href="' + absoluteURL + '">' + typeQName.localName + '</a>';
+    }
+
+    addNewPrmMapping() {
+
     }
 }

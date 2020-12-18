@@ -102,6 +102,7 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
     @Output() sendNodeData: EventEmitter<any>;
     @Output() relationshipTemplateIdClicked: EventEmitter<string>;
     @Output() showYamlPolicyManagementModal: EventEmitter<void>;
+    @Output() addNewPrmMapping: EventEmitter<any>;
 
     @ViewChild('versionModal') versionModal: VersionsComponent;
     previousPosition: any;
@@ -141,6 +142,7 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
         this.sendNodeData = new EventEmitter();
         this.relationshipTemplateIdClicked = new EventEmitter<string>();
         this.showYamlPolicyManagementModal = new EventEmitter<void>();
+        this.addNewPrmMapping = new EventEmitter<any>();
 
         // update node's policies if the list is changed
         if (configurationService.isYaml()) {
@@ -361,6 +363,7 @@ export class NodeComponent implements OnInit, AfterViewInit, OnDestroy, DoCheck 
         this.entityTypes.relationshipTypes.some(relType => {
             if (relType.qName.includes(currentType)) {
                 this.sendSelectedRelationshipType.emit(relType);
+                this.addNewPrmMapping.emit(relType);
                 return true;
             }
         });

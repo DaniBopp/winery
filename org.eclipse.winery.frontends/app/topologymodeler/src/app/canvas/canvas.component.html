@@ -49,7 +49,8 @@
                      (unmarkConnections)="unmarkConnections()"
                      (relationshipTemplateIdClicked)="onClickRelationshipTemplateName($event)"
                      (sendNodeData)="toggleModalHandler($event)"
-                     (showYamlPolicyManagementModal)="showYamlPolicyManagementModal();">
+                     (showYamlPolicyManagementModal)="showYamlPolicyManagementModal()"
+                     (addNewPrmMapping)="togglePrmPropertiesModalHandler($event)">
         </winery-node>
     </div>
     <!-- workaround for a jsPlumb connection bug, where upon loading node templates without relationships
@@ -516,6 +517,16 @@
     </winery-modal-footer>
 </winery-modal>
 
+<winery-modal bsModal #prmPropertiesModal="bs-modal" [modalRef]="prmPropertiesModal">
+    <winery-modal-header title="Add Properties"></winery-modal-header>
+    <winery-modal-body>
+
+
+    </winery-modal-body>
+    <winery-modal-footer closeButtonLabel="Cancel" okButtonLabel="Add" (onOk)="addNewPrmMapping()">
+
+    </winery-modal-footer>
+</winery-modal>
 
 <!-- XML Policies and Deployment Artifacts Modal -->
 <winery-entities-modal *ngIf="!readonly"
