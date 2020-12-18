@@ -57,7 +57,7 @@ export class SubMenuItems {
     static readonly properties: SubMenuItem = { displayName: 'Properties', urlFragment: 'properties' };
     static readonly propertiesDefinition: SubMenuItem = { displayName: 'Property Definitions', urlFragment: 'propertiesdefinition' };
     static readonly propertyConstraints: SubMenuItem = { displayName: 'Property Constraints', urlFragment: 'propertyconstraints' };
-    static readonly readme: SubMenuItem = { displayName: 'README', urlFragment: 'readme' };
+    static readonly readme: SubMenuItem = { displayName: 'Readme & Publication', urlFragment: 'readme' };
     static readonly refinementStructure: SubMenuItem = { displayName: 'Refinement Structure', urlFragment: 'refinementstructure' };
     static readonly relationMappings: SubMenuItem = { displayName: 'Relation Mappings', urlFragment: 'relationmappings' };
     static readonly repository: SubMenuItem = { displayName: 'Repository', urlFragment: 'repository' };

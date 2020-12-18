@@ -16,7 +16,7 @@ import { ReadmeService } from './wineryReadme.service';
 import { WineryNotificationService } from '../wineryNotificationModule/wineryNotification.service';
 import { InstanceService } from '../instance/instance.service';
 import { ToscaTypes } from '../model/enums';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 
 @Component({
     templateUrl: 'wineryReadme.component.html',
@@ -29,9 +29,15 @@ export class WineryReadmeComponent implements OnInit {
     readmeContent = '';
     initialReadmeContent = '';
 
+    documentationData: string;
+
     isEditable = false;
     readmeAvailable = true;
     toscaType: ToscaTypes;
+    fileDropped = false;
+    showArchiveUpload = true;
+    fileToUpload: any;
+    uploaderUrl: string;
 
     constructor(private service: ReadmeService, private notify: WineryNotificationService, public sharedData: InstanceService) {
         this.toscaType = this.sharedData.toscaComponent.toscaType;
@@ -46,6 +52,7 @@ export class WineryReadmeComponent implements OnInit {
             },
             () => this.handleMissingReadme()
         );
+       this.uploaderUrl = this.service.path + 'addarchive/';
     }
 
     saveReadmeFile() {
@@ -60,8 +67,9 @@ export class WineryReadmeComponent implements OnInit {
         this.readmeContent = this.initialReadmeContent;
     }
 
-    private handleError(error: HttpErrorResponse) {
+    private handleError(error: unknown) {
         this.loading = false;
+        // @ts-ignore
         this.notify.error(error.message);
     }
 
@@ -74,4 +82,22 @@ export class WineryReadmeComponent implements OnInit {
         this.notify.success('Successfully saved README.md');
     }
 
+    onFileDropped(event: any) {
+        this.fileDropped = true;
+        this.fileToUpload = event;
+    }
+
+    saveToServer() {
+        this.loading = true;
+        this.service.saveDocumentationData(this.documentationData)
+            .subscribe(
+                data => this.handleResponse(data),
+                error => this.handleError(error)
+            );
+    }
+
+    private handleResponse(response: HttpResponse<string>) {
+        this.loading = false;
+        this.notify.success('Successfully saved Documentation!');
+    }
 }

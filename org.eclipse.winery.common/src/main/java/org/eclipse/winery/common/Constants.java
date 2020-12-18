@@ -48,7 +48,7 @@ public class Constants {
     public static final String SUFFIX_BPMN4TOSCA = ".bpmn4tosca";
 
     // suffix for CSAR files
-    public static final String SUFFIX_CSAR = ".csar";
+    public static final String SUFFIX_CSAR = ".roar";
 
     // suffix for ZIP files
     public static final String SUFFIX_ZIP = ".zip";

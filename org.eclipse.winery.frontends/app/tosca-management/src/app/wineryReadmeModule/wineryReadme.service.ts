@@ -15,12 +15,15 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { InstanceService } from '../instance/instance.service';
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
+import { backendBaseURL } from '../configuration';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class ReadmeService {
-
+    readonly path: string;
     constructor(private http: HttpClient,
-                private sharedData: InstanceService) {
+                private sharedData: InstanceService,
+                private route: Router) {
     }
 
     getData(): Observable<string> {
@@ -36,5 +39,13 @@ export class ReadmeService {
             this.sharedData.path + '/README.md',
             readmeFile,
             { observe: 'response', responseType: 'text' });
+    }
+
+    saveDocumentationData(documentationData: string): Observable<HttpResponse<string>> {
+        return this.http.put(
+            backendBaseURL + this.route.url + '/',
+            documentationData,
+            { observe: 'response', responseType: 'text' }
+        );
     }
 }

@@ -77,6 +77,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.eclipse.winery.model.csar.toscametafile.TOSCAMetaFileAttributes.Author;
 import static org.eclipse.winery.model.csar.toscametafile.TOSCAMetaFileAttributes.CONTENT_TYPE;
 import static org.eclipse.winery.model.csar.toscametafile.TOSCAMetaFileAttributes.CREATED_BY;
 import static org.eclipse.winery.model.csar.toscametafile.TOSCAMetaFileAttributes.CSAR_VERSION;
@@ -558,6 +559,8 @@ public class CsarExporter {
         stringBuilder.append(TOSCA_META_VERSION).append(": 1.0").append("\n");
         stringBuilder.append(CSAR_VERSION).append(": 1.0").append("\n");
         stringBuilder.append(CREATED_BY).append(": Winery ").append(Environments.getInstance().getVersion()).append("\n");
+        stringBuilder.append(Author).append(": Author").append("\n");
+        
 
         // Winery currently is unaware of tDefinitions, therefore, we use the
         // name of the service template

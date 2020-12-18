@@ -42,10 +42,10 @@
                tooltip="Allocate to cloud providers"></a>
             <a *ngIf="!this.configurationService.isYaml(); else yamlExport" class="exportButton"
                (click)="exportComponent($event)"
-               tooltip="Export CSAR. Hold CTRL to export XML."></a>
+               tooltip="Export ROAR. Hold CTRL to export XML."></a>
             <ng-template #yamlExport>
                 <a class="exportButton" (click)="exportComponent($event)"
-                   tooltip="Export CSAR. Hold CTRL to export YAML."></a>
+                   tooltip="Export ROAR. Hold CTRL to export YAML."></a>
             </ng-template>
             <a class="editButton" (click)="editComponent($event)"
                tooltip="{{editButtonToolTip}}"></a>

@@ -28,6 +28,7 @@ public class TOSCAMetaFileAttributes {
     final public static String ENTRY_DEFINITIONS = "Entry-Definitions";
     final public static String TOPOLOGY = "Topology";
     final public static String DESCRIPTION = "Description";
+    final public static String Author = "Author";
 
     // of blocks > 0 (file blocks)
     final public static String CONTENT_TYPE = "Content-Type";

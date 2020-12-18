@@ -19,6 +19,7 @@ import { WineryLoaderModule } from '../wineryLoader/wineryLoader.module';
 import { TabsModule } from 'ngx-bootstrap';
 import { WineryPipesModule } from '../wineryPipes/wineryPipes.module';
 import { WineryMarkdownModule } from '../wineryMarkdownComponent/wineryMarkdown.module';
+import { WineryUploaderModule } from '../wineryUploader/wineryUploader.module';
 
 @NgModule({
     imports: [
@@ -27,7 +28,8 @@ import { WineryMarkdownModule } from '../wineryMarkdownComponent/wineryMarkdown.
         FormsModule,
         WineryMarkdownModule,
         TabsModule,
-        WineryPipesModule
+        WineryPipesModule,
+        WineryUploaderModule
     ],
     exports: [
         WineryReadmeComponent

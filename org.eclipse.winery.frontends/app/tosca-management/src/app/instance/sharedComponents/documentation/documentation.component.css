@@ -29,3 +29,22 @@ div.documentationField > div.floatButton {
     float: right;
     margin-top: 10px;
 }
+
+div.pdfField {
+    width: 100%;
+    margin-left: auto;
+    margin-bottom: 50px;
+}
+
+div.pdfField > .texDoc {
+    width: 20%;
+    height: 200px;
+    display: block;
+    resize: none;
+}
+
+div.pdfField > div.floatButton {
+    float:left;
+    margin-top: 10px;
+}
+
