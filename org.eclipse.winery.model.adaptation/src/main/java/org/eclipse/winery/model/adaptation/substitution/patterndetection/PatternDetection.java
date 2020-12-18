@@ -86,7 +86,7 @@ public class PatternDetection extends TopologyFragmentRefinement {
 
     @Override
     public IToscaMatcher getMatcher(OTRefinementModel prm) {
-        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm);
+        return new ToscaBehaviorPatternMatcher((OTTopologyFragmentRefinementModel) prm, repository.getNamespaceManager());
     }
 
     @Override

@@ -23,7 +23,6 @@ import org.eclipse.winery.model.tosca.extensions.OTAttributeMappingType;
 import org.eclipse.winery.model.tosca.extensions.OTTopologyFragmentRefinementModel;
 import org.eclipse.winery.model.tosca.utils.ModelUtilities;
 import org.eclipse.winery.repository.backend.NamespaceManager;
-import org.eclipse.winery.repository.backend.RepositoryFactory;
 import org.eclipse.winery.topologygraph.model.ToscaEdge;
 import org.eclipse.winery.topologygraph.model.ToscaEntity;
 import org.eclipse.winery.topologygraph.model.ToscaNode;
@@ -37,8 +36,8 @@ public class ToscaBehaviorPatternMatcher extends ToscaTypeMatcher {
     private final NamespaceManager namespaceManager;
     private final OTTopologyFragmentRefinementModel prm;
 
-    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm) {
-        this.namespaceManager = RepositoryFactory.getRepository().getNamespaceManager();
+    public ToscaBehaviorPatternMatcher(OTTopologyFragmentRefinementModel prm, NamespaceManager namespaceManager) {
+        this.namespaceManager = namespaceManager;
         this.prm = prm;
     }
 
